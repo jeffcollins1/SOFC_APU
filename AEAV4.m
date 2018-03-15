@@ -43,5 +43,6 @@ end
 % plot(i_denVec,WeightHXVec,i_denVec,WeightFCVec)
 % hold on
 plot(i_denVec,PdenVec)
+legend('Power Density')
 flowO2FC
 %StateTable = [TA1 PA1; TA2 PA2; TA3 PA3; TA4 PA4; TA5 PA5; TF1 PF1; TF2 PF2; TF3 PF3; TF4 PF4; TF5 PF5; TO1 PO1; TO2 PO2; TO3 PO3; TE1 PE1; TE2 PE2; TE3 PE3; TE4 PE4]
