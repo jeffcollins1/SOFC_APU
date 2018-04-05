@@ -12,7 +12,7 @@ FC.i_den = i_total/(options.SOFC_area*10000); %A/cm^2
 
 FC.Cells = options.SOFC_area*10000/(L*W); % Number of cells based on average current density and size of cells
 i_Cell = i_total/FC.Cells; %Total amount of current per cell
-G_H2O = refpropm('h','T',T,'P',P,'WATER')/1000*18-241826.4-refpropm('s','T',T,'P',P,'WATER')/1000*18.*T;
+G_H2O = refpropm('h','T',T,'P',P,'WATER')/1000*18-refpropm('s','T',T,'P',P,'WATER')/1000*18.*T;
 G_H2 = refpropm('h','T',T,'P',P,'HYDROGEN')/1000*2-refpropm('s','T',T,'P',P,'HYDROGEN')/1000*2.*T;
 G_O2 = refpropm('h','T',T,'P',P,'OXYGEN')/1000*32-refpropm('s','T',T,'P',P,'OXYGEN')/1000*32.*T;
 E0 = -(G_H2O - G_H2 - .5*G_O2)/(2*F);%Reference Voltage

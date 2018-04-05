@@ -1,6 +1,6 @@
 %%  Test Cycle
 %Create options to test
-options.height = 1000; %Altitude, meters
+options.height = 100; %Altitude, meters
 options.OTM_area = 2.5e3; %membrane area in m^2
 options.SOFC_area = 2e3; %SOFC active area
 options.dT_fc = 50; %Maximum temperature differential, Kelvin
@@ -11,7 +11,6 @@ options.T_otm = options.T_fc+25; %Operating temperature for OTM
 options.T_oxygen_pump = 323; %Inlet temperature of vacuum pump
 options.spu = 0.1; 
 options.steamratio = 0.05; %Percentage of humidification at fuel inlet
-options.height = 100; %Altitude, meters
 options.velocity = 100; %Velocity, m/s 
 options.P_non_perm = 1000; %Constant permeate pressure for OTM, kPa
 options.C1_eff = 0.80; %Mechanical efficiency of compressor 1
