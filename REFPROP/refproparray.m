@@ -52,3 +52,4 @@ if maxsize>1  && (L1==maxsize || L1==1) && (L2==maxsize || L2==1) && (L3==maxsiz
     if L4==1
         concentrations=repmat(concentrations, [maxsize,1]); %#ok<NASGU>
     end
+end

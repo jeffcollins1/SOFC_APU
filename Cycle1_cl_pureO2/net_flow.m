@@ -1,14 +1,10 @@
 function n = net_flow(A)
+CESInom = {'O2';'N2';'H2';'H2O';};
 n = 0;
-if isfield(A,'O2')
-    n = n + A.O2;
-end
-if isfield(A,'N2')
-    n = n + A.N2;
-end
-if isfield(A,'H2')
-    n = n + A.H2;
-end
-if isfield(A,'H2O')
-    n = n + A.H2O;
+F = fieldnames(A);
+for i = 1:1:length(F)
+    s = nonzeros((1:1:length(CESInom))'.*strcmp(F{i},CESInom));
+    if ~isempty(s)
+        n = n + A.(F{i});
+    end
 end
