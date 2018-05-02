@@ -1,4 +1,4 @@
-function [FC,Exhaust] = fuelcell(options,Cathode)
+function [FC,Exhaust] = fuelcell_air(options,Cathode)
 F = 96485.33; %Faraday's Constant in Coulombs/mol
 Ru = 8.314; %Universal gas constant, J/mol.K  
 T = options.T_fc;
@@ -17,6 +17,7 @@ i_Cell = i_total/FC.Cells; %Total amount of current per cell
 % G_O2 = refpropm('h','T',T,'P',100,'OXYGEN')/1000*32-refpropm('s','T',T,'P',100,'OXYGEN')/1000*32.*T;
 % E0 = -(G_H2O - G_H2 - .5*G_O2)/(2*F);%Reference Voltage
 T_avg = T + .5*options.dT_fc;
+
 if T_avg>=900 && T_avg < 1000
     FC.G = -198141 + (T_avg-900)*(-192652+198141)/(1000-900);
 elseif T_avg >=1000 && T_avg<1100
@@ -27,14 +28,15 @@ E0 = -FC.G/(2*F);
 i = (ones(n,1)).*(i_Cell./(L.*W)); %Initial current distribution per cell
 J_int = zeros(n,1); %Initializing the matrix for Current distribution
 
-h_H2O = (refproparray('h','T',T,'P',P,'WATER')*18/1000 -45839 -241847);% total enthalpy in kJ/kmol
-h_H2 = ((refproparray('h','T',T,'P',P,'hydrogen') - refpropm('h','T',298,'P',100,'hydrogen'))*2/1000);% total enthalpy in kJ/mol
-h_O2 = ((refproparray('h','T',T,'P',P,'oxygen') - refpropm('h','T',298,'P',100,'oxygen'))*32/1000);% total enthalpy in kJ/kmol
-% s_H2O = ((refpropm('s','T',T,'P',P,'WATER') - refpropm('s','T',298,'P',100,'WATER'))*18/1000 -44010 -241847);% total enthalpy in kJ/kmol
-% s_H2 = ((refpropm('s','T',T,'P',P,'hydrogen') - refpropm('s','T',298,'P',100,'hydrogen'))*2/1000);% total enthalpy in kJ/kmol
-% s_O2 = ((refpropm('s','T',T,'P',P,'oxygen') - refpropm('s','T',298,'P',100,'oxygen'))*32/1000);% total enthalpy in kJ/kmol
+h_H2O = ((refpropm('h','T',T,'P',P,'WATER') - refpropm('h','T',298,'P',100,'WATER'))*18/1000 -44010 -241847);% total enthalpy in kJ/kmol
+h_H2 = ((refpropm('h','T',T,'P',P,'hydrogen') - refpropm('h','T',298,'P',100,'hydrogen'))*2/1000);% total enthalpy in kJ/mol
+h_O2 = ((refpropm('h','T',T,'P',P,'oxygen') - refpropm('h','T',298,'P',100,'oxygen'))*32/1000);% total enthalpy in kJ/kmol
+s_H2O = ((refpropm('s','T',T,'P',P,'WATER') - refpropm('s','T',298,'P',100,'WATER'))*18/1000 -44010 -241847);% total enthalpy in kJ/kmol
+s_H2 = ((refpropm('s','T',T,'P',P,'hydrogen') - refpropm('s','T',298,'P',100,'hydrogen'))*2/1000);% total enthalpy in kJ/kmol
+s_O2 = ((refpropm('s','T',T,'P',P,'oxygen') - refpropm('s','T',298,'P',100,'oxygen'))*32/1000);% total enthalpy in kJ/kmol
+cp_air = 0.21*property('O2','C','kJ/kmol') + 0.79*property('N2','C','kJ/kmol'); % specific heat of air
 FC.hrxnmol = -(h_H2O - h_H2 - .5*h_O2); %H2 + 0.5*O2 -->  H2O, Heat Released in kJ/kmol
-% FC.Xch_in = FC.hrxnmol- 298*(s_H2O + s_H2 + 0.5*s_O2); %Chemical exergy present in fuel stream, kJ/kmol (0.019*(h_H2O-298*s_H2O)- 0.2*(h_O2 - 298*s_O2)) -
+FC.Xch_in = FC.hrxnmol- 298*(s_H2O + s_H2 + 0.5*s_O2); %Chemical exergy present in fuel stream, kJ/kmol (0.019*(h_H2O-298*s_H2O)- 0.2*(h_O2 - 298*s_O2)) -
 % hrxnmol = 241847;
 FC.H2_used = 2*Cathode.O2; %Flow of H2 Needed to React 100% O2 Flow mol/s
 FC.H2_supply = FC.H2_used/options.spu;
@@ -46,23 +48,36 @@ Anode.P = options.P_fc;
 Anode.H2 = FC.H2_supply;
 Anode.H2O = FC.H2O_supply; 
 Anode.Y_H2 = FC.H2_supply/(FC.H2_supply+FC.H2O_supply);
-Anode.Y_H2O = FC.H2O_supply/(FC.H2_supply+FC.H2O_supply);
+Anode.Y_H2O = FC.H2O_supply/(FC.H2_supply+FC.H2O_supply)
 Exhaust.T = Anode.T + options.dT_fc;
 Exhaust.P = Anode.P;
 Exhaust.H2 = Anode.H2 - FC.H2_used;
 Exhaust.H2O = Anode.H2O + 2*Cathode.O2; %Water/Steam Produced by Reaction, mol/s
 Exhaust.Y_H2O = Exhaust.H2O/(Exhaust.H2 + Exhaust.H2O); %Molar composition of water in exhaust
 Exhaust.Y_H2 = Exhaust.H2/(Exhaust.H2 + Exhaust.H2O); %Molar composition of hydrogen in exhaust
+Cathode.Y_O2 = options.airflow*0.21;
+Cathode.Y_N2 = options.airflow*0.79;
 error_V = 1;
+error_Q = 1;
+E5 = Exhaust.H2O - FC.H2O_supply; 
+A1 = Cathode.O2/0.21;
+A2 = A1;
+A2.T = intake.A2T
+A3.T = T;
+A4.T = T+options.dT_fc; 
+while abs(error_Q) > 1e-4
+   
 while abs(error_V)>1e-4
     X_H2 = zeros(n,1);   
     X_H2O = zeros(n,1);
+    X_O2 = zeros(n,1);
     E = zeros(n,1);
     for k=1:1:n
         J_int(k) = sum(i(1:k))*(W*L/n); %integral of current density as a function of length, total current thus far
         X_H2(k,1) = (FC.H2_supply - J_int(k)/(2000*F/FC.Cells))/(FC.n_in); %Concentration of H2 as a function of position and steam concentration
         X_H2O(k,1) = 1-X_H2(k,1); %Concentration of H20 product as H2 is consumed 
-        E(k,1) = E0 + Ru*T/(2*F)*log(X_H2(k,1)/X_H2O(k,1)*(P/100)^0.5); %Nernst Potential as a function of product and reactant concentrations
+        X_O2(k,1) = 1-(Cathode.Y_O2 - 0.5*J_int(k)/(2000*F/FC.Cells))/Cathode.Y_O2; %Concentration of oxygen as a function of position
+        E(k,1) = E0 + Ru*T/(2*F)*log(X_H2(k,1)*X_O2(k,1)/X_H2O(k,1)*(P/100)^0.5); %Nernst Potential as a function of product and reactant concentrations
     end
     error = 1;
     count=0;
@@ -79,9 +94,11 @@ while abs(error_V)>1e-4
     error_V = Vold - V;
     Vold = V;
 end
+FC.Cathode_outlet = options.airflow*0.79 + options.airflow*X_O2(n,1); % flow and compostion of cathode exhaust
 FC.V = mean(V);
 FC.Power = FC.V*i_Cell/1000*FC.Cells; %Electric Power produced by FC, kW
 FC.Qgen = i_total/(2000*F)*FC.hrxnmol - FC.V*i_total/1000; %Heat generated by fuel cell, kW
 FC.Qremove = FC.Qgen - (property(Exhaust,'h','kJ')-property(Anode,'h','kJ')); %heat removed by some means to maintain temperature in kW
-FC.O2 = Cathode.O2;
+error_Q = FC.Qremove - (property(A4,'h','kJ')-property(A3,'h','kJ'); %heat removed by excess air flow
+A1 = 1.1*A1; 
 end

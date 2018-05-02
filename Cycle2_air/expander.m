@@ -1,5 +1,7 @@
-function [Outlet,Work] = compressor(Inlet,P_out,eff)
-gamma = property(Inlet,'cp','kJ/(kmol K)')/property(Inlet,'cv','kJ/(kmol K)');
+function [Outlet,Work] = expander(Inlet,P_out,eff)
+R = 8.314; %kJ/kmol*K
+cp = property(Inlet,'C','kJ/(kmol K)');
+gamma = cp/(cp-R);
 H_in = property(Inlet,'h','kJ');
 S_in = property(Inlet,'s','kJ/K');
 Ideal = Inlet;
@@ -16,8 +18,8 @@ while abs(error)>1e-3
     Ideal.T = Ideal.T + dT_dS*error*S_in;
 end
 H_ideal = property(Ideal,'h','kJ');
-H_out = H_in + 1/eff*(H_ideal - H_in);
-Cp = property(Ideal,'cp','kJ/K');
+H_out = H_in - eff*(H_in - H_ideal);
+Cp = property(Ideal,'C','kJ/K');
 Outlet = Ideal;
 Outlet.T = Ideal.T + (H_out - H_ideal)/Cp;
 Outlet.T = find_T(Outlet, H_out);

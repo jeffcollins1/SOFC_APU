@@ -9,14 +9,15 @@ F = fieldnames(A);
 for i = 1:1:length(F)
     s = nonzeros((1:1:length(CESInom))'.*strcmp(F{i},CESInom));
     if ~isempty(s)
-        n = refpropm(out,'T',A.T,'P',A.P,REFPROPnom{i});
+        X = A.(F{i})./NetFlow;
+        n = refpropm(out,'T',A.T,'P',X*A.P,REFPROPnom{s});
         switch unit
             case {'kJ/kg' , 'kJ/(kg K)'}
                 Val = Val + n./1000*A.(F{i})./NetFlow;
             case {'kJ/kmol' , 'kJ/(kmol K)'}
-                Val = Val + n./1000*MM(i)*A.(F{i})./NetFlow;
+                Val = Val + n./1000*MM(s)*X;
             case {'kJ' , 'kJ/K'}
-                Val = Val + n./1000*MM(i)*A.(F{i});
+                Val = Val + n./1000*MM(s)*A.(F{i});
         end
     end
 end

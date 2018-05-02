@@ -23,9 +23,16 @@ Q_oxygen_HX =  property(O5,'h','kJ') - property(O4,'h','kJ');
 O2 = O1;
 H_O2 = property(O1,'h','kJ') - Q_oxygen_HX;
 O2.T = find_T(O2, H_O2);
-
+OTM.A2T = A2.T;
 A4 = A3;
 A4.O2 = A4.O2-O3.O2;
+A4.Y_O2 = A4.O2/(A4.O2 + A4.N2); %Molar fraction of O2 in non permeate stream
+A4.Y_N2 = A4.N2/(A4.O2 + A4.N2);
 [A5,T1_work] = expander(A4,A1.P,options.T1_eff);
-
+OTM.C1_work = C1_work;
+OTM.T1_work = T1_work;
+OTM.C2_work = C2_work; 
+OTM.work_in = C1_work + C2_work;
 OTM.net_work = C1_work + C2_work + T1_work;
+OTM.O5 = exergy(O5,options.T0,options.P0);
+OTM.Q_out = property(O2,'h','kJ') - property(O3,'h','kJ');
