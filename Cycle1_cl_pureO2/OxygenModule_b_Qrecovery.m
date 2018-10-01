@@ -1,0 +1,43 @@
+function [OTM,A2,A3,A4,A5,A6,A7,O1,O2,O3,O4,O5] = OxygenModule_b_Qrecovery(options,A1,P_non_perm)
+[A2,C1_work] = compressor(A1,options.P_non_perm,options.C1_eff);
+A4 = A2;
+A3 = A2; 
+A4.P = A2.P;
+A4.T = options.T_otm;
+OTM.heat_added =  property(A4,'h','kJ') - property(A2,'h','kJ');
+X_O2 = A4.O2./net_flow(A4);
+OTM.Rt = 1-(1-X_O2).*(options.P_perm)./(X_O2.*(P_non_perm-options.P_perm)); %Theoretical Percentage Recovery of O2 through OTM
+OTM.Ra = options.OTM_perc_theoretical.*OTM.Rt;
+O1.T = A4.T;
+O1.P = options.P_perm*ones;
+O1.O2 = OTM.Ra.*A4.O2;
+%OTM.flux = O1.O2*1000./options.OTM_area;
+%OTM.cells = options.OTM_area.*10000./81; %Number of cells as a function of OTM area;
+O3 = O1;
+O3.T = options.T_oxygen_pump;
+[O4,C2_work] = compressor(O3,options.P_fc,options.C2_eff);
+O5 = O4;
+O5.T = options.T_fc;
+
+Q_oxygen_HX =  property(O5,'h','kJ') - property(O4,'h','kJ');
+OTM.Q_oxygen_HX = Q_oxygen_HX; 
+O2 = O1;
+H_O2 = property(O1,'h','kJ') - Q_oxygen_HX;
+O2.T = find_T(O2, H_O2);
+OTM.A2T = A2.T;
+
+A5 = A4;
+A5.O2 = A5.O2-O3.O2;
+A5.N2 = A4.N2; 
+A5.Y_O2 = A5.O2./(A5.O2 + A5.N2); %Molar fraction of O2 in non permeate stream
+A5.Y_N2 = A5.N2./(A5.O2 + A5.N2);
+A6 = A5;
+[A7,T1_work] = expander(A6,options.Pamb,options.T1_eff); 
+OTM.C1_work = C1_work;
+OTM.T1_work = T1_work;
+OTM.C2_work = C2_work; 
+OTM.work_in = C1_work + C2_work;
+OTM.net_work = C1_work + C2_work + T1_work;
+%OTM.O5 = exergy(O5,options.T0,options.P0);
+OTM.Q_out = property(O2,'h','kJ') - property(O3,'h','kJ');
+end

@@ -1,0 +1,31 @@
+function [Weight,param] = NetParam_3b(options,FCArray,intake,HL,E4)
+Ein = (FCArray.H2in + HL.H2used).*FCArray.hrxnmol; %Lower heating value of fuel intake, kJ/kmol
+Eout = FCArray.Power + intake.C1_work + HL.T1_work;
+param.FTE = Eout./Ein;
+param.FC_eff = FCArray.Power./(FCArray.H2used.*FCArray.hrxnmol);
+param.FCPower = FCArray.Power;
+param.NetPower = Eout;
+param.Cells = FCArray.Cells; 
+param.O2used = FCArray.O2used;
+param.O2util = FCArray.O2util;
+param.preheat_air = intake.heat_added; 
+param.FCVoltage = FCArray.FCVoltage;
+param.Qgen = FCArray.Qgen; 
+param.Qoutanode = HL.Qoutanode;
+param.Qoutcathode = HL.Qoutcathode;
+param.H2_used = FCArray.H2in + HL.H2used; 
+[Weight] = weight_3(options,param,FCArray,intake,HL,E4);
+param.weight = Weight.Total;
+param.weightComp = Weight.comp;
+param.weightTurb = Weight.turb;
+param.weightFC = Weight.sofc; 
+param.weightHX = Weight.hx; 
+param.iden = FCArray.iDenArray;
+param.C1_work = intake.C1_work;
+param.T1_work = HL.T1_work; 
+param.hrxnmol = FCArray.hrxnmol;
+param.Qbalance = HL.Qexcess;
+param.CoolingLoad = HL.CoolingLoad; 
+param.P_den = Eout./param.weight;
+
+end

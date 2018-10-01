@@ -7,4 +7,5 @@ A0.P = P0;
 A0.H = property(A0,'h','kJ');
 A0.S = property(A0,'s','kJ/K');
 
-A.X = A.H - A0.H - A0.T*(A.S-A0.S)  ; % - A0.T*(A.S - A0.S) %A0.H - A0.T*(A.S - A0.S);
+A.X = A.H - A0.H - A0.T.*(A.S-A0.S)  ; % - A0.T*(A.S - A0.S) %A0.H - A0.T*(A.S - A0.S);
+end

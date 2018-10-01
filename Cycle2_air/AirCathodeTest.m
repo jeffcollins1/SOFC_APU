@@ -1,0 +1,45 @@
+n = 10;
+T = 1023;%*ones(n,n);
+ASR = 0.15;%*ones(n,n);
+A1.O2 = 0.21;%*ones(n,n); %Molar flow oxygen
+A1.N2 = 0.79;%*ones(n,n); %Molar flow nitrogen
+A1.T = 300; %Ambient Temperature, Kelvin
+A1.P = 100; %Ambient Pressure, kPa
+L = 9;
+W = 9;
+Cells = 1000;%ones(n,1)*linspace(100,1000,n); 
+P = 10;
+%iDen = 0.8;%*(ones(n,1)*linspace(0.5,2.0,n))';
+util = 0.8;%(ones(n,1)*linspace(0.1,0.5,n))';%*ones(n,n);
+r = 0;%*ones(n,n); 
+Power = zeros(n,n);
+Qgen = zeros(n,n);
+Efficiency = zeros(n,n);
+H2out = zeros(n,n);
+H2Oout = zeros(n,n); 
+H2in = zeros(n,n);
+iDenArray = zeros(n,n);
+CellsArray = zeros(n,n);
+FCVoltage = zeros(n,n);
+FCO2out = zeros(n,n); 
+P_out = 1000; %Pressure out of compressor
+eff = 0.8; 
+[Outlet,Work] = compressor(Oxidant,P_out,eff);
+for i = 1:1:n
+    for j = 1:1:10
+        O2util =  i*0.035;
+        Cells = 100000 + 10000*j;
+        FC = FuelCell_H2(T,ASR,A1,L,W,n,Cells,P,O2util,util,r);
+        Power(i,j) = FC.Power;
+        Qgen(i,j) = FC.Qgen;
+        Efficiency(i,j) = FC.Efficiency;
+        H2in(i,j) = FC.FuelFlow;
+        H2out(i,j) = FC.Flow.H2;
+        H2Oout(i,j) = FC.Flow.H2O;
+        iDenArray(i,j) = FC.iDen;
+        CellsArray(i,j) = Cells;
+        FCVoltage(i,j) = FC.Voltage;
+        FCO2out(i,j) = FC.O2out; 
+    end
+end
+        

@@ -1,0 +1,4 @@
+H1 = 28.84*refpropm('H','T',1023,'P',1000,'OXYGEN','NITROGEN',[0.21,0.79])/1000
+H2 = 28.84*refpropm('H','T',635,'P',1000,'OXYGEN','NITROGEN',[0.21,0.79])/1000
+
+Q = H1 - H2

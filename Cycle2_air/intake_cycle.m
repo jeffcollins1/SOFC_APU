@@ -1,19 +1,23 @@
-function [intake,A2,A3,A4,A5] = intake_cycle(options,A1)
+function [intake,A2,A3,A4,A5] = intake_cycle(options,FCArray,A1)
+Intake.O2 = 0.21*ones(10,10);
+Intake.N2 = 0.79*ones(10,10); 
+Intake.T = A1.T*ones(10,10);
+Intake.P = A1.P*ones(10,10); 
 
-[A2,C1_work] = compressor(A1,options.P_non_perm,options.C1_eff);
+[A2,C1_work] = compressor(Intake,options.P_fc,options.C1_eff);
 A3 = A2;
-A3.T = options.T_otm;
+A3.T = options.T_fc;
+A3.P = options.P_fc; 
 intake.heat_added =  property(A3,'h','kJ') - property(A2,'h','kJ');
-X_O2 = A3.O2/net_flow(A3);
+intake.Y_O2 = A3.O2./net_flow(A3);
+intake.Y_N2 = A3.N2./net_flow(A3); 
 
-
-
-intake.A2T = A2.T;
-A4 = A3;
-[A5,T1_work] = expander(A4,A1.P,options.T1_eff);
 intake.C1_work = C1_work;
-intake.T1_work = T1_work;
-intake.work_in = C1_work;
-intake.net_work = C1_work + T1_work;
-intake.A5 = exergy(A5,options.T0,options.P0);
+A4.O2 = FCArray.O2out;
+A4.N2 = FCArray.N2out;
+A4.T = A3.T+ 50*ones(10,10); 
+A4.P = 980*ones(10,10); 
+P_out = options.P0; 
+[A5,intake.T1_work] = expander(A4,P_out,options.T1_eff);
+end
 

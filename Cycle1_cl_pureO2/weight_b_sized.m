@@ -1,0 +1,31 @@
+function [Weight] = weight_b_sized(OD)
+Weight.sofc = (OD.SOFC_area*(10000/81).*0.05508); %Weight per cell, kg
+OTMarea = OD.Performance(1,14)*1000/0.037946; %Total OTM area required based on max flux of 0.037946 mol/s*m^2 = 5.1 ml/cm^2*s
+Weight.otm = OTMarea.*0.048907.*10000./81; %Weight per cell of each 81 cm^2 OTM membrane, kg
+Pden_comp = 8; %Power density of compressors, kW/kg
+nominalmflow = OD.CompIn*28.84; 
+PratioComp = sqrt(OD.Pratio); %Pressure ratio required for a two stage turbine and two stage compressor
+PratioTurb = sqrt(OD.Pratiot);
+relation = 0.2131*PratioComp.^2 -2.508.*PratioComp + 16.901; %Compressor mass based on pressure ratio and mass flow rate of 1.16 kg/s, from NASA paper
+intakemass = nominalmflow.*relation./1.16; %Two compressor stages with mass scale 
+blowermass = ((0.231*(1000/980)^2 -2.508*(1000/980) + 16.901)/1.16).*(OD.H2used); %Extrapolated blower mass based on pressure ratio and mass flow of h2 into fuel cell 
+%Pden_comp = 8; %Power density of compressors, kW/kg
+Weight.comp = 2*intakemass + blowermass; %Compressor mass
+turbinemass = -0.381*PratioTurb.^2 + 5.5*PratioTurb + 1.9167; %Relation for Turbine mass as a function of pressure ratio, 
+%Weight.comp = (-1.5*OTM.C1_work - HL.blower_work - OTM.C2_work)./Pden_comp; %Compressor work divided by power density, kG
+%Pden_turb = 8; %Power density of turbines, kW/kg
+%Weight.turb = OTM.T1_work./Pden_turb; 
+Weight.turb = 2*turbinemass.*OD.TurbIn./1.16; 
+Pden_hx = 15; %Power density of heat exchangers, kW/kg
+Weight.hx = (OD.HXLoad)/Pden_hx; %Heat exchanger weight
+Pden_motor = 20; %Power density of HTSM
+Weight.motor = (10500)/(0.986*Pden_motor); %Weight of propulstion motors
+Weight.Total = (Weight.sofc(1,1) + Weight.otm + Weight.comp + Weight.turb + Weight.hx + Weight.motor)*1.1 ; % assume power cables, gas pipes etc. are 10% of total component weight;
+% Weight.Penalty = Weight.Total - 0.7*4*(9670/2.2); %Weight penalty of replacing power plants of 4 RR RB-211 engines while keeping the propulsor
+% Weight.Fuel = (101100 - Weight.Penalty)*(1660/(1660+270)); %Total LH2 storage including weight of insulated container
+% Weightfraction.SOFC = Weight.sofc./Weight;
+% Weightfraction.OTM = Weight.otm./Weight;
+% Weightfraction.comp = Weight.comp./Weight;
+% Weightfraction.turb = Weight.turb./Weight;
+% Weightfraction.hx = Weight.hx./Weight
+end
