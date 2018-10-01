@@ -1,0 +1,42 @@
+function [Weight,param] = NetParam(options,FC,OTM,HL)
+Weight = weight(options,FC,OTM,HL);
+Ein = FC.H2_used.*FC.hrxnmol; %Lower heating value of fuel intake, kJ/kmol
+param.Eout = FC.Power + OTM.net_work + HL.blower_work;
+param.FTE = param.Eout./(Ein - min(0,HL.FCQbalance));
+param.FC_eff = FC.Power./Ein;
+param.NetPower = param.Eout;
+param.iden = FC.i_den; 
+param.O2_used = FC.O2; 
+param.T1_work = OTM.T1_work;
+param.C1_work = OTM.C1_work; 
+param.BlowerWork = HL.blower_work; 
+param.H2_used = FC.H2_used; 
+
+param.weight = Weight.Total;
+param.weightOTM = Weight.otm;
+param.weightComp = Weight.comp;
+param.weightTurb = Weight.turb;
+param.weightFC = Weight.sofc; 
+param.weightHX = Weight.hx; 
+param.fuelstoragenominal = Weight.Fuel; 
+param.FCVoltage = FC.V; 
+param.FCPower = FC.Power; 
+
+param.Qbalance = HL.Qexcess;
+param.Qremovefuel = HL.Qremove_fuel;
+param.Q_preheat = HL.Q_preheat; 
+param.FCQgen = FC.Qgen;
+param.i_total = FC.i_total;
+param.OTMnetwork = OTM.net_work; 
+param.OTMheat_in = OTM.heat_added;
+param.OTMheat_out = OTM.Q_out;
+param.P_non_perm = options.P_non_perm; 
+param.P_perm = options.P_perm; 
+param.i_cell = 81*FC.i_den;
+param.FCQout = FC.Qremove; 
+param.FCV = FC.V;
+param.hrxnmol = FC.hrxnmol; 
+param.sofc_area = options.SOFC_area;
+param.P_den = param.NetPower./param.weight;
+param.i_den = FC.i_den; 
+end
