@@ -1,5 +1,5 @@
 function [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options,A1)
-[A2,OTM.C1_work] = compressor(A1,options.P_non_perm,options.C1_eff);
+[A2,OTM.C1_work] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
 A3.T = max(options.T_otm,A2.T);
 OTM.heat_added =  property(A3,'h','kJ') - property(A2,'h','kJ');
@@ -18,7 +18,7 @@ for i = 1:1:n
     A4.O2 = A4.O2 - flux;
 end
 OTM.Ra = O1.O2./A1.O2;
-
+OTM.mean_flux = O1.O2./options.OTM_area*1000*22.4*60*1000/1e4;%kmol/s*m^2 * 1000 mol/kmol  * 22.4 L/mol * 60s/min * 1000mL/L / 1e4cm^2/m^2
 O3 = O1;
 O3.T = options.T_oxygen_pump;
 [O4,OTM.C2_work] = compressor(O3,options.P_fc,options.C2_eff);

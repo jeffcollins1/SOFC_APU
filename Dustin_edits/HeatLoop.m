@@ -14,16 +14,17 @@ F3.H2O = FC.H2O_supply;
 
 F5 = F4;
 F5.T = options.T_fc;
-Q_preheat = property(F5,'h','kJ') - property(F4,'h','kJ');
+HeatLoop.Q_preheat = property(F5,'h','kJ') - property(F4,'h','kJ');
 E2 = E1;
 
 E2.T = F4.T;
 Q_removed = property(E1,'h','kJ') - property(E2,'h','kJ');
-H_E2 = property(E1,'h','kJ') - Q_preheat;
-E2.T = E1.T - Q_preheat./Q_removed.*(E1.T - F4.T);
+H_E2 = property(E1,'h','kJ') - HeatLoop.Q_preheat;
+E2.T = E1.T - HeatLoop.Q_preheat./Q_removed.*(E1.T - F4.T);
 E2.T = find_T(E2, H_E2);
 
-HeatLoop.Q_preheat = Q_preheat; 
+HeatLoop.Q_removed = property(E1,'h','kJ') - property(E2,'h','kJ');
+
 E3 = E2;
 E3.H2 = E2.H2 + F2.H2;
 H_E3 = H_E2 + property(F2,'h','kJ');
@@ -43,5 +44,6 @@ E4.T = F3.T;
 E4.P = F5.P;
 E4.H2O = E3.H2O - F3.H2O;
 HeatLoop.Qremove_fuel = H_E3 - property(F3,'h','kJ') - property(E4,'h','kJ');
+
 HeatLoop.Qexcess = FC.Qremove - OTM.heat_added + OTM.Q_out + HeatLoop.Qremove_fuel;% - Q_addtl_fuel_heat;
 end
