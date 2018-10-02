@@ -28,7 +28,7 @@ i = (ones(n1,n2,n)).*(FC.i_Cell./FC.cell_area); %Initial current density distrib
 J_int = zeros(n1,n2,n); %Initializing the matrix for Current distribution
 FC.hrxnmol = -dH/1000; %H2 + 0.5*O2 -->  H2O, Heat Released in kJ/kmol
 
-FC.H2_used = 2*Cathode.O2; %Flow of H2 Needed to React 100% O2 Flow mol/s
+FC.H2_used = 2*Cathode.O2; %Flow of H2 Needed to React 100% O2 Flow kmol/s
 FC.H2_supply = FC.H2_used./options.spu;
 FC.H2O_supply = FC.H2_supply.*options.steamratio./(1-options.steamratio);
 FC.n_in = FC.H2_supply + FC.H2O_supply;  

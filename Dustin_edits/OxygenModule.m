@@ -13,7 +13,7 @@ A4 = A3;
 n = 25;
 for i = 1:1:n
     X_O2 = A4.O2./net_flow(A4);
-    flux = options.j0_otm./log(options.P0_otm).*log(X_O2.*A4.P./O1.P).*options.OTM_area/n*1e4/60/1000/22.4/1000;%1e4 cm^2/m, 60 s/min, 1000 mL/L, 22.4 L/mol, 1000mol/kmol
+    flux = options.j0_otm./log(options.P0_otm).*log(X_O2.*A4.P./O1.P).*options.OTM_area/n*1e4/60/1000/22.4/1000;%in kmol/s:  NmL/cm^2*min * 1e4 cm^2/m / 60 s/min / 1000 mL/L / 22.4 L/mol / 1000mol/kmol
     O1.O2 = O1.O2 + flux;
     A4.O2 = A4.O2 - flux;
 end
