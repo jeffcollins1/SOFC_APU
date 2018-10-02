@@ -22,7 +22,7 @@ options.P_fc = 1000*ones(n1,n2); %Operating pressure for SOFC
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.T_otm = options.T_fc + 0.25*options.dT_fc; %Operating temperature for OTM
 options.T_oxygen_pump = 323*ones(n1,n2); %Inlet temperature of vacuum pump
-options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
+options.T_motor = 77*ones(n1,n2); %temperature of H2 gas after cooling superconducting motors
 options.spu = 0.5*ones(n1,n2); 
 options.steamratio = 0.05*ones(n1,n2); %Percentage of humidification at fuel inlet
 % options.velocity_to = (ones(n1,1)*linspace(0,70,n2)); %Velocity, m/s 
@@ -282,7 +282,7 @@ else
 OD.Mass(z,1:6) = [Weight.Total,Weight.turb,Weight.comp,Weight.hx,Weight.otm,Weight.sofc(1,1)]; %Total mass for a single power plant across a variety of conditions
 end
 l = 10*b;
-m = l-9; 
+m = l-9;  
 PerformanceTable(m:l,1:18) = OD.Performance; 
 Performance(:,:,b) = OD.Performance; 
 end
@@ -309,7 +309,7 @@ OD.FB_climb = OD.FB_b1 + OD.FB_b2 +OD.FB_b3 + OD.FB_b4 +OD.FB_b5+OD.FB_b6+OD.FB_
 OD.FuelReserve = OD.FB_to + OD.FB_climb + OD.Performance(10,5)*3600; %Reserve fuel sufficient to takeoff, climb and cruise for one hour; 
 %Maximum Cruise distance
 W0 = 396000*9.81; %Gross weight of craft
-OD.Wb1 = W0 - OD.Fb_b1;
+OD.Wb1 = W0 - OD.Fb_b1; %Beg
 
 %W1 = W0 - 9.81*OD.Cruise_fuel; %Empty weight of craft
 TSFCcruise = OD.Performance(10,5)*1000000/param.Thr_cruise; %g/kNs
