@@ -51,7 +51,7 @@ end
 weight.fuel = weight.fuel*1.15; %Total LH2 storage including weight of insulated container
 weight.battery = battery_kJ/1260; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
 weight.total = weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel; 
-weight.payload = 820000 - weight.total;
+weight.payload = (101000 + 112760 - 0.7*4*(9670/2.2))*ones(m,n) - weight.total; %Max Fuel = 101000 kg.  Max payload = 112760 kg.  Subtract 0.7*4*9670lb/(2.2 lb/kg) to account for removal of turbine and compressor, then shouldn't need to add propulsor weight to total.  Takeoff weight is 360,000 kg   
 param.weight = weight;
 param.P_den = param.NetPower./(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle

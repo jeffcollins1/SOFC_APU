@@ -264,6 +264,7 @@ Tr = m*9.81./ratio; %Thrust required at sea level to overcome drag, Newtons
 Ta = 0.5*Tmax*ones(1,mtot);  
 Taalt = 4*Tmax.*dclimb./1.22; 
 Pr = sqrt(2*(W^3)*(cd.^2)/(1.22.*S*cl.^3))/(0.986*1000); %Power required at sea level to achieve velocity, kW
+Pr2 = Tr.*velocityclimb/0.95; 
 Pa = Ta.*velocityclimb/1000; %Power available at sea level, kW
 %plot(velocityclimb,Tr)
 % Thrust Required for Climbing
