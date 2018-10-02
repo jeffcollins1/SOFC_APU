@@ -16,6 +16,7 @@ options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling supercondu
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.01*ones(n1,n2); %Percentage of humidification at fuel inlet
 options.PR_comp = ones(n1,1)*linspace(15,60,n2); %Range of intake pressures for OTM, kPa
+options.P_non_perm = 50*ones(n1,n2); %Range of intake pressures for OTM, kPa
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.P_perm = 50*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 

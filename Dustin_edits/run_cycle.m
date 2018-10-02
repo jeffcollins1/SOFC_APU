@@ -23,7 +23,7 @@ T = options.TO_weight./options.Lift_2_Drag*4.448;% Thrust in N:  Thrust = Cd/Cl*
 P = T.*max(mission.mach_num).*ss./options.prop_eff/1000;%shaft power in kW.  propellor momentum theory at cruise http://164.100.133.129:81/econtent/Uploads/09-%20Ducted%20Fans%20and%20Propellers%20%5BCompatibility%20Mode%5D.pdf ,  http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
 scale = P./options.motor_eff./(FC.Power + OTM.net_work + HL.blower_work);
 molar_flow = scale.*molar_flow;
-vol_flow = molar_flow*28.84./air_den;
+vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
 [weight,options] = system_weight(options,scale,FC,OTM,HL,A1);
 
 %%calculate off-design power output to meet mission profile for each condition by varying permeate pressure
@@ -37,17 +37,27 @@ for i = 1:1:m
         for k = 1:1:length(f)
             options2.(f{k}) = ones(mm,nn)*options.(f{k})(i,j);
         end
-        %need to reverse calculate permeate pressure and molar flow to produce around the correct Oxygen flux
         vol_flow2 = vol_flow(i,j)*[1;.9;.8;.7;.5; .5*ones(mm-5,1);]*ones(1,nn);%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
         options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
         air_den = interp1(alt_tab,atmosphere_density,options2.height);
-        molar_flow2 = vol_flow2.*air_den/28.84;
+        molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
         [A1,ss] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
         for k = 1:1:nn
             options2.P_perm(:,k) = [50*ones(5,1);logspace(log10(50),log10(0.99*.21*A1.P(1,k)*options.PR_comp(i,j)),mm-5)']; %Pressure of OTM oxygen stream, kPa; 
         end
-        
         [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options2,A1);
+        %adjust permeate pressure to be within feasible oxygen output range for SOFC area
+        min_O2 = 0.1*options2.SOFC_area(1,1)*10000/(96485.33*4000);
+        max_O2 = .4./options2.asr(1,1).*options2.SOFC_area(1,1)*10000/(96485.33*4000);%Cant solve for ultra low or high current densities
+        if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
+            R1 = max_O2./O5.O2;
+            R2 = min_O2./O5.O2;
+            options2.P_perm = min(max(options2.P_perm,(0.21*options2.PR_comp.*A1.P).^(1-R1).*options2.P_perm.^R1),(0.21*options2.PR_comp.*A1.P).^(1-R2).*options2.P_perm.^R2);
+            for k = 1:1:nn
+                options2.P_perm(:,k) = linspace(min(options2.P_perm(:,k)),max(options2.P_perm(:,k)),mm);
+            end
+            [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options2,A1);
+        end
         [FC,E1] = oxy_fuelcell(options2,O5);
         [HL,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options2,FC,OTM,E1);
         P_shaft = options2.motor_eff.*(FC.Power + OTM.net_work + HL.blower_work);
