@@ -15,9 +15,11 @@ FC.i_den = FC.i_total./(options.SOFC_area*10000); %A/cm^2
 
 FC.Cells = options.SOFC_area.*10000/FC.cell_area; % Number of cells based on total active surface area of 81 cm^2 per cell
 FC.i_Cell = FC.cell_area*FC.i_den;%FC.i_total./FC.Cells; %Total amount of current per cell
-
-%dS = refpropm('s','T',T,'P',100,'WATER')*18.01528 - refpropm('s','T',T,'P',100,'Hydrogen')*2.016 - .5*refpropm('s','T',T,'P',100,'Oxygen')*32;
-dH = refproparray('h','T',T,'P',100,'WATER')*18.01528 - refproparray('h','T',T,'P',100,'Hydrogen')*2.016 - .5*refproparray('h','T',T,'P',100,'Oxygen')*32 - 45839000 - 241826400;%J/kmol
+dH = 0*T;
+for i = 1:1:n2
+%     dS(:,i) = refproparray('s','T',T(:,i),'P',P(:,i),'WATER')*18.01528 - refpropm('s','T',T(:,i),'P',P(:,i),'Hydrogen')*2.016 - .5*refpropm('s','T',T(:,i),'P',P(:,i),'Oxygen')*32;
+    dH(:,i) = refproparray('h','T',T(:,i),'P',P(:,i),'WATER')*18.01528 - refproparray('h','T',T(:,i),'P',P(:,i),'Hydrogen')*2.016 - .5*refproparray('h','T',T(:,i),'P',P(:,i),'Oxygen')*32 - 45839000 - 241826400;%J/kmol
+end
 % E0 = -(dH-T.*dS)/(2000*F)%Reference Voltage
 T_avg = T + .5*options.dT_fc;
 FC.G = -198141 + (T_avg-900)*(-192652+198141)/(1000-900);

@@ -19,7 +19,7 @@ param = NetParam(options,FC,OTM,HL);
 param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F1',F1;'F2',F2;'F3',F3;'F4',F4;'O1',O1;'O2',O2;'O3',O3;'O4',O4;'O5',O5;};
 
 %% scale system to meet cruise power requirements
-T = options.TO_weight./options.Lift_2_Drag*4.448;% Thrust in N:  Thrust = Cd/Cl*Weight; cruise Cd = 0.036; Cl = .48; weight = 820,000lbs; thus 61,000lbs cruise thrust. Makes sense because max thrust at cruise is 100,000lbs.Range = 6100nautical miles, velocity = 635knts
+T = options.TO_weight./options.Lift_2_Drag*9.81;% Thrust in N:  Thrust = Cd/Cl*Weight; cruise Cd = 0.036; Cl = .48; weight = 820,000lbs; thus 61,000lbs cruise thrust. Makes sense because max thrust at cruise is 100,000lbs.Range = 6100nautical miles, velocity = 635knts
 P = T.*max(mission.mach_num).*ss./options.prop_eff/1000;%shaft power in kW.  propellor momentum theory at cruise http://164.100.133.129:81/econtent/Uploads/09-%20Ducted%20Fans%20and%20Propellers%20%5BCompatibility%20Mode%5D.pdf ,  http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
 scale = P./options.motor_eff./(FC.Power + OTM.net_work + HL.blower_work);
 molar_flow = scale.*molar_flow;
@@ -51,7 +51,7 @@ end
 weight.fuel = weight.fuel*1.15; %Total LH2 storage including weight of insulated container
 weight.battery = battery_kJ/1260; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
 weight.total = weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel; 
-weight.payload = (101000 + 112760 - 0.7*4*(9670/2.2))*ones(m,n) - weight.total; %Max Fuel = 101000 kg.  Max payload = 112760 kg.  Subtract 0.7*4*9670lb/(2.2 lb/kg) to account for removal of turbine and compressor, then shouldn't need to add propulsor weight to total.  Takeoff weight is 360,000 kg   
+weight.payload = options.TO_weight - options.air_frame_weight - weight.total;
 param.weight = weight;
 param.P_den = param.NetPower./(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
@@ -93,6 +93,7 @@ end
 [FC,E1] = oxy_fuelcell(options2,O5);
 [HL,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options2,FC,OTM,E1);
 P_shaft = options2.motor_eff.*(FC.Power + OTM.net_work + HL.blower_work);
+fuel_for_OTM_preheat = -min(0,HL.FCQbalance)./FC.hrxnmol;
 %find permeate pressure condition that results in correct power for each flight segment
 for k = 1:1:nn
     %update thrust to include climb and acceleration
@@ -101,11 +102,12 @@ for k = 1:1:nn
     if P_req>max(P_shaft(:,k))
         [P,I] = max(P_shaft(:,k));
         battery = battery + (P_req - P)*mission.duration(k)*3600;
-        fuel = fuel + FC.H2_used(I,k)*2*mission.duration(k)*3600;
+        fuel = fuel + (FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k))*2*mission.duration(k)*3600;
     elseif P_req<min(P_shaft(:,k))
-        fuel = fuel + P_req/min(P_shaft(:,k))*min(FC.H2_used(:,k));
+        [h2_use,I] = min(FC.H2_used(:,k));
+        fuel = fuel + P_req/min(P_shaft(:,k))*(FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k));
     else
-        fuel = fuel + interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;
+        fuel = fuel + (interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)+interp1(P_shaft(:,k),fuel_for_OTM_preheat(:,k),P_req))*2*mission.duration(k)*3600;
     end
 end
 
