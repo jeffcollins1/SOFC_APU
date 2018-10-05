@@ -31,6 +31,7 @@ vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
 [weight,options] = system_weight(options,scale,FC,OTM,HL,A1);
 
 %% Re-Run with scaled system parameters
+[A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options,A1);
 [FC,E1] = oxy_fuelcell(options,O5);
 [HL,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
