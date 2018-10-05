@@ -20,16 +20,16 @@ options.P_non_perm = 50*ones(n1,n2); %Range of intake pressures for OTM, kPa
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.P_perm = 50*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 
-options.T1_eff = 0.88*ones(n1,n2); %Mechanical efficiency of turbine
-options.C2_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 2
+options.T1_eff = 0.9*0.88*ones(n1,n2); %Mechanical efficiency of turbine
+options.C2_eff = 0.9*0.80*ones(n1,n2); %Mechanical efficiency of compressor 2
 options.Blower_eff = 0.5*ones(n1,n2); %efficiency of blower
 options.Blower_dP = 20*ones(n1,n2); %Pressure rise in blower in kPa
-options.TO_weight = 820000/2.2*ones(n1,n2);%take-off weight in kg
+options.TO_weight = 871200/2.2*ones(n1,n2);%take-off mass in kg
 options.Lift_2_Drag = 13.5*ones(n1,n2);%lift to drag ratio
 options.prop_eff = 0.95*ones(n1,n2);%propulsor efficiency
 options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
-options.air_frame_weight = (820000 - 222200 - 248072 - 4*9670)/2.2*ones(n1,n2);%airframe mass in kg: Max Fuel = 101000 kg.  Max payload = 112760 kg.  4 engines, each 9670lb
-
+options.air_frame_weight = (871200 - 222200 - 248072 - 0.4*9670)/2.2*ones(n1,n2);%airframe mass in kg: Max Fuel = 101000 kg.  Max payload = 112760 kg.  4 engines, each 9670lb
+[TO,Climb,Cruise] = craft(options);
 band = [0;500;4500;9500;19500;29500;39500;]/3.1;%altitude converted to m
 mission.alt = [(band(2:end)+band(1:end-1))/2;band(end)];
 mission.duration = [(band(2:end)+band(1:end-1))/3.54/3600;11];%assume a steady climb rate of 3.54m/s = climb to 39500 ft in 1 hr, then 11 hours cruise
