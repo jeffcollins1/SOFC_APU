@@ -26,7 +26,7 @@ options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 
 %% simplified assumptions
 mission.thrust = linspace(2,1,length(mission.duration))*options.TO_weight(1,1)./options.Lift_2_Drag(1,1)*9.81;
-P_nominal = min(mission.thrust)*max(mission.mach_num).*ss;
+P_nominal = min(mission.thrust)*max(mission.mach_num).*ss/1000;
 
 %% scale system to meet cruise power requirements
 scale = P_nominal./options.motor_eff./(FC.Power + OTM.net_work + HL.blower_work);
