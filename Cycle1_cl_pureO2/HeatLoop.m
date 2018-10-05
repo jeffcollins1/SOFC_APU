@@ -1,9 +1,9 @@
 function [HeatLoop,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1)
-F1.T = options.T_motor;
+F1.T =  216*ones(10,10); %options.T_motor + 100;
 F1.P = options.P_fc  - options.Blower_dP;
 F1.H2 = FC.H2_used;
 
-F2.T = 354;%temperature of condensation with water partial pressure of 50kPa
+F2.T = 354*ones(10,10);%temperature of condensation with water partial pressure of 50kPa
 F2.P = options.P_fc  - options.Blower_dP;
 F2.H2 = FC.H2_supply;
 F2.H2O = FC.H2O_supply;
@@ -18,22 +18,28 @@ E2.T = 400;
 
 E2.T = F3.T;
 Q_removed = property(E1,'h','kJ') - property(E2,'h','kJ');
-Q_addtl_fuel_heat = 0;
-if Q_removed > Q_preheat
-    H_E2 = property(E1,'h','kJ') - Q_preheat;
-    E2.T = E1.T - Q_preheat/Q_removed*(E1.T - F3.T);
-    E2.T = find_T(E2, H_E2);
-else
-    Q_addtl_fuel_heat = Q_preheat - Q_removed;
-end
+HeatLoop.Q_removed = Q_removed; 
+% if Q_removed > Q_preheat
+%     H_E2 = property(E1,'h','kJ') -Q_preheat;
+%     E2.T = E1.T - Q_preheat/Q_removed*(E1.T-F3.T);
+%     E2.T = find_T(E2,H_E2);
+% else Q_addtl_fuel_heat = Q_preheat - Q_removed;
+% end
+need_heat = Q_removed < Q_preheat;
+H_E2 = property(E1,'h','kJ') - Q_preheat;
+E2.T = E1.T - Q_preheat./Q_removed.*(E1.T - F3.T);
+E2.T = find_T(E2, H_E2);
+E2.T(need_heat) = F3.T(need_heat);
+Q_addtl_fuel_heat = max(0,Q_preheat - Q_removed);
+
 HeatLoop.Q_preheat = Q_preheat; 
 E3 = E2;
-E3.H2 = E3.H2 + F1.H2;
+E3.H2 = E2.H2 + F1.H2;
 H_E3 = H_E2 + property(F1,'h','kJ');
 E3.T = find_T(E3, H_E3);
-E3.Y_H2O = E1.H2O/(E3.H2 + E1.H2O);
-E3.Y_H2 = E2.H2/(E3.H2 + E1.H2O);
-
+E3.Y_H2O = E1.H2O./(E3.H2 + E1.H2O);
+E3.Y_H2 = E2.H2./(E3.H2 + E1.H2O);
+HeatLoop.FCQbalance = FC.Qremove - OTM.heat_added; 
 E4.T = F2.T;
 E4.P = F4.P;
 E4.H2O = E3.H2O - F2.H2O;

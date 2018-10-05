@@ -1,0 +1,42 @@
+% %Thrust Required
+% %climb
+% roc = 7.5; %Max rate of climb, m/s
+% V1_climb = (ones(10,1)*linspace(80,200,10)) ;%Range of velocities from takeoff to max climb velocity, m/s
+% aoa = asin(roc./V1_climb); 
+% aoadeg = aoa.*180/pi; 
+% Cl = 5.5.*aoa + 0.29; %Linearized lift coefficient as a function of angle of attack
+% Cd = 0.022; %Assumed constant drag coefficient
+% Awing = 525; %Area of wing to generate lift, m^2
+% Afront = 158.3; %Area of frontal projection, m^2
+% W = 362870; %Maximum aircraft weight
+% height = ones(10,1)*linspace(0,10000,10);
+% p0_climb = 107*exp(-0.0001*height)- 10;
+% T0_climb =  -0.0065.*height + 14.987 + 273.1;
+% d1 =  refproparray('D','T',T0_climb(1,1:10),'P',p0_climb(1,1:10),'OXYGEN','NITROGEN',[0.21,0.79]); 
+% d1_climb = (ones(10,1)*d1(1,1:10));
+% ag = 9.81; %Gravity
+% %Cl = 2*W./(d1_climb.*Awing.*V1_climb.^2)
+% Fl = 0.5.*Cl.*Awing.*d1_climb.*V1_climb.^2;
+% Fd = 0.5*Cd.*Afront.*d1_climb.*V1_climb.^2;
+% Fg = W*ag;
+% Ft = Fd + Fg.*sin(aoa); 
+% Ft_eng_lb = Ft/(4*4.45); 
+% Pr = sqrt(2*(W^3)*(Cd^2)./(d1_climb.*Awing.*(Cl.^3)));
+% Pr_eng = Pr/4; 
+Ai = 0.25*pi*2.2^2; %Inlet area
+Ap = 0.25*pi*2.2^2; %Prop area
+Ae = 0.25*pi*2.1^2; %Exit area
+Tmax_lb = 60600; %Max Rated TO thrust
+mflow_lb = 1605; %Mass Flow, lb/s
+conv = 4.44822; %lbf to N
+Tmax_N = Tmax_lb/conv; 
+mflow_kg = mflow_lb/2.2; 
+V1 = mflow_kg/(Ai*1.2); 
+V2 = mflow_kg/(Ap*1.2); 
+V4 = Tmax_N/mflow_kg + V1; 
+V3 = V4*Ae/Ap; 
+ss = 343; 
+p2 =100*(1 + 0.5*((1.4-1)/1.4)*(V2/ss)^2)^(1.4/(1.4-1)); %Stagnation pressure of incoming stream at propeller
+p3 = 100*(1 + 0.5*((1.4-1)/1.4)*(V4/ss)^2)^(1.4/(1.4-1));
+Wprop = mflow_kg*(p3 - p2)/1.2; 
+

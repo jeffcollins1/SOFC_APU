@@ -1,0 +1,71 @@
+function [HeatLoop,F1,F2,F3,F4,F5,E2,E3,E4] = HeatLoop_2odb(intake,options,FCArray,E1,A4)
+ F0.T = 20;
+ F0.P = 1000; 
+F1.T = options.T_motor;
+F1.P = options.P_fc  - options.Blower_dP;
+F1.H2 = FCArray.H2used;
+F2.T = 354*ones(10,10);%temperature of condensation with water partial pressure of 50kPa
+F2.P = options.P_fc  - options.Blower_dP;
+F2.H2 = FCArray.H2in;
+F2.H2O = FCArray.H2Oin;
+
+[F3,HeatLoop.blower_work] = compressor(F2,options.P_fc,options.Blower_eff);
+F4 = F3;
+F5 = F3;
+F4.T = options.T_fc;
+F4.P = options.P_fc; 
+Q_preheat = property(F4,'h','kJ') - property(F3,'h','kJ');
+HeatLoop.Qairin = intake.heat_added;
+E1.H2 = FCArray.H2out;
+E1.H2O = FCArray.H2Oout;
+E1.P = 980*ones(10,10);
+E1.T = 1073*ones(10,10);
+cp1 = property(E1,'c','kJ/(kmol K)');
+E2 = E1;
+E2.T = E1.T - Q_preheat./((E1.H2 + E1.H2O).*cp1);
+%E3 = E2;
+%E3.T = F3.T + 10;
+% Q_preheat2 = property(E2,'h','kJ') - property(E3,'h','kJ');
+% cp2 = property(F3,'c','kJ/(kmol K)');
+% F4.T = F3.T + Q_preheat2/(F3*cp2); 
+% E4.T = F2.T;
+% Q_removed = property(E1,'h','kJ') - property(E2,'h','kJ');
+% Q_addtl_fuel_heat = 0;
+% if Q_removed > Q_preheat
+%     H_E2 = property(E1,'h','kJ') - Q_preheat;
+%     E3.T = E1.T - Q_preheat/Q_removed*(E1.T - F3.T);
+%     E3.T = find_T(E3, H_E3);
+% else
+%     Q_addtl_fuel_heat = Q_preheat - Q_removed;
+% end
+% HeatLoop.Q_preheat = Q_preheat; 
+A3.O2 = 0.21*FCArray.airin;
+A3.N2 = 0.79*FCArray.airin; 
+A3.T = options.T_fc;
+A3.P = options.P_fc; 
+E3.H2 = E2.H2 + F1.H2;
+E3.H2O = E2.H2O;
+H_E2 = property(E2,'h','kJ');
+E3.P = E2.P;
+H_E3 = H_E2 + property(F1,'h','kJ');
+E3.T = 300*ones(10,10); %initial guess for T at E3
+E3.T = find_T(E3, H_E3);
+E3.Y_H2O = E1.H2O./(E3.H2 + E1.H2O);
+E3.Y_H2 = E3.H2./(E3.H2 + E1.H2O);
+E4.H2O = E3.H2O - F2.H2O;
+E4.T = 354*ones(10,10);
+E4.P = E3.P; 
+
+HeatLoop.Qoutanode = property(E1,'h','kJ') - property(F4,'h','kJ'); %Heat Leaving FC by fuel exhaust
+HeatLoop.Qoutcathode = (property(A4,'h','kJ') - property(A3,'h','kJ')); %Heat leaving fc by cathode exhaust
+HeatLoop.Qremove_fuel = H_E3 - property(F2,'h','kJ') - property(E4,'h','kJ'); %Heat rejected to condense water from exhaust
+HeatLoop.Qexcess = FCArray.Qgen - intake.heat_added  - HeatLoop.Qoutanode - HeatLoop.Qoutcathode;
+HeatLoop.Q_preheat = Q_preheat; 
+HeatLoop.CoolingLoad = property(F1,'h','kJ') - property(F0,'h','kJ'); 
+% HeatLoop.F4 = exergy(F4,options.T0,options.P0);
+% HeatLoop.E2 = exergy(E2,options.T0,options.P0);
+% HeatLoop.F3 = exergy(F3,options.T0,options.P0); 
+% HeatLoop.E1 = exergy(E1,options.T0,options.P0);
+% HeatLoop.E3 = exergy(E3,options.T0,options.P0);
+% HeatLoop.E4 = exergy(E4,options.T0,options.P0);
+end

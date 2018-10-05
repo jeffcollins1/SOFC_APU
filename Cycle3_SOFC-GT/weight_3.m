@@ -1,0 +1,26 @@
+function [Weight] = weight_3(options,param,FCArray,intake,HL,E4)
+Weight.sofc = FCArray.Cells.*0.05508; %Weight per cell, kg
+nominalmflow = 28.84.*ones(10,10); %Mass flow of 1 kmol/s air intake, kg/s
+PratioComp = sqrt(options.P_fc./options.P0); %Pressure ratio required for a two stage turbine and two stage compressor
+PratioTurb = sqrt(options.P_fc./options.Pamb);
+relation = 0.2131*PratioComp.^2 -2.508.*PratioComp + 16.901; %Compressor mass based on pressure ratio and mass flow rate of 1.16 kg/s, from NASA paper
+intakemass = 2*nominalmflow.*relation./1.16; %Two compressor stages with mass scale 
+%Pden_comp = 8; %Power density of compressors, kW/kg
+Weight.comp = intakemass; %Compressor mass
+turbinemass = -0.381*PratioTurb.^2 + 5.5*PratioTurb + 1.9167; %Relation for Turbine mass as a function of pressure ratio, 
+%Pden_turb = 8; %Power density of turbines, kW/kg
+%Weight.turb = intake.T1_work./Pden_turb; 
+Weight.turb = 2*turbinemass.*(28.*E4.N2 + 32.*E4.O2 + 18.*E4.H2O + 2.*E4.H2)./1.16; %Turbine mass using NASA relation for two stages
+Pden_hx = 15; %Power density of heat exchangers, kW/kg
+Weight.hx = (HL.Qexchangetotal)/Pden_hx; %Heat exchanger weight
+Pden_motor = 20; %Power density of HTSM
+Weight.motor = param.NetPower./Pden_motor; %Weight of propulstion motors
+Weight.Total = (Weight.sofc + Weight.comp + Weight.turb + Weight.hx + Weight.motor)*1.1 ; % assume power cables, gas pipes etc. are 10% of total component weight;
+%Weight.Penalty = Weight.Total - 0.7*4*(9670/2.2); %Weight penalty of replacing power plants of 4 RR RB-211 engines while keeping the propulsor
+%Weight.Fuel = (101100 - Weight.Penalty)*(1660/(1660+270)); %Total LH2 storage including weight of insulated container
+% Weightfraction.SOFC = Weight.sofc./Weight;
+% Weightfraction.OTM = Weight.otm./Weight;
+% Weightfraction.comp = Weight.comp./Weight;
+% Weightfraction.turb = Weight.turb./Weight;
+% Weightfraction.hx = Weight.hx./Weight
+end
