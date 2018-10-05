@@ -15,25 +15,32 @@ options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FC,E1] = oxy_fuelcell(options,O5);
 [HL,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
 
-%% scale system to meet cruise power requirements
-[time_profile,T_profile,V_profile] = craft(options);
-%% nominal_power at minimum thrust
-[thrust,I] = min(T_profile); 
-P_nominal = thrust.*V_profile(I)./options.prop_eff/1000;%shaft power in kW. %max(mission.mach_num).*ss. propellor momentum theory at cruise http://164.100.133.129:81/econtent/Uploads/09-%20Ducted%20Fans%20and%20Propellers%20%5BCompatibility%20Mode%5D.pdf ,  http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
-mission.thrust = mean(T_profile(1:nnz(time_profile<=mission.duration(1)*3600)));
-for k = 2:1:length(mission.duration)
-    mission.thrust(k) = mean(T_profile(max(1,nnz(time_profile<=sum(mission.duration(1:k-1))*3600)):nnz(time_profile<=sum(mission.duration(1:k))*3600)));
-end
+% %% Detailed craft calculations
+% [time_profile,T_profile,V_profile] = craft(options);
+% [thrust,I] = min(T_profile); 
+% P_nominal = thrust.*V_profile(I)./options.prop_eff/1000;%shaft power in kW. %max(mission.mach_num).*ss. propellor momentum theory at cruise http://164.100.133.129:81/econtent/Uploads/09-%20Ducted%20Fans%20and%20Propellers%20%5BCompatibility%20Mode%5D.pdf ,  http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
+% mission.thrust = mean(T_profile(1:nnz(time_profile<=mission.duration(1)*3600)));
+% for k = 2:1:length(mission.duration)
+%     mission.thrust(k) = mean(T_profile(max(1,nnz(time_profile<=sum(mission.duration(1:k-1))*3600)):nnz(time_profile<=sum(mission.duration(1:k))*3600)));
+% end
 
+%% simplified assumptions
+mission.thrust = linspace(2,1,length(mission.duration))*options.TO_weight(1,1)./options.Lift_2_Drag(1,1)*9.81;
+P_nominal = min(mission.thrust)*max(mission.mach_num).*ss/1000;
+
+%% scale system to meet cruise power requirements
 scale = P_nominal./options.motor_eff./(FC.Power + OTM.net_work + HL.blower_work);
 molar_flow = scale.*molar_flow;
 vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
-[weight,options] = system_weight(options,scale,FC,OTM,HL,A1);
+options.SOFC_area = scale.*options.SOFC_area;
+options.OTM_area = scale.*options.OTM_area;
 
 %% Re-Run with scaled system parameters
+[A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options,A1);
 [FC,E1] = oxy_fuelcell(options,O5);
 [HL,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
+weight = system_weight(options,FC,OTM,HL,A1);
 param = NetParam(options,FC,OTM,HL);
 param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F1',F1;'F2',F2;'F3',F3;'F4',F4;'O1',O1;'O2',O2;'O3',O3;'O4',O4;'O5',O5;};
 %%calculate off-design power output to meet mission profile for each condition by varying permeate pressure
