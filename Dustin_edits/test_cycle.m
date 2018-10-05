@@ -45,4 +45,5 @@ param = run_cycle(options,mission);
 toc
 payload = param.weight.payload;
 payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
+figure(3)
 ax1 = surf(options.PR_comp,param.i_den,payload);

@@ -26,7 +26,10 @@ options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 
 %% simplified assumptions
 mission.thrust = linspace(2,1,length(mission.duration))*options.TO_weight(1,1)./options.Lift_2_Drag(1,1)*9.81;
-P_nominal = min(mission.thrust)*max(mission.mach_num).*ss/1000;
+P_nominal = min(mission.thrust)*max(mission.mach_num).*ss/options.prop_eff(1,1)/1000;
+mission.air_den = interp1(alt_tab,atmosphere_density,mission.alt);
+[~,mission.ss] = std_atmosphere(mission.alt,1);%Ambient conditions as a function of altitude
+mission.power = mission.thrust.*mission.mach_num'.*mission.ss'/options.prop_eff(1,1)/1000;%shaft power in kW. 
 
 %% scale system to meet cruise power requirements
 scale = P_nominal./options.motor_eff./(FC.Power + OTM.net_work + HL.blower_work);
@@ -102,7 +105,7 @@ end
 [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options2,A1);
 %adjust permeate pressure to be within feasible oxygen output range for SOFC area
 min_O2 = 0.1*options2.SOFC_area(1,1)*10000/(96485.33*4000);
-max_O2 = .4./options2.asr(1,1).*options2.SOFC_area(1,1)*10000/(96485.33*4000);%Cant solve for ultra low or high current densities
+max_O2 = .6./options2.asr(1,1).*options2.SOFC_area(1,1)*10000/(96485.33*4000);%Cant solve for ultra low or high current densities
 if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
     R1 = max_O2./O5.O2;
     R2 = min_O2./O5.O2;
