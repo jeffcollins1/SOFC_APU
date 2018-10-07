@@ -1,5 +1,5 @@
 
-function [time_profile,T_profile,V_profile] = craft(options)
+function [time1,time2,time3,T_toVec,T_climb,T_cruise,V_toVec,V_climbVec,V_cruiseVec,time_profile,T_profile,V_profile] = craft(options)
 
 
 n=100; 
@@ -500,7 +500,7 @@ cd = 0.018 + (cl.^2)./(pi*e*AR);
 ratio = cl./cd; 
 
 
-Tr = m*9.81./ratio; %Thrust required at sea level to overcome drag, Newtons
+Tr = m*9.81./ratio; %Thrust required at steady velocity to overcome drag, Newtons
 
 
 % Thrust Required for Climbing
@@ -522,7 +522,7 @@ cdcruise = 0.01 + (clcruise^2)/(pi*e*AR);
 ratiocruise = clcruise./cdcruise; 
 
 Cruise.thrust = (options.TO_weight(1,1)*9.81)/ratiocruise; 
-
+T_cruise = Cruise.thrust; 
 %Gliding descent
 
 cldescent = W./(0.5*ddescent.*S.*velocitydescent.^2);
@@ -539,12 +539,17 @@ PrD = TrD.*velocitydescent.*sqrt(ddescent./1.22);
 time_cruise = (1.296e7)/Vcruise;  
 time1 = 1:1:time_to; 
 
-[x,s1] = size(time1);
+[x1,s1] = size(time1);
 time2 = time_to:1:time_climb; 
-[x,s2] = size(time2);
+[x2,s2] = size(time2);
 time3 = time_climb:1:time_cruise; 
+% <<<<<<< HEAD
+[x3,s3] = size(time3); 
+time_profile = [time1,time2,time3];
+% =======
 [x,s3] = size(time3); 
-time_profile = [time1,time2,time3]
+time_profile = [time1,time2,time3];
+% >>>>>>> a94902fceff968f0b4196b033f59abd518ab24c9
 V_toVec = linspace(10,V_to,s1);
 maxV = max(velocityclimb);
 minV = min(velocityclimb);
@@ -559,5 +564,5 @@ V_cruiseVec = Vcruise*ones(1,s3);
 T_profile = [T_toVec,T_climb,T_cruiseVec]';
 V_profile = [V_toVec,V_climbVec,V_cruiseVec]'; 
 
-
+plot(time_profile,T_profile); 
 end
