@@ -24,7 +24,7 @@ dT2 = Thout - Tcin;
 LMTD = (dT1 - dT2)./log(dT1./dT2); 
 U = 40; %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 As = Q./(U.*LMTD); %Surface area based on range of assumed overall heat transfer coefficients, U
-t = 0.0018; %Total thickness of housing in m, based on NASA estimates, 2005
+t = 0.018; %Total thickness of housing in m, based on NASA estimates, 2005
 density = 2300; %Density of silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates
 HX = As.*(t*density); 
 end
