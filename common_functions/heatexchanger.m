@@ -8,8 +8,8 @@ Tcout = coldout.T;
 
 mflowh = net_flow(hotin); %mass flow of into hot side
 mflowc = net_flow(coldin); %mass flow into cold side
-Cph = property(hotin,'cp','kJ/(kgK)'); %Constant pressure specific heat for hot inlet
-Cpc = property(coldin,'cp','kJ/(kgK)'); %Constant pressure specific heat for cold inlet
+Cph = property(hotin,'C','kJ/(kg K)'); %Constant pressure specific heat for hot inlet
+Cpc = property(coldin,'C','kJ/(kg K)'); %Constant pressure specific heat for cold inlet
 Ch = mflowh.*Cph;
 Cc = mflowc.*Cpc; 
 Cmin = min(min(Ch,Cc));
