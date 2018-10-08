@@ -15,6 +15,9 @@ options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FC,E1] = oxy_fuelcell(options,O5);
 [HL,F1,F2,F3,F4,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1);
 
+[HL,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
+
+
 % %% Detailed craft calculations
 % [time_profile,T_profile,V_profile] = craft(options);
 % [thrust,I] = min(T_profile); 
@@ -29,15 +32,12 @@ mission.thrust = linspace(2,1,length(mission.duration))*options.TO_weight(1,1)./
 P_nominal = min(mission.thrust)*max(mission.mach_num).*ss/1000;
 
 %% scale system to meet cruise power requirements
-% <<<<<<< HEAD
+
 [time1,time2,time3,T_toVec,T_climb,T_cruise,V_toVec,V_climbVec,V_cruiseVec,time_profile,T_profile,V_profile] = craft(options);
 T = T_cruise(1,1); 
 %T = options.TO_weight./options.Lift_2_Drag*9.81;% Thrust in N:  Thrust = Cd/Cl*Weight; cruise Cd = 0.036; Cl = .48; weight = 820,000lbs; thus 61,000lbs cruise thrust. Makes sense because max thrust at cruise is 100,000lbs.Range = 6100nautical miles, velocity = 635knts
 P = T.*max(mission.mach_num).*ss./options.prop_eff/1000;%shaft power in kW.  propellor momentum theory at cruise http://164.100.133.129:81/econtent/Uploads/09-%20Ducted%20Fans%20and%20Propellers%20%5BCompatibility%20Mode%5D.pdf ,  http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
 scale = P./options.motor_eff./(FC.Power + OTM.net_work + HL.blower_work);
-% =======
-scale = P_nominal./options.motor_eff./(FC.Power + OTM.net_work + HL.blower_work);
-% >>>>>>> a94902fceff968f0b4196b033f59abd518ab24c9
 molar_flow = scale.*molar_flow;
 vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
 options.SOFC_area = scale.*options.SOFC_area;
@@ -92,10 +92,9 @@ battery = 0;
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
 [time1,time2,time3,T_toVec,T_climb,T_cruise,V_toVec,V_climbVec,V_cruiseVec,time_profile,T_profile,V_profile] = craft(options)
 atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
-% <<<<<<< HEAD
+
 %Create Thrust Profile
-% =======
-% >>>>>>> a94902fceff968f0b4196b033f59abd518ab24c9
+
 i = ceil(par_i/n);
 j = par_i-n*(i-1);
 f = fieldnames(options);

@@ -46,5 +46,6 @@ E4.H2O = E3.H2O - F3.H2O;
 HeatLoop.Qremove_fuel = H_E3 - property(F3,'h','kJ') - property(E4,'h','kJ');
 
 HeatLoop.Qexcess = FC.Qremove - OTM.heat_added + OTM.Q_out + HeatLoop.Qremove_fuel;% - Q_addtl_fuel_heat;
-[HX.fuel] = heatexchanger(E1,E2,F4,F5)
+[HX.fuel] = heatexchanger(E1,E2,F4,F5);
+
 end

@@ -543,13 +543,14 @@ time1 = 1:1:time_to;
 time2 = time_to:1:time_climb; 
 [x2,s2] = size(time2);
 time3 = time_climb:1:time_cruise; 
-% <<<<<<< HEAD
+
 [x3,s3] = size(time3); 
 time_profile = [time1,time2,time3];
-% =======
+
 [x,s3] = size(time3); 
 time_profile = [time1,time2,time3];
-% >>>>>>> a94902fceff968f0b4196b033f59abd518ab24c9
+
+
 V_toVec = linspace(10,V_to,s1);
 maxV = max(velocityclimb);
 minV = min(velocityclimb);

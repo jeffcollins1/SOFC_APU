@@ -27,11 +27,10 @@ options.Blower_dP = 20*ones(n1,n2); %Pressure rise in blower in kPa
 options.TO_weight = 871200/2.2*ones(n1,n2);%take-off mass in kg
 options.Lift_2_Drag = 13.5*ones(n1,n2);%lift to drag ratio
 options.prop_eff = 0.95*ones(n1,n2);%propulsor efficiency
-options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
-% <<<<<<< HEAD
+options.motor_eff = 0.986*ones(n1,n2);%motor efficiency
+
 options.air_frame_weight = (871200 - 222200 - 248072 - 0.4*9670)/2.2*ones(n1,n2);%airframe mass in kg: Max Fuel = 101000 kg.  Max payload = 112760 kg.  4 engines, each 9670lb
 [time1,time2,time3,T_toVec,T_climb,T_cruise,V_toVec,V_climbVec,V_cruiseVec,time_profile,T_profile,V_profile] = craft(options); %Thrust, velocity and time profiles
-% =======
 options.air_frame_weight = options.TO_weight - 101000 - 112760 - 4*9670/2.2;%airframe mass in kg: Max Fuel = 101000 kg.  Max payload = 112760 kg.  4 engines, each 9670lb
 options.propulsor_weight = 0.3*4*(9670/2.2)*ones(n1,n2); %Weight propulsor portion (30%) of 4 RR RB-211 engines
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
@@ -39,8 +38,7 @@ options.OTM_specific_mass = 0.048907*10000/81*ones(n1,n2); %Weight per m^2 OTM m
 options.sofc_specific_mass = 0.05508*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
 %% should edit to be fcn of minimum temperature difference
 options.heat_exchange_power_den = 15*ones(n1,n2); %Power density of heat exchangers, kW/kg
-% 
-% >>>>>>> a94902fceff968f0b4196b033f59abd518ab24c9
+
 band = [0;500;4500;9500;19500;29500;39500;]/3.1;%altitude converted to m
 mission.alt = [(band(2:end)+band(1:end-1))/2;band(end)];
 mission.duration = [(band(2:end)-band(1:end-1))/7.5/3600;14.38];%assume a steady climb rate of 7.5m/s , then 14.38 hours cruise

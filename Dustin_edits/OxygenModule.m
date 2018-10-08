@@ -1,4 +1,4 @@
-function [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options,A1)
+function [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5,HX] = OxygenModule(options,A1)
 [A2,OTM.C1_work] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
 A3.T = max(options.T_otm,A2.T);
@@ -35,4 +35,5 @@ OTM.A2T = A2.T;
 OTM.work_in = OTM.C1_work + OTM.C2_work;
 OTM.net_work = OTM.C1_work + OTM.C2_work + OTM.T1_work;
 OTM.Q_out = property(O2,'h','kJ') - property(O3,'h','kJ');
+[HX.oxygen] = heatexchanger(O1,O2,O4,O5);
 end
