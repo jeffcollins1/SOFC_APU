@@ -1,4 +1,4 @@
-function [Outlet,Work] = expander(Inlet,P_out,eff)
+function [outlet,prop] = expander(Inlet,P_out,eff)
 R = 8.314; %kJ/kmol*K
 cp = property(Inlet,'C','kJ/(kmol K)');
 gamma = cp./(cp-R);
@@ -20,9 +20,12 @@ end
 H_ideal = property(Ideal,'h','kJ');
 H_out = H_in - eff.*(H_in - H_ideal);
 Cp = property(Ideal,'C','kJ/K');
-Outlet = Ideal;
-Outlet.T = Ideal.T + (H_out - H_ideal)./Cp;
-Outlet.T = find_T(Outlet, H_out);
-Work = H_in - H_out;
+outlet = Ideal;
+outlet.T = Ideal.T + (H_out - H_ideal)./Cp;
+outlet.T = find_T(outlet, H_out);
+prop.work = H_in - H_out;
+prop.pressure_ratio = P_out./Inlet.P;
+prop.eff = eff;
+prop.mass_flow = mass_flow(outlet);
 end
 

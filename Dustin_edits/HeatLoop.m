@@ -1,6 +1,6 @@
-function [HeatLoop,F2,F3,F4,F5,E2,E3,E4] = HeatLoop(options,FC,OTM,E1)
+function [HeatLoop,B1,F2,F3,F4,F5,E2,E3,E4] = HeatLoop(options,FC,OTM,E1)
 F2.T =  options.T_motor;
-F2.P = options.P_fc  - options.Blower_dP;
+F2.P = FC.pressure  - options.Blower_dP;
 F2.H2 = FC.H2_used;
 
 Tdb_K = linspace(275,423);
@@ -10,10 +10,10 @@ F3.P = F2.P;
 F3.H2 = FC.H2_supply;
 F3.H2O = FC.H2O_supply;
 
-[F4,HeatLoop.blower_work] = compressor(F3,options.P_fc,options.Blower_eff);
+[F4,B1] = compressor(F3,FC.pressure,options.Blower_eff);
 
 F5 = F4;
-F5.T = options.T_fc;
+F5.T = options.T_fc - .5*options.dT_fc;
 HeatLoop.Q_preheat = property(F5,'h','kJ') - property(F4,'h','kJ');
 E2 = E1;
 
@@ -28,22 +28,24 @@ HeatLoop.Q_removed = property(E1,'h','kJ') - property(E2,'h','kJ');
 E3 = E2;
 E3.H2 = E2.H2 + F2.H2;
 H_E3 = H_E2 + property(F2,'h','kJ');
+E3_sat = E3;
 P_h2O_E3_sat = E3.H2O./net_flow(E3).*E3.P;
-E3.T = interp1(satP,Tdb_K,P_h2O_E3_sat);%temperature of condensation with exhaust water concentration
-H_E3_sat = property(E3,'h','kJ');
-H2O_condense = max(0,(H_E3 - H_E3_sat)./(2260*18));%latent heat of water = 2260kJ/kg
+E3_sat.T = interp1(satP,Tdb_K,P_h2O_E3_sat);%temperature of condensation with exhaust water concentration
+H_E3_sat = property(E3_sat,'h','kJ');
+E3.T = 0.5*E3.T + 0.5*E3_sat.T;
+H2O_condense = min(.99*E3.H2O,max(0,(H_E3_sat - H_E3)./(2260*18)));%latent heat of water = 2260kJ/kg
 E3.H2O = E3.H2O - H2O_condense;
 water.H2O = H2O_condense;
 water.T = E2.T;
 water.P = E2.P;
-E3_Tsat = E3.T;
-E3.T = find_T(E3, H_E3-  property(water,'h','kJ'));
-E3.T(H2O_condense>0) = E3_Tsat(H2O_condense>0);
-HeatLoop.FCQbalance = FC.Qremove - OTM.heat_added; 
+E3.T = find_T(E3, H_E3 -  property(water,'h','kJ'));
+E3.T(H2O_condense>0) = E3_sat.T(H2O_condense>0);
 E4.T = F3.T;
 E4.P = F5.P;
 E4.H2O = E3.H2O - F3.H2O;
 HeatLoop.Qremove_fuel = H_E3 - property(F3,'h','kJ') - property(E4,'h','kJ');
-
-HeatLoop.Qexcess = FC.Qremove - OTM.heat_added + OTM.Q_out + HeatLoop.Qremove_fuel;% - Q_addtl_fuel_heat;
+if ~isempty(OTM)
+    HeatLoop.FCQbalance = FC.Qremove - OTM.heat_added; 
+    HeatLoop.Qexcess = FC.Qremove - OTM.heat_added + OTM.Q_out + HeatLoop.Qremove_fuel;% - Q_addtl_fuel_heat;
 end
+end%Ends function HeatLoop

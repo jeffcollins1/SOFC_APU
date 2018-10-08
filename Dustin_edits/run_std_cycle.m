@@ -1,4 +1,4 @@
-function param = run_cycle(options,mission)
+function param = run_std_cycle(options,mission)
 %% calculate cruise conditions for each design trade-off
 [m,n] = size(options.SOFC_area);
 molar_flow = ones(m,n);
@@ -8,14 +8,16 @@ atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.02
 air_den = interp1(alt_tab,atmosphere_density,options.height);
 [A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
-[OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2);
-[A5,T1] = expander(A4,A1.P,options.T1_eff);
-%one-time adjustment of SOFC area per kmol air flow to ensure a feasible current density
-i_den = 4000.*O5.O2.*96485.33./(options.SOFC_area*10000); %A/cm^2
-i_den = max(.1,min(i_den,.4./options.asr));%Cant solve for ultra low or high current densities
-options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
-[FC,E1] = oxy_fuelcell(options,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
+A3 = A2;
+A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
+[FC,A4,E1] = std_fuelcell(options,A3);
+A5 = A4;
+A5.T = A4.T - (A3.T-A2.T);
+RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
+A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
+
+[A6,T1] = expander(A5,A1.P,options.T1_eff);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,[],E1);
 
 %% simplified assumptions
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
@@ -26,22 +28,27 @@ for i = 1:1:length(mission.alt)
 end
 
 %% scale system to meet cruise power requirements
-scale = P_nominal./options.motor_eff./(FC.Power + C1.work + C2.work + T1.work + B1.work);
+scale = P_nominal./options.motor_eff./(FC.Power + C1.work + T1.work + B1.work);
 molar_flow = scale.*molar_flow;
 vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
 options.SOFC_area = scale.*options.SOFC_area;
-options.OTM_area = scale.*options.OTM_area;
 
 %% Re-Run with scaled system parameters
 [A1,~] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
-[OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2);
-[A5,T1] = expander(A4,A1.P,options.T1_eff);
-[FC,E1] = oxy_fuelcell(options,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
-weight = system_weight(options,FC,{C1;T1;B1;C2},OTM,HL);
-param = NetParam(options,FC,{C1;T1;B1;C2},OTM,HL);
-param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F1',F1;'F2',F2;'F3',F3;'F4',F4;'O1',O1;'O2',O2;'O3',O3;'O4',O4;'O5',O5;};
+A3 = A2;
+A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
+[FC,A4,E1] = std_fuelcell(options,A3);
+A5 = A4;
+A5.T = A4.T - (A3.T-A2.T);
+RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
+A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
+
+[A6,T1] = expander(A5,A1.P,options.T1_eff);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,[],E1);
+weight = system_weight(options,FC,{C1;T1;B1;},[],HL);
+param = NetParam(options,FC,{C1;T1;B1;},[],HL);
+param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'A6',A6;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F1',F1;'F2',F2;'F3',F3;'F4',F4;};
 
 %% calculate off-design power output to meet mission profile for each condition by varying permeate pressure
 weight.fuel = zeros(m,n);
@@ -52,13 +59,14 @@ P_sys_mission = zeros(m*n,length(mission.alt));
 eff_mission = zeros(m*n,length(mission.alt));
 param.power_mission = zeros(m,n,length(mission.alt));
 param.efficiency_mission = zeros(m,n,length(mission.alt));
-parallel = true;
+parallel = false;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,vol_flow,par_i,n);
     end
 else
     for i = 1:1:m*n
+        i
         [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:)] = flight_profile(options,mission,vol_flow,i,n);
     end
 end
@@ -72,9 +80,9 @@ for i = 1:1:m
 end
 weight.fuel = weight.fuel.*options.fuel_tank_mass_per_kg_fuel; %Total LH2 storage including weight of insulated container
 weight.battery = battery_kJ./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
-weight.total = weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel; 
+weight.total = weight.sofc + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel; 
 param.weight = weight;
-param.P_den = scale*param.NetPower./(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx);
+param.P_den = scale*param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
 function [fuel,battery,P_sys_mission,eff_mission] = flight_profile(options,mission,vol_flow,par_i,n)
@@ -90,35 +98,25 @@ mm = 12;
 for k = 1:1:length(f)
     options2.(f{k}) = ones(mm,nn)*options.(f{k})(i,j);
 end
-vol_flow2 = vol_flow(i,j)*[1;.9;.8;.7;.5; .5*ones(mm-5,1);]*ones(1,nn);%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
+vol_flow2 = vol_flow(i,j)*(linspace(1,.1,mm)'*ones(1,nn));%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
 options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
 air_den = interp1(alt_tab,atmosphere_density,options2.height);
 molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
 [A1,~] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
-for k = 1:1:nn
-    options2.P_perm(:,k) = [50*ones(5,1);logspace(log10(50),log10(0.99*.21*A1.P(1,k)*options2.PR_comp(1,1)),mm-5)']; %Pressure of OTM oxygen stream, kPa; 
-end
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
-[OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options2,A2);
-%adjust permeate pressure to be within feasible oxygen output range for SOFC area
-min_O2 = 0.1*options2.SOFC_area(1,1)*10000/(96485.33*4000);
-max_O2 = .6./options2.asr(1,1).*options2.SOFC_area(1,1)*10000/(96485.33*4000);%Cant solve for ultra low or high current densities
-if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
-    R1 = max_O2./O5.O2;
-    R2 = min_O2./O5.O2;
-    options2.P_perm = min(max(options2.P_perm,(0.21*options2.PR_comp.*A1.P).^(1-R1).*options2.P_perm.^R1),(0.21*options2.PR_comp.*A1.P).^(1-R2).*options2.P_perm.^R2);
-    for k = 1:1:nn
-        options2.P_perm(:,k) = linspace(min(options2.P_perm(:,k)),max(options2.P_perm(:,k)),mm);
-    end
-    [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options2,A2);
-end
-[A5,T1] = expander(A4,A1.P,options2.T1_eff);
-[FC,E1] = oxy_fuelcell(options2,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options2,FC,OTM,E1);
-P_sys = FC.Power + C1.work + C2.work + T1.work + B1.work;
+A3 = A2;
+A3.T = max(options2.T_fc-.5*options2.dT_fc,A2.T);
+[FC,A4,E1] = std_fuelcell(options2,A3);
+A5 = A4;
+A5.T = A4.T - (A3.T-A2.T);
+RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
+A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
+[A6,T1] = expander(A5,A1.P,options2.T1_eff);
+
+[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options2,FC,[],E1);
+P_sys = FC.Power + C1.work + T1.work + B1.work;
 P_shaft = options2.motor_eff.*P_sys;
-fuel_for_OTM_preheat = -min(0,HL.FCQbalance)./FC.hrxnmol;
-FTE = P_sys./(FC.H2_used.*FC.hrxnmol - min(0,HL.FCQbalance));
+FTE = P_sys./(FC.H2_used.*FC.hrxnmol);
 P_sys_mission = zeros(1,nn);
 eff_mission = zeros(1,nn);
 %find permeate pressure condition that results in correct power for each flight segment
@@ -127,16 +125,16 @@ for k = 1:1:nn
     if P_req>max(P_shaft(:,k))
         [P,I] = max(P_shaft(:,k));
         battery = battery + (P_req - P)*mission.duration(k)*3600;
-        fuel = fuel + (FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k))*2*mission.duration(k)*3600;
+        fuel = fuel + (FC.H2_used(I,k))*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_sys(I,k);
         eff_mission(k) = FTE(I,k);
     elseif P_req<min(P_shaft(:,k))
         [h2_use,I] = min(FC.H2_used(:,k));
-        fuel = fuel + P_req/P_shaft(I,k)*(FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k))*2*mission.duration(k)*3600;
+        fuel = fuel + P_req/P_shaft(I,k)*(FC.H2_used(I,k))*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_req/min(P_sys(:,k))*P_sys(I,k);
         eff_mission(k) = FTE(I,k);
     else
-        fuel = fuel + (interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)+interp1(P_shaft(:,k),fuel_for_OTM_preheat(:,k),P_req))*2*mission.duration(k)*3600;
+        fuel = fuel + interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;
         P_sys_mission(k) = interp1(P_shaft(:,k),P_sys(:,k),P_req);
         eff_mission(k) = interp1(P_shaft(:,k),FTE(:,k),P_req);
     end

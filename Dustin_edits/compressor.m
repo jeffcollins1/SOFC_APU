@@ -1,4 +1,4 @@
-function [Outlet,Work] = compressor(Inlet,P_out,eff)
+function [outlet,prop] = compressor(Inlet,P_out,eff)
 gamma = property(Inlet,'C','kJ/(kmol K)')./property(Inlet,'O','kJ/(kmol K)');
 H_in = property(Inlet,'h','kJ');
 S_in = property(Inlet,'s','kJ/K');
@@ -18,9 +18,12 @@ end
 H_ideal = property(Ideal,'h','kJ');
 H_out = H_in + 1./eff.*(H_ideal - H_in);
 Cp = property(Ideal,'cp','kJ/K');
-Outlet = Ideal;
-Outlet.T = Ideal.T + (H_out - H_ideal)./Cp;
-Outlet.T = find_T(Outlet, H_out);
-Work = H_in - H_out;
+outlet = Ideal;
+outlet.T = Ideal.T + (H_out - H_ideal)./Cp;
+outlet.T = find_T(outlet, H_out);
+prop.work = H_in - H_out;
+prop.pressure_ratio = P_out./Inlet.P;
+prop.eff = eff;
+prop.mass_flow = mass_flow(outlet);
 end
 
