@@ -1,4 +1,4 @@
-function weight = system_weight(options,FC,OTM,HL,A1)
+function weight = system_weight(options,FC,OTM,HL,A1,HX)
 weight.sofc = options.SOFC_area.*options.sofc_specific_mass;
 weight.otm = options.OTM_area.*options.OTM_specific_mass;
 
