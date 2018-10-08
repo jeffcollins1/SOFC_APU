@@ -32,7 +32,7 @@ E3_sat = E3;
 P_h2O_E3_sat = E3.H2O./net_flow(E3).*E3.P;
 E3_sat.T = interp1(satP,Tdb_K,P_h2O_E3_sat);%temperature of condensation with exhaust water concentration
 H_E3_sat = property(E3_sat,'h','kJ');
-E3.T = 0.5*E3.T + 0.5*E3_sat.T;
+% E3.T = 0.5*E3.T + 0.5*E3_sat.T;
 H2O_condense = min(.99*E3.H2O,max(0,(H_E3_sat - H_E3)./(2260*18)));%latent heat of water = 2260kJ/kg
 E3.H2O = E3.H2O - H2O_condense;
 water.H2O = H2O_condense;
