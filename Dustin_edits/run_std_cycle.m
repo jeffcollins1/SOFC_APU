@@ -1,5 +1,5 @@
 function param = run_std_cycle(options,mission)
-%% calculate cruise conditions for each design trade-off
+%% calculate conditions for each design trade-off per kmol/s of inlet air
 [m,n] = size(options.SOFC_area);
 molar_flow = ones(m,n);
 options.height = mission.alt(mission.design_point)*ones(m,n); %Altitude, meters
@@ -19,7 +19,7 @@ A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
 [A6,T1] = expander(A5,A1.P,options.T1_eff);
 [HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,[],E1);
 
-%% simplified assumptions
+%% Calculate nominal and mission power
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
 mission.air_den = interp1(alt_tab,atmosphere_density,mission.alt);
 [~,mission.ss] = std_atmosphere(mission.alt,1);%Ambient conditions as a function of altitude
@@ -27,7 +27,7 @@ for i = 1:1:length(mission.alt)
     mission.power(:,:,i) = mission.thrust(:,:,i).*mission.mach_num(i).*mission.ss(i)./options.prop_eff/1000;%shaft power in kW. 
 end
 
-%% scale system to meet cruise power requirements
+%% scale system to meet nominal power requirements
 scale = P_nominal./options.motor_eff./(FC.Power + C1.work + T1.work + B1.work);
 molar_flow = scale.*molar_flow;
 vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
