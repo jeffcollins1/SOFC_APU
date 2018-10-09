@@ -15,7 +15,7 @@ i_den = 4000.*O5.O2.*96485.33./(options.SOFC_area*10000); %A/cm^2
 i_den = max(.1,min(i_den,.4./options.asr));%Cant solve for ultra low or high current densities
 options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FC,E1] = oxy_fuelcell(options,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options,FC,OTM,E1,A1,O2,O3);
 
 %% Calculate nominal and mission power
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
@@ -38,7 +38,7 @@ options.OTM_area = scale.*options.OTM_area;
 [OTM,C2,A3,A4,O1,O2,O3,O4,O5,HX] = OxygenModule(options,A2);
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
 [FC,E1] = oxy_fuelcell(options,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options,FC,OTM,E1);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options,FC,OTM,E1,A1,O2,O3);
 weight = system_weight(options,FC,{C1;T1;B1;C2},OTM,HL,HX,HX2);
 param = NetParam(options,FC,{C1;T1;B1;C2},OTM,HL);
 
@@ -116,7 +116,7 @@ if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
 end
 [A5,T1] = expander(A4,A1.P,options2.T1_eff);
 [FC,E1] = oxy_fuelcell(options2,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options2,FC,OTM,E1,O2,O3);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options2,FC,OTM,E1,A1,O2,O3);
 P_sys = FC.Power + C1.work + C2.work + T1.work + B1.work;
 
 P_shaft = options2.motor_eff.*P_sys;

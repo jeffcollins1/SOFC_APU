@@ -1,4 +1,4 @@
-function [HeatLoop,F2,F3,F4,F5,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O2,O3)
+function [HeatLoop,B1,F2,F3,F4,F5,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O2,O3)
 F2.T =  options.T_motor;
 F2.P = FC.pressure  - options.Blower_dP;
 F2.H2 = FC.H2_used;
@@ -10,12 +10,12 @@ F3.H2 = FC.H2_supply;
 F3.H2O = FC.H2O_supply;
 
 [m,n] = size(F2.T);
-AC.O2 = 0.5*0.21*ones(m,n); 
-AC.N2 = 0.5*0.79*ones(m,n);
+AC.O2 = 3*A1.O2;
+AC.N2 = 3*A1.N2;
 AC.T = A1.T;
-AC.P = A1.P;
+AC.P = A1.P; 
 [F4,HeatLoop.blower_work] = compressor(F3,options.P_fc,options.Blower_eff);
-
+B1 = HeatLoop.blower_work; 
 F5 = F4;
 F5.T = options.T_fc - .5*options.dT_fc;
 HeatLoop.Q_preheat = property(F5,'h','kJ') - property(F4,'h','kJ');
@@ -28,7 +28,7 @@ E2.T = E1.T - HeatLoop.Q_preheat./Q_removed.*(E1.T - F4.T);
 E2.T = find_T(E2, H_E2);
 
 HeatLoop.Q_removed = property(E1,'h','kJ') - property(E2,'h','kJ');
-
+HeatLoop.FCQbalance = FC.Qremove - OTM.heat_added; 
 E3 = E2;
 E3.H2 = E2.H2 + F2.H2;
 H_E3 = H_E2 + property(F2,'h','kJ');
@@ -57,9 +57,16 @@ ACout = AC;
 ACout.T = find_T(AC, HACout);
 [HX.fuel] = heatexchanger(E1,E2,F4,F5);
 HX.condenser = heatexchanger(E3,F3,AC,ACout); 
-HACout2 = property(AC,'h','kJ') + OTM.Q_out;
-ACout2 = AC;
-ACout2.T = find_T(ACout2,HACout2); 
-HX.oxycompressor = heatexchanger(O2,O3,AC,ACout2); 
-HX.HP = FC.Qremove./(0.628); %Weight of heat pipes
+
+AC2.O2 = 0.33*A1.O2;
+AC2.N2 = 0.33*A1.N2;
+AC2.T = A1.T; 
+AC2.P = A1.P;
+HACout2 = property(AC2,'h','kJ') + OTM.Q_out;
+ACout2.O2 = AC.O2;
+ACout2.N2 = AC.N2;
+ACout2.P = A1.P; 
+ACout2.T = find_T(AC2,HACout2); 
+HX.oxycompressor = heatexchanger(O2,O3,AC2,ACout2); 
+HX.HP = FC.Qremove./(1.977); %Weight of heat pipes
 end%Ends function HeatLoop

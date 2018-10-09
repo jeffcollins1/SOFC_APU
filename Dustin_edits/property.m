@@ -18,11 +18,11 @@ for i = 1:1:length(F)
         end
         switch unit
             case {'kJ/kg' , 'kJ/(kg K)'}
-                new_val = n./1000*A.(F{i})./NetFlow;
+                new_val = n./1000.*A.(F{i})./NetFlow;
             case {'kJ/kmol' , 'kJ/(kmol K)'}
-               new_val = n./1000*MM(s).*X;
+               new_val = n./1000.*MM(s).*X;
             case {'kJ' , 'kJ/K'}
-               new_val = n./1000*MM(s).*A.(F{i});
+               new_val = n./1000.*MM(s).*A.(F{i});
         end
         new_val(A.(F{i})==0) = 0;
         Val = Val + new_val;

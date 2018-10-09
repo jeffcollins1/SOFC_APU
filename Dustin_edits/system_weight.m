@@ -21,11 +21,11 @@ end
 
 weight.motor = options.motor_eff.*net_power./options.motor_power_den; %Weight of propulstion motors
 
-PratioTurb = sqrt(options.P_non_perm./A1.P);
-turbine_mass = -0.381*PratioTurb.^2 + 5.5*PratioTurb + 1.9167; %Relation for Turbine mass as a function of pressure ratio, 
-weight.turb = 2*turbine_mass.*mass_flow./1.16; 
+% PratioTurb = sqrt(options.PR_comp);
+% turbine_mass = -0.381*PratioTurb.^2 + 5.5*PratioTurb + 1.9167; %Relation for Turbine mass as a function of pressure ratio, 
+% weight.turb = 2*turbine_mass.*mass_flow./1.16; 
 weight.hx_fuel = HX2.fuel; 
-weight.hx = HX2.oxycompressor + HX2.fuel + HX2.condenser + HX.oxygen + HX2.hp; %Heat exchanger weight
+weight.hx = HX2.oxycompressor + HX2.fuel + HX2.condenser + HX.oxygen + HX2.HP; %Heat exchanger weight
 
 weight.propulsor = options.propulsor_weight; 
 end
