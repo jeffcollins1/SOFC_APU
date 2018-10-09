@@ -59,15 +59,14 @@ P_sys_mission = zeros(m*n,length(mission.alt));
 eff_mission = zeros(m*n,length(mission.alt));
 param.power_mission = zeros(m,n,length(mission.alt));
 param.efficiency_mission = zeros(m,n,length(mission.alt));
-parallel = false;
+parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,vol_flow,par_i,n);
+        [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,molar_flow,par_i,n);
     end
 else
     for i = 1:1:m*n
-        i
-        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:)] = flight_profile(options,mission,vol_flow,i,n);
+        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:)] = flight_profile(options,mission,molar_flow,i,n);
     end
 end
 for i = 1:1:m
@@ -85,7 +84,7 @@ param.weight = weight;
 param.P_den = scale*param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
-function [fuel,battery,P_sys_mission,eff_mission] = flight_profile(options,mission,vol_flow,par_i,n)
+function [fuel,battery,P_sys_mission,eff_mission] = flight_profile(options,mission,molar_flow,par_i,n)
 fuel = 0;
 battery = 0;
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
@@ -98,10 +97,14 @@ mm = 12;
 for k = 1:1:length(f)
     options2.(f{k}) = ones(mm,nn)*options.(f{k})(i,j);
 end
-vol_flow2 = vol_flow(i,j)*(linspace(1,.1,mm)'*ones(1,nn));%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
-options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
-air_den = interp1(alt_tab,atmosphere_density,options2.height);
-molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
+% vol_flow2 = vol_flow(i,j)*(linspace(1,.1,mm)'*ones(1,nn));%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
+% options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
+% air_den = interp1(alt_tab,atmosphere_density,options2.height);
+% molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
+
+%% molar_flowtemporary shortcut
+molar_flow2 = molar_flow(i,j)*(linspace(2,.5,mm)'*ones(1,nn));%
+
 [A1,~] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
 A3 = A2;
