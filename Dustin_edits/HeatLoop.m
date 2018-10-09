@@ -1,5 +1,5 @@
 function [HeatLoop,B1,F2,F3,F4,F5,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O1,O2,O3,O4,O5)
-HX.oxygen = heat_exchanger(O1,O2,O4,O5);
+HX.oxygen = heat_exchanger(O1,O2,O4,O5,options);
 
 F2.T =  options.T_motor;
 F2.P = FC.pressure  - options.Blower_dP;
@@ -58,8 +58,8 @@ end
 %% find AC mass flow based on condensor heat transfer
 ACout = AC; 
 ACout.T = E3.T + 25;%find_T(AC, HACout);
-HX.fuel = heat_exchanger(E1,E2,F4,F5);
-HX.condenser = heat_exchanger(E3,F3,AC,ACout); 
+HX.fuel = heat_exchanger(E1,E2,F4,F5,options);
+HX.condenser = heat_exchanger(E3,F3,AC,ACout,options); 
 
 AC2.O2 = 0.33*A1.O2;
 AC2.N2 = 0.33*A1.N2;
@@ -70,6 +70,6 @@ ACout2.O2 = AC.O2;
 ACout2.N2 = AC.N2;
 ACout2.P = A1.P; 
 ACout2.T = find_T(AC2,HACout2); 
-HX.oxycompressor = heat_exchanger(O2,O3,AC2,ACout2); 
+HX.oxycompressor = heat_exchanger(O2,O3,AC2,ACout2,options); 
 HX.HP.mass = FC.Qremove./(1.977); %Weight of heat pipes
 end%Ends function HeatLoop

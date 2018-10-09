@@ -11,7 +11,7 @@ for i = 1:1:length(turbo)
         weight.comp = weight.comp + turbo{i}.mass_flow/1.16.*(0.2131*(turbo{i}.pressure_ratio.^.5).^2 -2.508.*(turbo{i}.pressure_ratio.^.5) + 16.901); %Compressor mass based on pressure ratio and mass flow rate of 1.16 kg/s, from NASA paper
     end
 end
-weight.hx = (HL.Qremove_fuel + HL.Q_preheat + HL.Q_removed)./options.heat_exchange_power_den; %Heat exchanger weight
+%weight.hx = (HL.Qremove_fuel + HL.Q_preheat + HL.Q_removed)./options.heat_exchange_power_den; %Heat exchanger weight
 
 if ~isempty(OTM)
     weight.otm = options.OTM_area.*options.OTM_specific_mass;

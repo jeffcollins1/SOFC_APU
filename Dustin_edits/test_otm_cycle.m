@@ -26,14 +26,16 @@ options.P_perm = 50*ones(n1,n2); %Pressure of OTM oxygen stream, kPa;
 options.C2_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 2 propulsor portion (30%) of 4 RR RB-211 engines
 options.prop_eff = 0.95*ones(n1,n2);%propulsor efficiency
 options.motor_eff = 0.986*ones(n1,n2);%motor efficiency
-
+options.electricdemand = 1000*ones(n1,n2); %Ancilliary demand, kW
 %% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
 options.OTM_specific_mass = 0.048907*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.048907kg/ 81cm^2 cell
 options.sofc_specific_mass = 0.05508*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
-options.fuel_tank_mass_per_kg_fuel = ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
+options.fuel_tank_mass_per_kg_fuel = 1.15*ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
-
+options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
+options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
+options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
 %% aircraft specific parameters
 %787-8 Standard Case in Piano_X
 [segment,history,profile] = import_flight_txt('787');
@@ -46,7 +48,7 @@ engine_mass = 6033;
 RRTrent1000engine = 2*6033*ones(n1,n1);% kg
 
 %%%
-options.air_frame_weight = (options.TO_weight - FuelUsed - StandardPayload - num_engines*engine_mass)*ones(n1,n2);%airframe mass in kg:
+options.air_frame_weight = (TO_weight - FuelUsed - StandardPayload - num_engines*engine_mass)*ones(n1,n2);%airframe mass in kg:
 options.propulsor_weight = 0.3*num_engines*engine_mass*ones(n1,n2); %Weight propulsor portion (30%) 
 
 %% all parameters of mission must be the same length, design_point is the index of the mission profile for whitch the nominal power is scaled
@@ -62,8 +64,9 @@ tic
 param = run_cycle(options,mission);
 toc
 
-param.weight.payload = options.TO_weight - options.air_frame_weight - param.weight.total;
+param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
 payload = param.weight.payload;
+[performancetable,weighttable] = collector(param,mission);
 payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
 figure(3)
 ax = surf(options.PR_comp,param.i_den,payload);
