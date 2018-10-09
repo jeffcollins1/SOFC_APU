@@ -1,8 +1,7 @@
-function [HeatLoop,B1,F2,F3,F4,F5,E2,E3,E4] = HeatLoop(options,FC,OTM,E1)
+function [HeatLoop,F2,F3,F4,F5,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O2,O3)
 F2.T =  options.T_motor;
 F2.P = FC.pressure  - options.Blower_dP;
 F2.H2 = FC.H2_used;
-
 Tdb_K = linspace(275,423);
 satP = exp((-5.8002206e3)./Tdb_K + 1.3914993 - 4.8640239e-2*Tdb_K + 4.1764768e-5*Tdb_K.^2 - 1.4452093e-8*Tdb_K.^3 + 6.5459673*log(Tdb_K))/1000; %saturated water vapor pressure ASHRAE 2013 fundamentals eq. 6 in kPa valid for 0 to 200C
 F3.T = interp1(satP,Tdb_K,options.steamratio.*F2.P)+.02;%temperature of condensation at supply water ratio
@@ -10,7 +9,12 @@ F3.P = F2.P;
 F3.H2 = FC.H2_supply;
 F3.H2O = FC.H2O_supply;
 
-[F4,B1] = compressor(F3,FC.pressure,options.Blower_eff);
+[m,n] = size(F2.T);
+AC.O2 = 0.5*0.21*ones(m,n); 
+AC.N2 = 0.5*0.79*ones(m,n);
+AC.T = A1.T;
+AC.P = A1.P;
+[F4,HeatLoop.blower_work] = compressor(F3,options.P_fc,options.Blower_eff);
 
 F5 = F4;
 F5.T = options.T_fc - .5*options.dT_fc;
@@ -46,7 +50,16 @@ E4.P = F5.P;
 E4.H2O = E3.H2O - F3.H2O;
 HeatLoop.Qremove_fuel = H_E3 - property(F3,'h','kJ') - property(E4,'h','kJ');
 if ~isempty(OTM)
-    HeatLoop.FCQbalance = FC.Qremove - OTM.heat_added; 
     HeatLoop.Qexcess = FC.Qremove - OTM.heat_added + OTM.Q_out + HeatLoop.Qremove_fuel;% - Q_addtl_fuel_heat;
 end
+HACout = property(AC,'h','kJ') + HeatLoop.Qremove_fuel; 
+ACout = AC; 
+ACout.T = find_T(AC, HACout);
+[HX.fuel] = heatexchanger(E1,E2,F4,F5);
+HX.condenser = heatexchanger(E3,F3,AC,ACout); 
+HACout2 = property(AC,'h','kJ') + OTM.Q_out;
+ACout2 = AC;
+ACout2.T = find_T(ACout2,HACout2); 
+HX.oxycompressor = heatexchanger(O2,O3,AC,ACout2); 
+HX.HP = FC.Qremove./(0.628); %Weight of heat pipes
 end%Ends function HeatLoop
