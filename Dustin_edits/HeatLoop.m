@@ -1,4 +1,6 @@
-function [HeatLoop,B1,F2,F3,F4,F5,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O2,O3)
+function [HeatLoop,B1,F2,F3,F4,F5,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O1,O2,O3,O4,O5)
+HX.oxygen = heat_exchanger(O1,O2,O4,O5);
+
 F2.T =  options.T_motor;
 F2.P = FC.pressure  - options.Blower_dP;
 F2.H2 = FC.H2_used;
@@ -52,11 +54,12 @@ HeatLoop.Qremove_fuel = H_E3 - property(F3,'h','kJ') - property(E4,'h','kJ');
 if ~isempty(OTM)
     HeatLoop.Qexcess = FC.Qremove - OTM.heat_added + OTM.Q_out + HeatLoop.Qremove_fuel;% - Q_addtl_fuel_heat;
 end
-HACout = property(AC,'h','kJ') + HeatLoop.Qremove_fuel; 
+% HACout = property(AC,'h','kJ') + HeatLoop.Qremove_fuel; 
+%% find AC mass flow based on condensor heat transfer
 ACout = AC; 
-ACout.T = find_T(AC, HACout);
-[HX.fuel] = heatexchanger(E1,E2,F4,F5);
-HX.condenser = heatexchanger(E3,F3,AC,ACout); 
+ACout.T = E3.T + 25;%find_T(AC, HACout);
+HX.fuel = heat_exchanger(E1,E2,F4,F5);
+HX.condenser = heat_exchanger(E3,F3,AC,ACout); 
 
 AC2.O2 = 0.33*A1.O2;
 AC2.N2 = 0.33*A1.N2;
@@ -67,6 +70,6 @@ ACout2.O2 = AC.O2;
 ACout2.N2 = AC.N2;
 ACout2.P = A1.P; 
 ACout2.T = find_T(AC2,HACout2); 
-HX.oxycompressor = heatexchanger(O2,O3,AC2,ACout2); 
-HX.HP = FC.Qremove./(1.977); %Weight of heat pipes
+HX.oxycompressor = heat_exchanger(O2,O3,AC2,ACout2); 
+HX.HP.mass = FC.Qremove./(1.977); %Weight of heat pipes
 end%Ends function HeatLoop

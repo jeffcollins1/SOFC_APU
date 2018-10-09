@@ -16,29 +16,37 @@ options.Blower_eff = 0.5*ones(n1,n2); %efficiency of blower
 options.Blower_dP = 20*ones(n1,n2); %Pressure rise in blower in kPa
 options.prop_eff = 0.95*ones(n1,n2);%propulsor efficiency
 options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
-options.propulsor_weight = 0.3*4*(9670/2.2)*ones(n1,n2); %Weight propulsor portion (30%) of 4 RR RB-211 engines
+
+%% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
 options.OTM_specific_mass = 0.048907*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.048907kg/ 81cm^2 cell
 options.sofc_specific_mass = 0.05508*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
-options.fuel_tank_mass_per_kg_fuel = 1.15*ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
+options.fuel_tank_mass_per_kg_fuel = ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
-%% should edit to be fcn of minimum temperature difference
-options.heat_exchange_power_den = 15*ones(n1,n2); %Power density of heat exchangers, kW/kg
 
-%% unnecessary if thrust eqn is replaced (edit eqn on line 55 also)
-options.TO_weight = 871200/2.2*ones(n1,n2);%take-off mass in kg
-options.Lift_2_Drag = 13.5*ones(n1,n2);%lift to drag ratio
-options.air_frame_weight = options.TO_weight - 101000 - 112760 - 4*9670/2.2;%airframe mass in kg: Max Fuel = 101000 kg.  Max payload = 112760 kg.  4 engines, each 9670lb
+%% aircraft specific parameters
+%787-8 Standard Case in Piano_X
+[segment,history,profile] = import_flight_txt('787');
+TO_weight = 254011;% kg From 747-8 airport planning guides
+StandardPayload = 23052;% kg
+FuelUsed = 75126;% kg
+Range = 7661;% nm
+num_engines = 2;
+engine_mass = 6033;
+RRTrent1000engine = 2*6033*ones(n1,n1);% kg
+
+%%%
+options.air_frame_weight = (options.TO_weight - FuelUsed - StandardPayload - num_engines*engine_mass)*ones(n1,n2);%airframe mass in kg:
+options.propulsor_weight = 0.3*num_engines*engine_mass*ones(n1,n2); %Weight propulsor portion (30%) 
 
 %% all parameters of mission must be the same length, design_point is the index of the mission profile for whitch the nominal power is scaled
-band = [0;500;4500;9500;19500;29500;39500;]/3.1;%altitude converted to m
-mission.alt = [(band(2:end)+band(1:end-1))/2;band(end)];
-mission.duration = [(band(2:end)-band(1:end-1))/7.5/3600;14.38];%assume a steady climb rate of 7.5m/s , then 14.38 hours cruise
-mission.mach_num = min(0.8,0.5+0.3*mission.alt/9000);
+mission.alt = (segment.initial_alt + [segment.initial_alt(2:end);0])/2; %average altitude for segment (m)
+mission.duration = (segment.end_time - [0;segment.end_time(1:end-1)])/60; %duration for segment (hrs)
 for i = 1:1:length(mission.alt)
-	mission.thrust(:,:,i) = (1+(length(mission.alt)-i)/(length(mission.alt)-1))*options.TO_weight./options.Lift_2_Drag*9.81;%thrust profile in N
+    mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
+	mission.thrust(:,:,i) = ones(n1,n2)*abs(mean(nonzeros(history.FN_eng(i,:))))*num_engines;%thrust profile in N
 end
-mission.design_point = length(mission.alt);%%change if you don't want design point to be end of cruise
+mission.design_point = 3;%%change based on mission profile
 
 tic
 param = run_std_cycle(options,mission);

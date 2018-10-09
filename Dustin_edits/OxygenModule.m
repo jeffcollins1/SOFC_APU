@@ -1,4 +1,4 @@
-function [OTM,C2,A3,A4,O1,O2,O3,O4,O5,HX] = OxygenModule(options,A2)
+function [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2)
 A3 = A2;
 A3.T = max(options.T_otm,A2.T);
 OTM.heat_added =  property(A3,'h','kJ') - property(A2,'h','kJ');
@@ -31,5 +31,4 @@ O2 = O1;
 H_O2 = property(O1,'h','kJ') - OTM.Q_oxygen_HX;
 O2.T = find_T(O2, H_O2);
 OTM.Q_out = property(O2,'h','kJ') - property(O3,'h','kJ');
-[HX.oxygen] = heatexchanger(O1,O2,O4,O5);
 end
