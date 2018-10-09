@@ -8,14 +8,14 @@ atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.02
 air_den = interp1(alt_tab,atmosphere_density,options.height);
 [A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
-[OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2);
+[OTM,C2,A3,A4,O1,O2,O3,O4,O5,HX] = OxygenModule(options,A2);
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
 %one-time adjustment of SOFC area per kmol air flow to ensure a feasible current density
 i_den = 4000.*O5.O2.*96485.33./(options.SOFC_area*10000); %A/cm^2
 i_den = max(.1,min(i_den,.4./options.asr));%Cant solve for ultra low or high current densities
 options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FC,E1] = oxy_fuelcell(options,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options,FC,OTM,E1,A1,O2,O3);
 
 %% Calculate nominal and mission power
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
@@ -35,12 +35,13 @@ options.OTM_area = scale.*options.OTM_area;
 %% Re-Run with scaled system parameters
 [A1,~] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
-[OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2);
+[OTM,C2,A3,A4,O1,O2,O3,O4,O5,HX] = OxygenModule(options,A2);
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
 [FC,E1] = oxy_fuelcell(options,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,OTM,E1);
-weight = system_weight(options,FC,{C1;T1;B1;C2},OTM,HL);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options,FC,OTM,E1,A1,O2,O3);
+weight = system_weight(options,FC,{C1;T1;B1;C2},OTM,HL,HX,HX2);
 param = NetParam(options,FC,{C1;T1;B1;C2},OTM,HL);
+
 param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F1',F1;'F2',F2;'F3',F3;'F4',F4;'O1',O1;'O2',O2;'O3',O3;'O4',O4;'O5',O5;};
 
 %% calculate off-design power output to meet mission profile for each condition by varying permeate pressure
@@ -82,6 +83,7 @@ fuel = 0;
 battery = 0;
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
 atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
+
 i = ceil(par_i/n);
 j = par_i-n*(i-1);
 f = fieldnames(options);
@@ -99,7 +101,7 @@ for k = 1:1:nn
     options2.P_perm(:,k) = [50*ones(5,1);logspace(log10(50),log10(0.99*.21*A1.P(1,k)*options2.PR_comp(1,1)),mm-5)']; %Pressure of OTM oxygen stream, kPa; 
 end
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
-[OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options2,A2);
+[OTM,C2,A3,A4,O1,O2,O3,O4,O5,HX] = OxygenModule(options2,A2);
 %adjust permeate pressure to be within feasible oxygen output range for SOFC area
 min_O2 = 0.1*options2.SOFC_area(1,1)*10000/(96485.33*4000);
 max_O2 = .6./options2.asr(1,1).*options2.SOFC_area(1,1)*10000/(96485.33*4000);%Cant solve for ultra low or high current densities
@@ -110,12 +112,13 @@ if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
     for k = 1:1:nn
         options2.P_perm(:,k) = linspace(min(options2.P_perm(:,k)),max(options2.P_perm(:,k)),mm);
     end
-    [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options2,A2);
+    [OTM,C2,A3,A4,O1,O2,O3,O4,O5,HX] = OxygenModule(options2,A2);
 end
 [A5,T1] = expander(A4,A1.P,options2.T1_eff);
 [FC,E1] = oxy_fuelcell(options2,O5);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options2,FC,OTM,E1);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4,HX2] = HeatLoop(options2,FC,OTM,E1,A1,O2,O3);
 P_sys = FC.Power + C1.work + C2.work + T1.work + B1.work;
+
 P_shaft = options2.motor_eff.*P_sys;
 fuel_for_OTM_preheat = -min(0,HL.FCQbalance)./FC.hrxnmol;
 FTE = P_sys./(FC.H2_used.*FC.hrxnmol - min(0,HL.FCQbalance));

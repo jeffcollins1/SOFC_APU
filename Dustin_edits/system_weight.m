@@ -1,4 +1,4 @@
-function weight = system_weight(options,FC,turbo,OTM,HL)
+function weight = system_weight(options,FC,turbo,OTM,HL,HX,HX2)
 weight.sofc = options.SOFC_area.*options.sofc_specific_mass;
 net_power = FC.Power;
 weight.comp = 0;
@@ -18,6 +18,14 @@ if ~isempty(OTM)
     weight.hx = weight.hx + (OTM.Q_out + OTM.heat_added + OTM.Q_oxygen_HX)./options.heat_exchange_power_den; %Heat exchanger weight
 end
 
+
 weight.motor = options.motor_eff.*net_power./options.motor_power_den; %Weight of propulstion motors
+
+% PratioTurb = sqrt(options.PR_comp);
+% turbine_mass = -0.381*PratioTurb.^2 + 5.5*PratioTurb + 1.9167; %Relation for Turbine mass as a function of pressure ratio, 
+% weight.turb = 2*turbine_mass.*mass_flow./1.16; 
+weight.hx_fuel = HX2.fuel; 
+weight.hx = HX2.oxycompressor + HX2.fuel + HX2.condenser + HX.oxygen + HX2.HP; %Heat exchanger weight
+
 weight.propulsor = options.propulsor_weight; 
 end

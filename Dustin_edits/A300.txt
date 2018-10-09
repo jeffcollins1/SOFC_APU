@@ -1,0 +1,667 @@
+
+
+ DETAILED FLIGHT PROFILE {design range & standard payload}
+ _______________________
+
+ Generating manoeuvre sequence from 'range' calculations..
+
+ Summary of segments in the sequence:
+ -----------------------------------------------
+ Seg.  Speed mode   Thrust mode   Stop condition
+
+   1.  v3           at-%mto       to alt 457.
+   2.  specify-cas  at-%mcl       to alt 3048.
+   3.  specify-cas  at-%mcl       to mach 0.74
+   4.  same-mach    at-%mcl       to alt 9449.
+   5.  specify-mach level-cruise  to next stepup
+   6.  same-mach    at-%mcl       to dalt  1219.
+   7.  same-mach    level-cruise  to mass 123330.
+   8.  specify-mach at-idle       to cas 308.
+   9.  specify-cas  at-idle       to alt 3048.
+  10.  specify-cas  at-idle       to alt 457.
+  11.  vapp         match-grad    to alt 15.
+ -----------------------------------------------
+
+ Items not included in flight sequence totals:
+ Item                        Time      Fuel Burn
+ -----------------------------------------------
+ Taxi-out                300. sec.      114. kg.
+ T/O to screen height     39. sec.      111. kg.
+ Note: Distances are not credited below 1500 ft.
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 1 starts at:
+ 
+ Initial Mass         170389.   kg.  (CL 1.32 airbus)
+ Initial Altitude         11.   metres 
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          173.   kts  (V3)
+ Flaps                    15    deg. 
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine    208855.   newtons (100% MTO) 
+
+ Climb/Descent rate    13.78    m/sec 
+ Flightpath angle        8.8    deg. (grad.15.44%)
+ True airspeed           174.   kts
+
+ Fuel Flow rate        19709.   kg/hr 
+ NOx emission rate     673.1    kg/hr
+ HC  emission rate     1.303    kg/hr
+ CO  emission rate      10.3    kg/hr 
+
+ L/D ratio             11.15
+ Total aircraft drag  149903.   newtons 
+
+ Segment 1 ends at total time = 0.6 mins, endmass = 170211.kg.
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:    +447.   +33.0    +0.00     +177.7    +6.01   +0.012   +0.09
+ Final :     457.    33.0     0.00      177.7     6.01    0.012    0.09
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+              11.     0.0    0.000        0.0    208855.  173.   0.262   13.78
+              60.     3.6    0.000       19.7    208017.  173.   0.263   13.73
+             110.     7.2    0.000       39.4    207181.  173.   0.264   13.67
+             160.    10.9    0.000       59.2    206347.  173.   0.265   13.62
+             209.    14.5    0.000       78.9    205516.  173.   0.265   13.56
+             259.    18.2    0.000       98.6    204686.  173.   0.266   13.50
+             308.    21.9    0.000      118.4    203859.  173.   0.267   13.45
+             358.    25.6    0.000      138.1    203034.  173.   0.268   13.39
+             408.    29.3    0.000      157.9    202211.  173.   0.268   13.34
+             457.    33.0    0.000      177.7    201390.  173.   0.269   13.28
+ -----------------------------------------------------------------------------
+
+ Acceleration to 250.kts in level flight at 457.metres 0.15g:
+ Time +27.2 sec, Dist +3.00 km., Fuelburn +143.2 kg.
+ NOx  +4.81 kg., HC +0.010 kg., CO +0.076 kg.
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 2 starts at:
+ 
+ Initial Mass         170068.   kg.  (CL 0.63 airbus)
+ Initial Altitude        457.   metres 
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          250.   kts  (input)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine    149495.   newtons (100% MCL) 
+
+ Climb/Descent rate    15.04    m/sec 
+ Flightpath angle        6.5    deg. (grad.11.45%)
+ True airspeed           255.   kts
+
+ Fuel Flow rate        15811.   kg/hr 
+ NOx emission rate     414.7    kg/hr
+ HC  emission rate     1.222    kg/hr
+ CO  emission rate       8.4    kg/hr 
+
+ L/D ratio             18.03
+ Total aircraft drag   92503.   newtons 
+
+ Segment 2 ends at total time = 4.1 mins, endmass = 169314.kg.
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:   +2591.   +185.   +25.91     +754.2   +19.15   +0.063   +0.43
+ Final :    3048.    245.    28.91     1075.1    29.97    0.085    0.60
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+             457.    60.2    3.002      320.9    149495.  250.   0.388   15.04
+             594.    69.3    4.201      360.7    148146.  250.   0.391   14.92
+             730.    78.5    5.418      400.5    146804.  250.   0.394   14.80
+             866.    87.7    6.652      440.3    145469.  250.   0.397   14.69
+            1003.    97.0    7.904      480.0    144158.  250.   0.400   14.57
+            1139.   106.4    9.173      519.8    142950.  250.   0.404   14.47
+            1275.   115.9    10.46      559.5    141751.  250.   0.407   14.37
+            1412.   125.4    11.76      599.2    140559.  250.   0.410   14.27
+            1548.   135.0    13.08      638.9    139377.  250.   0.413   14.16
+            1684.   144.7    14.42      678.5    138202.  250.   0.417   14.06
+            1821.   154.4    15.78      718.2    137037.  250.   0.420   13.96
+            1957.   164.2    17.16      757.8    135880.  250.   0.424   13.86
+            2093.   174.1    18.56      797.5    134733.  250.   0.427   13.75
+            2230.   184.0    19.97      837.1    133595.  250.   0.431   13.65
+            2366.   194.1    21.41      876.8    132466.  250.   0.434   13.55
+            2503.   204.2    22.87      916.4    131346.  250.   0.438   13.44
+            2639.   214.3    24.35      956.1    130236.  250.   0.441   13.34
+            2775.   224.6    25.85      995.8    129136.  250.   0.445   13.23
+            2912.   235.0    27.37     1035.4    128047.  250.   0.449   13.13
+            3048.   245.4    28.91     1075.1    126967.  250.   0.452   13.03
+ -----------------------------------------------------------------------------
+
+ Acceleration to 308.kts in level flight at 3048.metres 0.11g:
+ Time +32.4 sec, Dist +5.38 km., Fuelburn +137.1 kg.
+ NOx  +3.98 kg., HC +0.011 kg., CO +0.083 kg.
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 3 starts at:
+ 
+ Initial Mass         169177.   kg.  (CL 0.42 airbus)
+ Initial Altitude       3048.   metres 
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          308.   kts  (input)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine    120215.   newtons (100% MCL) 
+
+ Climb/Descent rate    13.62    m/sec 
+ Flightpath angle        4.3    deg. (grad.7.46%)
+ True airspeed           355.   kts
+
+ Fuel Flow rate        14101.   kg/hr 
+ NOx emission rate     372.3    kg/hr
+ HC  emission rate     1.232    kg/hr
+ CO  emission rate       8.5    kg/hr 
+
+ L/D ratio             17.14
+ Total aircraft drag   96823.   newtons 
+
+ Segment 3 ends at total time = 12.4 mins, endmass = 167665.kg.(1.72g buff)
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:   +4594.   +469.   +97.06    +1511.6   +34.71   +0.160   +1.07
+ Final :    7642.    747.   131.35     2723.9    68.65    0.256    1.75
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+            3048.   277.8    34.29     1212.2    120215.  308.   0.556   13.62
+            3290.   295.8    37.59     1282.0    117868.  308.   0.564   13.29
+            3532.   314.2    41.01     1352.2    115559.  308.   0.572   12.96
+            3773.   333.1    44.56     1423.1    113290.  308.   0.580   12.63
+            4015.   352.5    48.25     1494.5    111062.  308.   0.589   12.29
+            4257.   372.5    52.09     1566.7    108875.  308.   0.598   11.95
+            4499.   393.0    56.08     1639.7    106808.  308.   0.606   11.62
+            4740.   414.1    60.23     1713.5    104549.  308.   0.615   11.26
+            4982.   436.0    64.59     1788.4    102215.  308.   0.624   10.86
+            5224.   458.7    69.15     1864.5    99917.   308.   0.634   10.47
+            5466.   482.2    73.95     1941.9    97655.   308.   0.643   10.08
+            5708.   506.7    78.99     2020.7    95430.   308.   0.653   9.69
+            5949.   532.1    84.30     2101.0    93244.   308.   0.663   9.30
+            6191.   558.7    89.91     2183.1    91098.   308.   0.673   8.92
+            6433.   586.4    95.83     2267.0    88992.   308.   0.683   8.53
+            6675.   615.4   102.10     2353.1    86929.   308.   0.693   8.15
+            6916.   645.8   108.74     2441.6    84909.   308.   0.704   7.77
+            7158.   677.7   115.81     2532.7    82933.   308.   0.714   7.39
+            7400.   711.3   123.33     2626.7    81003.   308.   0.725   7.02
+            7642.   746.7   131.35     2723.9    79112.   308.   0.737   6.65
+ -----------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 4 starts at:
+ 
+ Initial Mass         167665.   kg.  (CL 0.44 airbus)
+ Initial Altitude       7642.   metres (1.72g buffet)
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          308.   kts  (fixed Mach 0.737)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine     79112.   newtons (100% MCL) 
+
+ Climb/Descent rate     9.06    m/sec 
+ Flightpath angle        2.3    deg. (grad.3.97%)
+ True airspeed           443.   kts
+
+ Fuel Flow rate         9793.   kg/hr 
+ NOx emission rate     196.0    kg/hr
+ HC  emission rate     1.263    kg/hr
+ CO  emission rate       8.8    kg/hr 
+
+ L/D ratio             16.84
+ Total aircraft drag   97623.   newtons 
+
+ Segment 4 ends at total time = 16.7 mins, endmass = 167040.kg.(1.33g buff)
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:   +1807.   +257.   +57.88     +625.1   +11.27   +0.097   +0.73
+ Final :    9449.   1004.   189.23     3348.9    79.92    0.353    2.48
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+            7642.   746.7   131.35     2723.9    79112.   308.   0.737   9.06
+            7737.   757.3   133.77     2752.6    78381.   306.   0.737   8.87
+            7832.   768.1   136.24     2781.6    77650.   304.   0.737   8.69
+            7927.   779.2   138.75     2810.9    76918.   302.   0.737   8.50
+            8022.   790.5   141.32     2840.6    76187.   300.   0.737   8.30
+            8117.   802.1   143.95     2870.6    75456.   299.   0.737   8.11
+            8212.   814.0   146.64     2901.1    74724.   297.   0.737   7.91
+            8308.   826.1   149.39     2931.9    73993.   295.   0.737   7.72
+            8403.   838.6   152.21     2963.3    73261.   293.   0.737   7.52
+            8498.   851.4   155.10     2995.1    72530.   291.   0.737   7.32
+            8593.   864.6   158.07     3027.4    71799.   289.   0.737   7.12
+            8688.   878.2   161.12     3060.2    71067.   287.   0.737   6.91
+            8783.   892.1   164.25     3093.7    70336.   285.   0.737   6.71
+            8878.   906.5   167.49     3127.8    69604.   283.   0.737   6.50
+            8973.   921.4   170.82     3162.6    68873.   281.   0.737   6.29
+            9068.   936.8   174.26     3198.1    68142.   279.   0.737   6.08
+            9163.   952.7   177.81     3234.5    67426.   277.   0.737   5.87
+            9259.   969.2   181.49     3271.7    66773.   275.   0.737   5.68
+            9354.   986.2   185.29     3309.8    66120.   274.   0.737   5.48
+            9449.   1004.   189.23     3348.9    65467.   272.   0.737   5.27
+ -----------------------------------------------------------------------------
+
+ Acceleration to 293.kts in level flight at 9449.metres 0.02g:
+ Time +79.6 sec, Dist +18.99 km., Fuelburn +184.9 kg.
+ NOx  +3.26 kg., HC +0.030 kg., CO +0.224 kg.
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 5 starts at:
+ 
+ Initial Mass         166855.   kg.  (CL 0.50 airbus)
+ Initial Altitude       9449.   metres (1.21g buffet)
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          293.   kts  (input Mach 0.790)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine     49989.   newtons (level cruise) 87.0%MCR
+
+ Climb/Descent rate     0.00    m/sec 
+ Flightpath angle        0.0    deg. (grad.0.00%)
+ True airspeed           464.   kts
+
+ Fuel Flow rate         6246.   kg/hr 
+ NOx emission rate      84.4    kg/hr
+ HC  emission rate     1.425    kg/hr
+ CO  emission rate      12.4    kg/hr 
+
+ L/D ratio             16.37
+ Total aircraft drag   99977.   newtons 
+
+ Segment 5 ends at total time = 175.4 mins, endmass = 151188.kg.(1.34g buff)
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:      +0.  +9441. +2251.36   +15667.5  +204.43   +3.707  +32.78
+ Final :    9449.  10524.  2459.58    19201.2   287.60    4.090   35.48
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+            9449.   1084.   208.22     3533.8    49989.   293.   0.790   0.00
+            9449.   1560.   321.84     4358.4    49725.   293.   0.790   0.00
+            9449.   2039.   436.01     5183.0    49465.   293.   0.790   0.00
+            9449.   2520.   550.73     6007.6    49209.   293.   0.790   0.00
+            9449.   3003.   665.99     6832.2    48956.   293.   0.790   0.00
+            9449.   3489.   781.81     7656.8    48706.   293.   0.790   0.00
+            9449.   3977.   898.17     8481.4    48460.   293.   0.790   0.00
+            9449.   4467.  1015.07     9306.0    48216.   293.   0.790   0.00
+            9449.   4959.  1132.51    10130.6    47976.   293.   0.790   0.00
+            9449.   5454.  1250.49    10955.2    47739.   293.   0.790   0.00
+            9449.   5951.  1369.01    11779.8    47504.   293.   0.790   0.00
+            9449.   6450.  1488.06    12604.4    47273.   293.   0.790   0.00
+            9449.   6952.  1607.65    13429.0    47044.   293.   0.790   0.00
+            9449.   7456.  1727.77    14253.6    46818.   293.   0.790   0.00
+            9449.   7962.  1848.42    15078.2    46594.   293.   0.790   0.00
+            9449.   8470.  1969.60    15902.8    46373.   293.   0.790   0.00
+            9449.   8980.  2091.30    16727.4    46154.   293.   0.790   0.00
+            9449.   9493.  2213.54    17552.0    45938.   293.   0.790   0.00
+            9449.  10007.  2336.30    18376.6    45724.   293.   0.790   0.00
+            9449.  10524.  2459.58    19201.2    45513.   293.   0.790   0.00
+ -----------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 6 starts at:
+ 
+ Initial Mass         151188.   kg.  (CL 0.45 airbus)
+ Initial Altitude       9449.   metres (1.34g buffet)
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          293.   kts  (fixed Mach 0.790)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine     65473.   newtons (100% MCL) 
+
+ Climb/Descent rate     7.00    m/sec 
+ Flightpath angle        1.7    deg. (grad.2.94%)
+ True airspeed           464.   kts
+
+ Fuel Flow rate         8161.   kg/hr 
+ NOx emission rate     140.3    kg/hr
+ HC  emission rate     1.371    kg/hr
+ CO  emission rate      10.5    kg/hr 
+
+ L/D ratio             16.29
+ Total aircraft drag   91026.   newtons 
+
+ Segment 6 ends at total time = 179.2 mins, endmass = 150711.kg.(1.11g buff)
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:   +1219.   +228.   +53.79     +476.6    +7.64   +0.090   +0.71
+ Final :   10668.  10752.  2513.37    19677.9   295.25    4.180   36.19
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+            9449.  10524.  2459.58    19201.2    65473.   293.   0.790   7.00
+            9513.  10534.  2461.79    19222.2    65050.   292.   0.790   6.86
+            9577.  10543.  2464.04    19243.3    64627.   291.   0.790   6.72
+            9641.  10553.  2466.33    19264.8    64204.   289.   0.790   6.58
+            9705.  10563.  2468.68    19286.6    63781.   288.   0.790   6.43
+            9770.  10573.  2471.08    19308.7    63357.   287.   0.790   6.28
+            9834.  10583.  2473.53    19331.2    62934.   285.   0.790   6.13
+            9898.  10594.  2476.04    19354.0    62511.   284.   0.790   5.98
+            9962.  10604.  2478.62    19377.3    62088.   283.   0.790   5.82
+           10026.  10616.  2481.26    19401.1    61665.   281.   0.790   5.66
+           10090.  10627.  2483.99    19425.4    61242.   280.   0.790   5.49
+           10155.  10639.  2486.79    19450.2    60818.   279.   0.790   5.32
+           10219.  10651.  2489.68    19475.6    60395.   277.   0.790   5.15
+           10283.  10664.  2492.67    19501.7    59972.   276.   0.790   4.97
+           10347.  10677.  2495.77    19528.6    59549.   275.   0.790   4.79
+           10411.  10691.  2498.98    19556.3    59126.   273.   0.790   4.60
+           10475.  10705.  2502.33    19584.9    58702.   272.   0.790   4.41
+           10540.  10720.  2505.83    19614.6    58279.   271.   0.790   4.21
+           10604.  10736.  2509.50    19645.5    57856.   269.   0.790   4.00
+           10668.  10752.  2513.37    19677.9    57433.   268.   0.790   3.78
+ -----------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 7 starts at:
+ 
+ Initial Mass         150711.   kg.  (CL 0.55 airbus)
+ Initial Altitude      10668.   metres (1.11g buffet)
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          268.   kts  (fixed Mach 0.790)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine     46486.   newtons (level cruise) 92.3%MCR
+
+ Climb/Descent rate     0.00    m/sec 
+ Flightpath angle        0.0    deg. (grad.0.00%)
+ True airspeed           455.   kts
+
+ Fuel Flow rate         5634.   kg/hr 
+ NOx emission rate      70.5    kg/hr
+ HC  emission rate     1.443    kg/hr
+ CO  emission rate      12.8    kg/hr 
+
+ L/D ratio             15.90
+ Total aircraft drag   92971.   newtons 
+
+ Segment 7 ends at total time = 503.0 mins, endmass = 123330.kg.(1.36g buff)
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:      +0. +19427. +4551.12   +27381.1  +317.49   +7.545  +68.37
+ Final :   10668.  30179.  7064.50    47059.0   612.74   11.724  104.56
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+           10668.  10752.  2513.37    19677.9    46486.   268.   0.790   0.00
+           10668.  11679.  2730.43    21119.0    45869.   268.   0.790   0.00
+           10668.  12617.  2950.16    22560.1    45277.   268.   0.790   0.00
+           10668.  13566.  3172.52    24001.2    44708.   268.   0.790   0.00
+           10668.  14526.  3397.47    25442.3    44159.   268.   0.790   0.00
+           10668.  15497.  3624.98    26883.4    43630.   268.   0.790   0.00
+           10668.  16479.  3855.02    28324.5    43119.   268.   0.790   0.00
+           10668.  17472.  4087.55    29765.6    42625.   268.   0.790   0.00
+           10668.  18475.  4322.55    31206.8    42146.   268.   0.790   0.00
+           10668.  19488.  4559.99    32647.9    41681.   268.   0.790   0.00
+           10668.  20512.  4799.85    34089.0    41230.   268.   0.790   0.00
+           10668.  21546.  5042.11    35530.1    40792.   268.   0.790   0.00
+           10668.  22591.  5286.75    36971.2    40365.   268.   0.790   0.00
+           10668.  23645.  5533.75    38412.3    39950.   268.   0.790   0.00
+           10668.  24709.  5783.09    39853.4    39544.   268.   0.790   0.00
+           10668.  25784.  6034.77    41294.5    39149.   268.   0.790   0.00
+           10668.  26868.  6288.76    42735.6    38764.   268.   0.790   0.00
+           10668.  27962.  6545.05    44176.7    38387.   268.   0.790   0.00
+           10668.  29066.  6803.63    45617.9    38019.   268.   0.790   0.00
+           10668.  30179.  7064.50    47059.0    37658.   268.   0.790   0.00
+ -----------------------------------------------------------------------------
+
+ Deceleration to 248.kts in level flight at 10668.metres -0.05g:
+ Time +29.8 sec, Dist +6.50 km., Fuelburn +8.3 kg.
+ NOx  +0.03 kg., HC +0.125 kg., CO +0.580 kg.
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 8 starts at:
+ 
+ Initial Mass         123322.   kg.  (CL 0.51 airbus)
+ Initial Altitude      10668.   metres (1.49g buffet)
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          248.   kts  (input Mach 0.737)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine      3004.   newtons (idle) 
+
+ Climb/Descent rate   -12.75    m/sec 
+ Flightpath angle       -3.3    deg. (grad.-5.84%)
+ True airspeed           425.   kts
+
+ Fuel Flow rate         1005.   kg/hr 
+ NOx emission rate       3.5    kg/hr
+ HC  emission rate    15.116    kg/hr
+ CO  emission rate      70.1    kg/hr 
+
+ L/D ratio             16.91
+ Total aircraft drag   71501.   newtons 
+
+ Segment 8 ends at total time = 507.1 mins, endmass = 123258.kg.
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:   -3026.   +214.   +47.80      +63.6    +0.23   +0.877   +4.07
+ Final :    7642.  30423.  7118.80    47130.9   613.00   12.726  109.21
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+           10668.  30209.  7071.00    47067.3    3004.    248.   0.737   -12.75
+           10509.  30221.  7073.72    47070.8    2897.    251.   0.737   -12.86
+           10349.  30234.  7076.42    47074.2    2790.    254.   0.737   -12.98
+           10190.  30246.  7079.10    47077.7    2683.    257.   0.737   -13.11
+           10031.  30258.  7081.77    47081.1    2576.    260.   0.737   -13.24
+            9872.  30270.  7084.41    47084.5    2469.    263.   0.737   -13.38
+            9712.  30282.  7087.03    47087.9    2362.    267.   0.737   -13.53
+            9553.  30293.  7089.62    47091.3    2255.    270.   0.737   -13.69
+            9394.  30305.  7092.19    47094.6    2148.    273.   0.737   -13.86
+            9235.  30316.  7094.74    47097.9    2041.    276.   0.737   -14.04
+            9075.  30328.  7097.25    47101.2    1961.    279.   0.737   -14.21
+            8916.  30339.  7099.75    47104.5    1916.    282.   0.737   -14.38
+            8757.  30350.  7102.22    47107.8    1871.    286.   0.737   -14.55
+            8597.  30361.  7104.66    47111.1    1827.    289.   0.737   -14.73
+            8438.  30371.  7107.08    47114.4    1782.    292.   0.737   -14.92
+            8279.  30382.  7109.48    47117.7    1738.    295.   0.737   -15.11
+            8120.  30392.  7111.85    47121.0    1693.    299.   0.737   -15.31
+            7960.  30403.  7114.19    47124.3    1648.    302.   0.737   -15.51
+            7801.  30413.  7116.51    47127.6    1604.    305.   0.737   -15.73
+            7642.  30423.  7118.80    47130.9    1559.    308.   0.737   -15.95
+ -----------------------------------------------------------------------------
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 9 starts at:
+ 
+ Initial Mass         123258.   kg.  (CL 0.33 airbus)
+ Initial Altitude       7642.   metres 
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          308.   kts  (input)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine      1559.   newtons (idle) 
+
+ Climb/Descent rate   -11.71    m/sec 
+ Flightpath angle       -2.9    deg. (grad.-5.13%)
+ True airspeed           443.   kts
+
+ Fuel Flow rate         1188.   kg/hr 
+ NOx emission rate       4.6    kg/hr
+ HC  emission rate    14.640    kg/hr
+ CO  emission rate      68.0    kg/hr 
+
+ L/D ratio             14.83
+ Total aircraft drag   81521.   newtons 
+
+ Segment 9 ends at total time = 514.0 mins, endmass = 123111.kg.
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:   -4594.   +416.   +84.73     +147.0    +0.58   +1.634   +7.58
+ Final :    3048.  30839.  7203.53    47277.9   613.58   14.360  116.79
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+            7642.  30423.  7118.80    47130.9    1559.    308.   0.737   -11.71
+            7400.  30444.  7123.50    47137.8    1491.    308.   0.725   -11.65
+            7158.  30465.  7128.16    47144.7    1424.    308.   0.714   -11.59
+            6916.  30486.  7132.79    47151.7    1364.    308.   0.704   -11.52
+            6675.  30507.  7137.39    47158.8    1309.    308.   0.693   -11.45
+            6433.  30528.  7141.97    47166.0    1261.    308.   0.683   -11.38
+            6191.  30549.  7146.52    47173.4    1218.    308.   0.673   -11.31
+            5949.  30570.  7151.05    47180.8    1181.    308.   0.663   -11.23
+            5708.  30592.  7155.55    47188.3    1149.    308.   0.653   -11.16
+            5466.  30614.  7160.03    47195.9    1123.    308.   0.643   -11.08
+            5224.  30636.  7164.50    47203.6    1101.    308.   0.634   -11.00
+            4982.  30658.  7168.94    47211.4    1085.    308.   0.624   -10.91
+            4740.  30680.  7173.37    47219.3    1073.    308.   0.615   -10.83
+            4499.  30702.  7177.78    47227.4    1020.    308.   0.606   -10.75
+            4257.  30725.  7182.15    47235.5    876.     308.   0.598   -10.72
+            4015.  30748.  7186.50    47243.8    757.     308.   0.589   -10.68
+            3773.  30770.  7190.80    47252.1    642.     308.   0.580   -10.65
+            3532.  30793.  7195.08    47260.6    533.     308.   0.572   -10.60
+            3290.  30816.  7199.32    47269.2    428.     308.   0.564   -10.56
+            3048.  30839.  7203.53    47277.9    328.     308.   0.556   -10.51
+ -----------------------------------------------------------------------------
+
+ Deceleration to 250.kts in level flight at 3048.metres -0.06g:
+ Time +57.6 sec, Dist +9.51 km., Fuelburn +21.4 kg.
+ NOx  +0.08 kg., HC +0.219 kg., CO +1.013 kg.
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 10 starts at:
+ 
+ Initial Mass         123090.   kg.  (CL 0.47 airbus)
+ Initial Altitude       3048.   metres 
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          250.   kts  (input)
+ Flaps                     0    deg. (hi-speed)
+ Undercarriage            up
+ All eng.operative
+ Thrust per engine      1800.   newtons (idle) 
+
+ Climb/Descent rate    -7.37    m/sec 
+ Flightpath angle       -2.8    deg. (grad.-4.97%)
+ True airspeed           289.   kts
+
+ Fuel Flow rate         1308.   kg/hr 
+ NOx emission rate       5.0    kg/hr
+ HC  emission rate    13.537    kg/hr
+ CO  emission rate      62.7    kg/hr 
+
+ L/D ratio             17.23
+ Total aircraft drag   70070.   newtons 
+
+ Segment 10 ends at total time = 521.0 mins, endmass = 122950.kg.
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:   -2591.   +366.   +51.08     +139.5    +0.54   +1.355   +6.28
+ Final :     457.  31262.  7264.12    47438.8   614.20   15.934  124.08
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+            3048.  30896.  7213.04    47299.3    1800.    250.   0.452   -7.37
+            2912.  30915.  7215.78    47306.1    1763.    250.   0.449   -7.35
+            2775.  30934.  7218.52    47312.9    1727.    250.   0.445   -7.32
+            2639.  30952.  7221.25    47319.8    1692.    250.   0.441   -7.29
+            2503.  30971.  7223.97    47326.7    1658.    250.   0.438   -7.26
+            2366.  30990.  7226.68    47333.7    1626.    250.   0.434   -7.23
+            2230.  31009.  7229.39    47340.7    1596.    250.   0.431   -7.20
+            2093.  31028.  7232.10    47347.9    1566.    250.   0.427   -7.16
+            1957.  31047.  7234.79    47355.1    1538.    250.   0.424   -7.13
+            1821.  31066.  7237.49    47362.3    1511.    250.   0.420   -7.10
+            1684.  31085.  7240.17    47369.6    1485.    250.   0.417   -7.07
+            1548.  31105.  7242.85    47377.0    1461.    250.   0.413   -7.04
+            1412.  31124.  7245.53    47384.5    1437.    250.   0.410   -7.01
+            1275.  31143.  7248.20    47392.0    1415.    250.   0.407   -6.98
+            1139.  31163.  7250.86    47399.6    1394.    250.   0.404   -6.94
+            1003.  31183.  7253.52    47407.3    1374.    250.   0.400   -6.91
+             866.  31202.  7256.18    47415.1    1359.    250.   0.397   -6.88
+             730.  31222.  7258.83    47422.9    1345.    250.   0.394   -6.85
+             594.  31242.  7261.48    47430.8    1332.    250.   0.391   -6.81
+             457.  31262.  7264.12    47438.8    1318.    250.   0.388   -6.78
+ -----------------------------------------------------------------------------
+
+ Deceleration to 129.kts in level flight at 457.metres -0.21g:
+ Time +31.3 sec, Dist +2.96 km., Fuelburn +12.2 kg.
+ NOx  +0.05 kg., HC +0.113 kg., CO +0.525 kg.
+
+ -----------------------------------------------------------------------------
+ Manoeuvre segment 11 starts at:
+ 
+ Initial Mass         122938.   kg.  (CL 1.72 airbus)
+ Initial Altitude        457.   metres 
+ Delta-ISA                +0.   degC
+ Airspeed (CAS)          129.   kts  (Vapp)
+ Flaps                    35    deg. 
+ Undercarriage          down
+ All eng.operative
+ Thrust per engine     61394.   newtons (match grad.) 35.2%MCL
+
+ Climb/Descent rate    -3.55    m/sec 
+ Flightpath angle       -3.0    deg. (grad.-5.24%)
+ True airspeed           132.   kts
+
+ Fuel Flow rate         6339.   kg/hr 
+ NOx emission rate      70.9    kg/hr
+ HC  emission rate     1.176    kg/hr
+ CO  emission rate      11.1    kg/hr 
+
+ L/D ratio              6.44
+ Total aircraft drag  187330.   newtons 
+
+ Segment 11 ends at total time = 523.7 mins, endmass = 122715.kg.
+
+         Altitude   Time   Distance   Fuel Burn    NOx     HC      CO
+           metres    sec    km.         kg.        kg.     kg.     kg.
+ 
+ Increm:    -442.   +126.    +0.00     +222.9    +2.48   +0.041   +0.39
+ Final :      15.  31420.  7267.08    47673.9   616.73   16.089  124.99
+ -----------------------------------------------------------------------------
+ History:    Alt    Time      Dist      Burnt    FN/eng   CAS    Mach    RoC
+             457.  31294.    0.000    47451.0    61394.   129.   0.200   -3.55
+             408.  31307.    0.000    47475.4    61387.   129.   0.200   -3.54
+             359.  31321.    0.000    47499.9    61379.   129.   0.199   -3.53
+             310.  31335.    0.000    47524.5    61371.   129.   0.198   -3.52
+             261.  31349.    0.000    47549.2    61364.   129.   0.198   -3.51
+             212.  31363.    0.000    47573.9    61356.   129.   0.197   -3.51
+             163.  31377.    0.000    47598.8    61348.   129.   0.197   -3.50
+             113.  31391.    0.000    47623.7    61340.   129.   0.196   -3.49
+              64.  31405.    0.000    47648.8    61332.   129.   0.195   -3.48
+              15.  31420.    0.000    47673.9    61324.   129.   0.195   -3.47
+ -----------------------------------------------------------------------------
+
+ Summary of segments in the sequence:
+ -----------------------------------------------
+ Seg.  Speed mode   Thrust mode   Stop condition
+
+   1.  v3           at-%mto       to alt 457.
+   2.  specify-cas  at-%mcl       to alt 3048.
+   3.  specify-cas  at-%mcl       to mach 0.74
+   4.  same-mach    at-%mcl       to alt 9449.
+   5.  specify-mach level-cruise  to next stepup
+   6.  same-mach    at-%mcl       to dalt  1219.
+   7.  same-mach    level-cruise  to mass 123330.
+   8.  specify-mach at-idle       to cas 308.
+   9.  specify-cas  at-idle       to alt 3048.
+  10.  specify-cas  at-idle       to alt 457.
+  11.  vapp         match-grad    to alt 15.
+ -----------------------------------------------
+
+ Block summary:               Time     Fuel Burn
+ -----------------------------------------------
+ Taxi-out                 300. sec.      114. kg.
+ T/O to screen height      39. sec.      111. kg.
+ In-flight sequence     31420. sec.    47674. kg.
+ Taxi-in                  300. sec.      114. kg.
+ 
+ Block total (7267.km)    534. min.    48012. kg.
+ -----------------------------------------------
+

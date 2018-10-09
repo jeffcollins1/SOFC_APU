@@ -17,7 +17,7 @@ RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
 A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
 
 [A6,T1] = expander(A5,A1.P,options.T1_eff);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,[],E1);
+[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,[],E1,O2,O3);
 
 %% Calculate nominal and mission power
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
