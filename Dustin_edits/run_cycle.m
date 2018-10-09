@@ -13,15 +13,15 @@ i_den = 4000.*O5.O2.*96485.33./(options.SOFC_area*10000); %A/cm^2
 i_den = max(.1,min(i_den,.4./options.asr));%Cant solve for ultra low or high current densities
 options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FC,E1] = oxy_fuelcell(options,O5);
-[HL,F1,F2,F3,F4,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1);
+[HL,F1,F2,F3,F4,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O2,O3);
 
 % %% Detailed craft calculations
 
 [segment,history,profile] = import_flight_txt('787');
 T_profile = mission.thrust; 
 time_profile = mission.duration; 
-P_nominal = T_profile(132,1).*profile.cas(132,1)./options.prop_eff/1000;%shaft power in kW. %max(mission.mach_num).*ss. propellor momentum theory at cruise http://164.100.133.129:81/econtent/Uploads/09-%20Ducted%20Fans%20and%20Propellers%20%5BCompatibility%20Mode%5D.pdf ,  http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
-mission.thrust = mean(T_profile(1:nnz(time_profile<=mission.duration(1)*3600)));
+P_nominal = T_profile(132,1).*profile.mach(132,1).*ss./options.prop_eff/1000;%shaft power in kW. %max(mission.mach_num).*ss. propellor momentum theory at cruise http://164.100.133.129:81/econtent/Uploads/09-%20Ducted%20Fans%20and%20Propellers%20%5BCompatibility%20Mode%5D.pdf ,  http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
+mission.thrust = mean(T_profile(1:nnz(time_profile<=mission.duration(:,end))));
 for k = 1:1:length(mission.duration)
 mission.thrust(k) = mean(T_profile(max(1,nnz(time_profile<=sum(mission.duration(1:k-1)))):nnz(time_profile<=sum(mission.duration(1:k)))));
 end
@@ -46,7 +46,7 @@ options.OTM_area = scale.*options.OTM_area;
 [A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [OTM,A2,A3,A4,A5,O1,O2,O3,O4,O5] = OxygenModule(options,A1);
 [FC,E1] = oxy_fuelcell(options,O5);
-[HL,F1,F2,F3,F4,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1);
+[HL,F1,F2,F3,F4,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,O2,O3);
 weight = system_weight(options,FC,OTM,HL,A1,HX);
 param = NetParam(options,FC,OTM,HL);
 param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F1',F1;'F2',F2;'F3',F3;'F4',F4;'O1',O1;'O2',O2;'O3',O3;'O4',O4;'O5',O5;};

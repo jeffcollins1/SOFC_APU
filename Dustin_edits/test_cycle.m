@@ -37,7 +37,7 @@ RRTrent1000engine = 2*6033*ones(n1,n1);% kg
 options.air_frame_weight = (options.TO_weight - FuelUsed - StandardPayload - 2*RRTrent1000engine)*ones(n1,n2);%airframe mass in kg: Max Fuel = 101000 kg.  Max payload = 112760 kg.  4 engines, each 9670lb
 [time1,time2,time3,T_toVec,T_climb,T_cruise,V_toVec,V_climbVec,V_cruiseVec,time_profile,T_profile,V_profile] = craft(options); %Thrust, velocity and time profiles
 %options.air_frame_weight = options.TO_weight - 101000 - 112760 - 4*9670/2.2;%airframe mass in kg: Max Fuel = 101000 kg.  Max payload = 112760 kg.  4 engines, each 9670lb
-options.propulsor_weight = 0.3*4*(9670/2.2)*ones(n1,n2); %Weight propulsor portion (30%) of 4 RR RB-211 engines
+options.propulsor_weight = 0.3*2*RRTrent1000engine; %Weight propulsor portion (30%) of 4 RR RB-211 engines
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
 options.OTM_specific_mass = 0.048907*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.048907kg/ 81cm^2 cell
 options.sofc_specific_mass = 0.05508*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
