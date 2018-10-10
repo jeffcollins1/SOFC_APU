@@ -61,6 +61,7 @@ param.power_mission = zeros(m,n,length(mission.alt));
 param.efficiency_mission = zeros(m,n,length(mission.alt));
 param.FCV_mission = zeros(m,n,length(mission.alt));
 param.FCiden_mission = zeros(m,n,length(mission.alt));
+%param.TSFC_mission = zeros(m,n,length(mission.alt));
 parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
@@ -68,7 +69,7 @@ if parallel
     end
 else
     for i = 1:1:m*n
-        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:)] = flight_profile(options,mission,vol_flow,i,n);
+        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:)] = flight_profile(options,mission,vol_flow,i,n);
     end
 end
 for i = 1:1:m
@@ -79,6 +80,7 @@ for i = 1:1:m
         param.efficiency_mission(i,j,:) = eff_mission(n*(i-1)+j,:);
         param.FCV_mission(i,j,:) = FCV_mission(n*(i-1)+j,:);
          param.FCiden_mission(i,j,:) = FCiden_mission(n*(i-1)+j,:);
+          %param.TSFC_mission(i,j,:) = TSFC_mission(n*(i-1)+j,:);
     end
 end
 weight.fuel = weight.fuel.*options.fuel_tank_mass_per_kg_fuel; %Total LH2 storage including weight of insulated container
@@ -138,6 +140,7 @@ P_sys_mission = zeros(1,nn);
 eff_mission = zeros(1,nn);
 FCV_mission = zeros(1,nn);
 FCiden_mission = zeros(1,nn); 
+%TSFC_mission = zeros(1,nn);
 %find permeate pressure condition that results in correct power for each flight segment
 for k = 1:1:nn
     P_req = mission.power(i,j,k);%shaft power in kW.  
@@ -149,6 +152,7 @@ for k = 1:1:nn
         eff_mission(k) = FTE(I,k);
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
+        %TSFC_mission(k) = mission.thrust(k)./fuel; 
     elseif P_req<min(P_shaft(:,k))
         [h2_use,I] = min(FC.H2_used(:,k));
         fuel = fuel + P_req/P_shaft(I,k)*(FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k))*2*mission.duration(k)*3600;
@@ -156,12 +160,14 @@ for k = 1:1:nn
         eff_mission(k) = FTE(I,k);
          FCV_mission(k) = FC.V(I,k);
          FCiden_mission(k) = FC.i_den(I,k);
+         %TSFC_mission(k) = mission.thrust(k)./fuel; 
     else
         fuel = fuel + (interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)+interp1(P_shaft(:,k),fuel_for_OTM_preheat(:,k),P_req))*2*mission.duration(k)*3600;
         P_sys_mission(k) = interp1(P_shaft(:,k),P_sys(:,k),P_req);
         eff_mission(k) = interp1(P_shaft(:,k),FTE(:,k),P_req);
         FCV_mission(k) = interp1(P_shaft(:,k),FCV(:,k),P_req);
         FCiden_mission(k) =interp1(P_shaft(:,k),iden(:,k),P_req);
+        %TSFC_mission(k) = mission.thrust(k)./fuel; 
     end
 end
 end%Ends function flight_profile
