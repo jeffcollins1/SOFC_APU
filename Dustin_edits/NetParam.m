@@ -17,7 +17,6 @@ if ~isempty(OTM)
     param.Qbalance = HL.Qexcess;
     param.FCQout = FC.Qremove; 
 end
-
 param.FC_eff = FC.Power./Ein;
 param.NetPower = param.Eout;
 param.iden = FC.i_den; 

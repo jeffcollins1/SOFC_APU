@@ -71,5 +71,5 @@ ACout2.N2 = AC.N2;
 ACout2.P = A1.P; 
 ACout2.T = find_T(AC2,HACout2); 
 HX.oxycompressor = heat_exchanger(O2,O3,AC2,ACout2,options); 
-HX.HP.mass = FC.Qremove./(1.977); %Weight of heat pipes
+HX.HP.mass = FC.Qremove./(1.116); %Updated estimate for heat pipes
 end%Ends function HeatLoop
