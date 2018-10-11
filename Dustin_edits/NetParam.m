@@ -11,10 +11,10 @@ if ~isempty(OTM)
     param.OTM.heat_out = OTM.Q_out;
     param.OTM.Ra = OTM.Ra;
     param.OTM.mean_flux = OTM.mean_flux;
-    param.fuel_for_OTM_preheat = -min(0,HL.FCQbalance)./FC.hrxnmol;
+    param.fuel_for_OTM_preheat = -min(0,FC.Qremove - OTM.heat_added)./FC.hrxnmol;
     param.P_perm = options.P_perm; 
-    param.FTE = param.Eout./(Ein - min(0,HL.FCQbalance));
-    param.Qbalance = HL.Qexcess;
+    param.FTE = param.Eout./(Ein  + param.fuel_for_OTM_preheat.*FC.hrxnmol);
+    param.Qbalance = FC.Qremove - OTM.heat_added + OTM.Q_out + HL.Qremove_fuel;
     param.FCQout = FC.Qremove; 
 end
 param.FC_eff = FC.Power./Ein;

@@ -9,15 +9,15 @@ air_den = interp1(alt_tab,atmosphere_density,options.height);
 [A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
-A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
-[FC,A4,E1] = std_fuelcell(options,A3);
+% A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
+[FC,A4,E1,F5] = des_fuelcell(options,A3);
 A5 = A4;
 A5.T = A4.T - (A3.T-A2.T);
 RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
 A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
 
 [A6,T1] = expander(A5,A1.P,options.T1_eff);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,[],E1,O2,O3);
+[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 
 %% Calculate nominal and mission power
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
@@ -37,18 +37,19 @@ options.SOFC_area = scale.*options.SOFC_area;
 [A1,~] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
-A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
-[FC,A4,E1] = std_fuelcell(options,A3);
-A5 = A4;
-A5.T = A4.T - (A3.T-A2.T);
-RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
-A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
+% A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
+[FC,A4,E1,F5] = des_fuelcell(options,A3);
+% A5 = A4;
+% A5.T = A4.T - (A3.T-A2.T);
+% RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
+% A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
 
-[A6,T1] = expander(A5,A1.P,options.T1_eff);
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options,FC,[],E1);
-weight = system_weight(options,FC,{C1;T1;B1;},[],HL);
-param = NetParam(options,FC,{C1;T1;B1;},[],HL);
-param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'A6',A6;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F1',F1;'F2',F2;'F3',F3;'F4',F4;};
+[A5,T1] = expander(A4,A1.P,options.T1_eff);
+[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
+
+weight = system_weight(options,FC,{C1;T1;B1;},[],HX);
+param = NetParam(options,FC,{C1;T1;B1;},[],FL);
+param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F2',F2;'F3',F3;'F4',F4;'F5',F5;};
 
 %% calculate off-design power output to meet mission profile for each condition by varying permeate pressure
 weight.fuel = zeros(m,n);
@@ -62,11 +63,11 @@ param.efficiency_mission = zeros(m,n,length(mission.alt));
 parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,molar_flow,par_i,n);
+        [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
     end
 else
     for i = 1:1:m*n
-        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:)] = flight_profile(options,mission,molar_flow,i,n);
+        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
     end
 end
 for i = 1:1:m
@@ -84,7 +85,7 @@ param.weight = weight;
 param.P_den = scale*param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
-function [fuel,battery,P_sys_mission,eff_mission] = flight_profile(options,mission,molar_flow,par_i,n)
+function [fuel,battery,P_sys_mission,eff_mission] = flight_profile(options,mission,vol_flow,nominal_fuel,par_i,n)
 fuel = 0;
 battery = 0;
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
@@ -97,26 +98,25 @@ mm = 12;
 for k = 1:1:length(f)
     options2.(f{k}) = ones(mm,nn)*options.(f{k})(i,j);
 end
-% vol_flow2 = vol_flow(i,j)*(linspace(1,.1,mm)'*ones(1,nn));%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
-% options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
-% air_den = interp1(alt_tab,atmosphere_density,options2.height);
-% molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
+vol_flow2 = vol_flow(i,j)*ones(mm,nn);%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
+options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
+air_den = interp1(alt_tab,atmosphere_density,options2.height);
+molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
 
-%% molar_flowtemporary shortcut
-molar_flow2 = molar_flow(i,j)*(linspace(2,.5,mm)'*ones(1,nn));%
 
 [A1,~] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
 A3 = A2;
-A3.T = max(options2.T_fc-.5*options2.dT_fc,A2.T);
-[FC,A4,E1] = std_fuelcell(options2,A3);
-A5 = A4;
-A5.T = A4.T - (A3.T-A2.T);
-RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
-A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
-[A6,T1] = expander(A5,A1.P,options2.T1_eff);
+%% add bypass
+F5.T = options2.T_fc - .5*options2.dT_fc;
+F5.P = A3.P;
+F5.H2 = nominal_fuel(i,j)*(linspace(1.2,.25,mm)'*ones(1,nn));
+F5.H2O = F5.H2.*options2.steamratio./(1-options2.steamratio);
 
-[HL,B1,F1,F2,F3,F4,E2,E3,E4] = HeatLoop(options2,FC,[],E1);
+[FC,A4,E1] = std_fuelcell(options2,A3,F5);
+[A5,T1] = expander(A4,A1.P,options2.T1_eff);
+
+[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options2,E1,F5,A1);
 P_sys = FC.Power + C1.work + T1.work + B1.work;
 P_shaft = options2.motor_eff.*P_sys;
 FTE = P_sys./(FC.H2_used.*FC.hrxnmol);

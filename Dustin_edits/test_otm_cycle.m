@@ -36,9 +36,9 @@ options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
 options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
-safety_factor = 1*ones(n1,n2); %Safety factor on power plant sizing
-%% aircraft specific parameters
-%787-8 Standard Case in Piano_X
+options.safety_factor = 1*ones(n1,n2); %Safety factor on power plant sizing
+
+%% 787-8 Standard Case in Piano_X
 % [segment,history,profile] = import_flight_txt('787');
 % TO_weight = 219539;% Initial mass at condition 1
 % StandardPayload = 23052;% kg
@@ -56,7 +56,7 @@ safety_factor = 1*ones(n1,n2); %Safety factor on power plant sizing
 % num_engines = 4;
 % engine_mass = 6246; % kg,Trent 900 EASA certification
 % res_fuel = 22356; %kg
-%%Airbus A300 600R, Standard case in Piano X
+%% Airbus A300 600R, Standard case in Piano X
 % [segment,history,profile] = import_flight_txt('A300');
 % TO_weight = 170500;% kg, Initial mass at condition 1
 % StandardPayload = 25365; %kg, Piano default design
@@ -65,8 +65,8 @@ safety_factor = 1*ones(n1,n2); %Safety factor on power plant sizing
 % num_engines = 2;
 % engine_mass = 5092; % kg,GE CF6 EASA certification
 % res_fuel= 7537; %Reserve fuel, kg
-%Fokker F70, Standard case in Piano X
-% [segment,history,profile] = import_flight_txt('A300');
+%% Fokker F70, Standard case in Piano X
+[segment,history,profile] = import_flight_txt('F70');
 TO_weight = 36741;% kg, Initial mass at condition 1
 StandardPayload = 7167; %kg, Piano default design
 FuelUsed = 4917;% kg, Piano block summary, end
@@ -88,7 +88,7 @@ end
 mission.design_point = 3;%%change based on mission profile
 
 tic
-param = run_cycle(options,mission,res_fuel,safety_factor);
+param = run_cycle(options,mission,res_fuel);
 toc
 
 param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
