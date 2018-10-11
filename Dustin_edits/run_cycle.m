@@ -1,4 +1,4 @@
-function param = run_cycle(options,mission)
+function param = run_cycle(options,mission,res_fuel,safety_factor)
 %% calculate conditions for each design trade-off per kmol/s of inlet air
 [m,n] = size(options.SOFC_area);
 molar_flow = ones(m,n);
@@ -22,11 +22,11 @@ options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [HL,B1,F1,F2,F3,F4,E2,E3,E4,HX] = HeatLoop(options,FC,OTM,E1,A1,O1,O2,O3,O4,O5);
 
 %% Calculate nominal and mission power
-P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
+P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000 + options.electricdemand;%nominal power in kW
 mission.air_den = interp1(alt_tab,atmosphere_density,mission.alt);
 [~,mission.ss] = std_atmosphere(mission.alt,1);%Ambient conditions as a function of altitude
 for i = 1:1:length(mission.alt)
-    mission.power(:,:,i) = mission.thrust(:,:,i).*mission.mach_num(i).*mission.ss(i)./options.prop_eff/1000;%shaft power in kW. 
+    mission.power(:,:,i) = mission.thrust(:,:,i).*mission.mach_num(i).*mission.ss(i)./options.prop_eff/1000 + options.electricdemand;%shaft power in kW. 
 end
 
 %% scale system to meet nominal power requirements
@@ -55,16 +55,21 @@ fuel = zeros(m*n,1);
 battery = zeros(m*n,1);
 P_sys_mission = zeros(m*n,length(mission.alt));
 eff_mission = zeros(m*n,length(mission.alt));
+FCV_mission = zeros(m*n,length(mission.alt));
+FCiden_mission = zeros(m*n,length(mission.alt));
 param.power_mission = zeros(m,n,length(mission.alt));
 param.efficiency_mission = zeros(m,n,length(mission.alt));
+param.FCV_mission = zeros(m,n,length(mission.alt));
+param.FCiden_mission = zeros(m,n,length(mission.alt));
+param.TSFC_mission = zeros(m,n,length(mission.alt));
 parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,vol_flow,par_i,n);
+        [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,par_i,n);
     end
 else
     for i = 1:1:m*n
-        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:)] = flight_profile(options,mission,vol_flow,i,n);
+        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:)] = flight_profile(options,mission,vol_flow,i,n);
     end
 end
 for i = 1:1:m
@@ -73,16 +78,20 @@ for i = 1:1:m
         weight.fuel(i,j) = fuel(n*(i-1)+j);
         param.power_mission(i,j,:) = P_sys_mission(n*(i-1)+j,:);
         param.efficiency_mission(i,j,:) = eff_mission(n*(i-1)+j,:);
+        param.FCV_mission(i,j,:) = FCV_mission(n*(i-1)+j,:);
+         param.FCiden_mission(i,j,:) = FCiden_mission(n*(i-1)+j,:);
+          param.TSFC_mission(i,j,:) = TSFC_mission(n*(i-1)+j,:);
     end
 end
-weight.fuel = weight.fuel.*options.fuel_tank_mass_per_kg_fuel; %Total LH2 storage including weight of insulated container
+weight.fuel_burn = weight.fuel; 
+weight.fuel_stored = weight.fuel.*options.fuel_tank_mass_per_kg_fuel + res_fuel/3; %Total LH2 storage including weight of insulated container and equivalent energy reserve storage
 weight.battery = battery_kJ./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
-weight.total = weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel; 
+weight.total = safety_factor.*(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel_stored); 
 param.weight = weight;
 param.P_den = scale*param.NetPower./(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
-function [fuel,battery,P_sys_mission,eff_mission] = flight_profile(options,mission,vol_flow,par_i,n)
+function [fuel,battery,P_sys_mission,eff_mission,FCV_mission,FCiden_mission,TSFC_mission] = flight_profile(options,mission,vol_flow,par_i,n)
 fuel = 0;
 battery = 0;
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
@@ -126,8 +135,13 @@ P_sys = FC.Power + C1.work + C2.work + T1.work + B1.work;
 P_shaft = options2.motor_eff.*P_sys;
 fuel_for_OTM_preheat = -min(0,HL.FCQbalance)./FC.hrxnmol;
 FTE = P_sys./(FC.H2_used.*FC.hrxnmol - min(0,HL.FCQbalance));
+FCV = FC.V;
+iden = FC.i_den;
 P_sys_mission = zeros(1,nn);
 eff_mission = zeros(1,nn);
+FCV_mission = zeros(1,nn);
+FCiden_mission = zeros(1,nn); 
+%TSFC_mission = zeros(1,nn);
 %find permeate pressure condition that results in correct power for each flight segment
 for k = 1:1:nn
     P_req = mission.power(i,j,k);%shaft power in kW.  
@@ -137,15 +151,24 @@ for k = 1:1:nn
         fuel = fuel + (FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k))*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_sys(I,k);
         eff_mission(k) = FTE(I,k);
+        FCV_mission(k) = FC.V(I,k);
+        FCiden_mission(k) = FC.i_den(I,k);
+        TSFC_mission(k) = fuel./(mission.thrust(k).*mission.duration(k)); % SFC in kg/N*hour; 
     elseif P_req<min(P_shaft(:,k))
         [h2_use,I] = min(FC.H2_used(:,k));
         fuel = fuel + P_req/P_shaft(I,k)*(FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k))*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_req/min(P_sys(:,k))*P_sys(I,k);
         eff_mission(k) = FTE(I,k);
+         FCV_mission(k) = FC.V(I,k);
+         FCiden_mission(k) = FC.i_den(I,k);
+         TSFC_mission(k) = fuel./(mission.thrust(k).*mission.duration(k)); 
     else
         fuel = fuel + (interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)+interp1(P_shaft(:,k),fuel_for_OTM_preheat(:,k),P_req))*2*mission.duration(k)*3600;
         P_sys_mission(k) = interp1(P_shaft(:,k),P_sys(:,k),P_req);
         eff_mission(k) = interp1(P_shaft(:,k),FTE(:,k),P_req);
+        FCV_mission(k) = interp1(P_shaft(:,k),FCV(:,k),P_req);
+        FCiden_mission(k) =interp1(P_shaft(:,k),iden(:,k),P_req);
+        TSFC_mission(k) = fuel./(mission.thrust(k).*mission.duration(k)); 
     end
 end
 end%Ends function flight_profile

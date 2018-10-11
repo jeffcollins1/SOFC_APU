@@ -70,4 +70,9 @@ figure(1)
 xlabel(ax(1),'Time (hrs)')
 ylabel(ax(1),'Thrust per Engine (N)')
 ylabel(ax(2),'Altitude (ft)')
+
+% [ax,h1,h2] = plotyy(profile.time/3600,max(0,profile.mach),profile.time/3600,profile.alt);
+% xlabel(ax(1),'Time (hrs)')
+% ylabel(ax(1),'Mach Number')
+% ylabel(ax(2),'Altitude (ft)')
 end%Ends function import_flight_txt
