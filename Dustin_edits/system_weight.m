@@ -12,10 +12,10 @@ for i = 1:1:length(turbo)
     end
 end
 weight.hx_fuel = HX.fuel.mass; 
-weight.hx =  HX.fuel.mass + HX.condenser.mass; %Heat exchanger weight
+weight.hx =  HX.fuel.mass + HX.condenser.mass + HX.HP.mass; %Heat exchanger weight
 if ~isempty(OTM)
     weight.otm = options.OTM_area.*options.OTM_specific_mass;
-    weight.hx = weight.hx + HX.oxycompressor.mass + HX.oxygen.mass + HX.HP.mass; %Heat exchanger weight
+    weight.hx = weight.hx + HX.oxycompressor.mass + HX.oxygen.mass; %Heat exchanger weight
 end
 
 weight.motor = options.motor_eff.*net_power./options.motor_power_den; %Weight of propulstion motors

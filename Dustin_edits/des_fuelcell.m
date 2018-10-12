@@ -26,6 +26,8 @@ FC.hrxnmol = -dH/1000; %H2 + 0.5*O2 -->  H2O, Heat Released in kJ/kmol
 cath_out = cath_in;
 cath_out.T = options.T_fc + .5*options.dT_fc;
 Q_cath = property(cath_out,'h','kJ') - property(cath_in,'h','kJ');
+A3 = cath_in;
+A3.T = options.T_fc - .5*options.dT_fc;
 
 anode_in.T = options.T_fc - .5*options.dT_fc;
 anode_in.P = P; 
@@ -106,4 +108,6 @@ FC.O2_util = ion.O2./cath_in.O2;
 FC.i_den = FC.i_total./(options.SOFC_area*10000); %A/cm^2
 FC.i_Cell = FC.cell_area*FC.i_den;%FC.i_total./FC.Cells; %Total amount of current per cell
 FC.pressure = P;
+Q_cath_in_stack = property(cath_out,'h','kJ') + property(ion,'h','kJ') - property(A3,'h','kJ');
+FC.Qremove = FC.Qgen - FC.Q_anode - Q_cath_in_stack;
 end
