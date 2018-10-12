@@ -14,7 +14,7 @@ air_den = interp1(alt_tab,atmosphere_density,options.height);
 
 %one-time adjustment of SOFC area per kmol air flow to ensure a feasible current density
 i_den = 4000.*O5.O2.*96485.33./(options.SOFC_area*10000); %A/cm^2
-i_den = max(.1,min(i_den,.4./options.asr));%Cant solve for ultra low or high current densities
+i_den = max(.1,min(i_den,.7./options.asr));%Cant solve for ultra low or high current densities
 options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FC,E1,F5] = oxy_fuelcell(options,O5);
 
@@ -22,12 +22,16 @@ options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 
 %% Calculate nominal and mission power
-P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000 + options.electricdemand;%nominal power in kW
 mission.air_den = interp1(alt_tab,atmosphere_density,mission.alt);
 [~,mission.ss] = std_atmosphere(mission.alt,1);%Ambient conditions as a function of altitude
 for i = 1:1:length(mission.alt)
-    mission.power(:,:,i) = mission.thrust(:,:,i).*mission.mach_num(i).*mission.ss(i)./options.prop_eff/1000 + options.electricdemand;%shaft power in kW. 
+    velocity = mission.mach_num(i).*mission.ss(i);
+    Thrust_Coefficient = mission.thrust(:,:,i)./(options.num_engines.*.5*mission.air_den(i).*velocity.^2*pi()*options.engine_radius.^2);
+    Froude_efficiency = 2./(1+(1+Thrust_Coefficient).^.5);
+    net_prop_eff = options.prop_eff.*Froude_efficiency;
+    mission.power(:,:,i) = mission.thrust(:,:,i)*velocity./net_prop_eff/1000 + options.electric_demand;%shaft power in kW. 
 end
+P_nominal = mission.power(:,:,mission.design_point);%nominal power in kW
 
 %% scale system to meet nominal power requirements
 scale = P_nominal./options.motor_eff./(FC.Power + C1.work + C2.work + T1.work + B1.work);

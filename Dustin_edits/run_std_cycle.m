@@ -9,7 +9,6 @@ air_den = interp1(alt_tab,atmosphere_density,options.height);
 [A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
-% A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
 [FC,A4,E1,F5] = des_fuelcell(options,A3);
 A5 = A4;
 A5.T = A4.T - (A3.T-A2.T);
@@ -20,12 +19,16 @@ A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 
 %% Calculate nominal and mission power
-P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
 mission.air_den = interp1(alt_tab,atmosphere_density,mission.alt);
 [~,mission.ss] = std_atmosphere(mission.alt,1);%Ambient conditions as a function of altitude
 for i = 1:1:length(mission.alt)
-    mission.power(:,:,i) = mission.thrust(:,:,i).*mission.mach_num(i).*mission.ss(i)./options.prop_eff/1000;%shaft power in kW. 
+    velocity = mission.mach_num(i).*mission.ss(i);
+    Thrust_Coefficient = mission.thrust(:,:,i)./(options.num_engines.*.5*mission.air_den(i).*velocity.^2*pi()*options.engine_radius.^2);
+    Froude_efficiency = 2./(1+(1+Thrust_Coefficient).^.5);
+    net_prop_eff = options.prop_eff.*Froude_efficiency;
+    mission.power(:,:,i) = mission.thrust(:,:,i)*velocity./net_prop_eff/1000 + options.electric_demand;%shaft power in kW. 
 end
+P_nominal = mission.power(:,:,mission.design_point);%nominal power in kW
 
 %% scale system to meet nominal power requirements
 scale = P_nominal./options.motor_eff./(FC.Power + C1.work + T1.work + B1.work);

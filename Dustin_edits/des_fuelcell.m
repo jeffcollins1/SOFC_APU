@@ -50,7 +50,7 @@ while any(any(abs(error)>1e-3))
     
     error = (FC.Qgen - Q_anode - Q_cath)./max(FC.Qgen-Q_anode,Q_cath);
     error(isnan(error)) = 0;
-    V = max(.5,min(1.1,V + .3*error.*max(0,(1.12-V))));
+    V = max(.25,min(1.1,V + .3*error.*max(0,(1.12-V))));
 end
 i = (ones(n1,n2,n)).*(FC.i_total./(1e4.*options.SOFC_area)); %Initial current density distribution per cell
 Vold = V;
