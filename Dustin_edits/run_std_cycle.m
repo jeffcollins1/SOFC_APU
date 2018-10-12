@@ -44,6 +44,7 @@ A3 = A2;
 
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
+HX.HP.mass = FC.Qremove.*options.heat_pipe_specific_mass; 
 
 weight = system_weight(options,FC,{C1;T1;B1;},[],HX);
 param = NetParam(options,FC,{C1;T1;B1;},[],FL);
@@ -80,7 +81,7 @@ weight.fuel = weight.fuel.*options.fuel_tank_mass_per_kg_fuel; %Total LH2 storag
 weight.battery = battery_kJ./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
 weight.total = weight.sofc + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel; 
 param.weight = weight;
-param.P_den = scale*param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
+param.P_den = param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
 function [fuel,battery,P_sys_mission,eff_mission] = flight_profile(options,mission,vol_flow,nominal_fuel,par_i,n)

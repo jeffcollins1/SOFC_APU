@@ -34,7 +34,7 @@ end
 P_nominal = mission.power(:,:,mission.design_point);%nominal power in kW
 
 %% scale system to meet nominal power requirements
-scale = P_nominal./options.motor_eff./(FC.Power + C1.work + C2.work + T1.work + B1.work);
+scale = options.safety_factor.*P_nominal./options.motor_eff./(FC.Power + C1.work + C2.work + T1.work + B1.work);
 molar_flow = scale.*molar_flow;
 vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
 options.SOFC_area = scale.*options.SOFC_area;
@@ -48,6 +48,7 @@ options.OTM_area = scale.*options.OTM_area;
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 HX = otm_heat_exchangers(options,FC,OTM,HX,A1,O1,O2,O3,O4,O5);
+HX.HP.mass = FC.Qremove.*options.heat_pipe_specific_mass; 
 
 weight = system_weight(options,FC,{C1;T1;B1;C2},OTM,HX);
 param = NetParam(options,FC,{C1;T1;B1;C2},OTM,FL);
@@ -67,7 +68,7 @@ param.efficiency_mission = zeros(m,n,length(mission.alt));
 param.FCV_mission = zeros(m,n,length(mission.alt));
 param.FCiden_mission = zeros(m,n,length(mission.alt));
 param.TSFC_mission = zeros(m,n,length(mission.alt));
-parallel = true;
+parallel = false;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,par_i,n);
@@ -84,16 +85,16 @@ for i = 1:1:m
         param.power_mission(i,j,:) = P_sys_mission(n*(i-1)+j,:);
         param.efficiency_mission(i,j,:) = eff_mission(n*(i-1)+j,:);
         param.FCV_mission(i,j,:) = FCV_mission(n*(i-1)+j,:);
-         param.FCiden_mission(i,j,:) = FCiden_mission(n*(i-1)+j,:);
-          param.TSFC_mission(i,j,:) = TSFC_mission(n*(i-1)+j,:);
+        param.FCiden_mission(i,j,:) = FCiden_mission(n*(i-1)+j,:);
+        param.TSFC_mission(i,j,:) = TSFC_mission(n*(i-1)+j,:);
     end
 end
 weight.fuel_burn = weight.fuel; 
 weight.fuel_stored = weight.fuel.*options.fuel_tank_mass_per_kg_fuel + res_fuel/3; %Total LH2 storage including weight of insulated container and equivalent energy reserve storage
 weight.battery = battery_kJ./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
-weight.total = options.safety_factor.*(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel_stored); 
+weight.total = (weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel_stored); 
 param.weight = weight;
-param.P_den = scale*param.NetPower./(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx);
+param.P_den = param.NetPower./(weight.sofc + weight.otm + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
 function [fuel,battery,P_sys_mission,eff_mission,FCV_mission,FCiden_mission,TSFC_mission] = flight_profile(options,mission,vol_flow,par_i,n)
@@ -122,7 +123,7 @@ end
 [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options2,A2);
 %adjust permeate pressure to be within feasible oxygen output range for SOFC area
 min_O2 = 0.1*options2.SOFC_area(1,1)*10000/(96485.33*4000);
-max_O2 = .6./options2.asr(1,1).*options2.SOFC_area(1,1)*10000/(96485.33*4000);%Cant solve for ultra low or high current densities
+max_O2 = .5./options2.asr(1,1).*options2.SOFC_area(1,1)*10000/(96485.33*4000);%Cant solve for ultra low or high current densities
 if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
     R1 = max_O2./O5.O2;
     R2 = min_O2./O5.O2;

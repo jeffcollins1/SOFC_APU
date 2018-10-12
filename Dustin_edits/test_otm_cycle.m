@@ -2,42 +2,43 @@
 n1 = 10; % number of points in test dimension 1
 n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
-options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
+options.SOFC_area = linspace(2e3,1e4,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
-options.asr = 0.35*ones(n1,n2); % Area specific resistance, ohm-cm^2
+options.asr = 0.2*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.01*ones(n1,n2); %Percentage of humidification at fuel inlet
-options.PR_comp = ones(n1,1)*linspace(15,60,n2); %Range of intake pressures for OTM, kPa
+options.PR_comp = ones(n1,1)*linspace(20,60,n2); %Range of intake pressures for OTM, kPa
 options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
 options.T1_eff = 0.88*ones(n1,n2); %Mechanical efficiency of turbine
 options.Blower_eff = 0.5*ones(n1,n2); %efficiency of blower
 options.Blower_dP = 20*ones(n1,n2); %Pressure rise in blower in kPa
-options.prop_eff = 0.75*ones(n1,n2);%propulsor efficiency
+options.prop_eff = 0.80*ones(n1,n2);%propulsor efficiency
 options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
 
 %%OTM cycle specific parameters
 options.P_fc = 1000*ones(n1,n2); %Operating pressure for SOFC
-options.OTM_area = 1.25e3*ones(n1,n2); %membrane area in m^2 per kmol airflow
+options.OTM_area = 1.5e3*ones(n1,n2); %membrane area in m^2 per kmol airflow
 options.T_otm = options.T_fc; %Operating temperature for OTM
-options.j0_otm = 4*ones(n1,n2); %Nominal oxygen flux through OTM NmL/cm^2*min
+options.j0_otm = 7*ones(n1,n2); %Nominal oxygen flux through OTM NmL/cm^2*min
 options.P0_otm = 2.1*ones(n1,n2); %Nominal oxygen pressure ratio across OTM (total pressure ratio *.21)
 options.T_oxygen_pump = 323*ones(n1,n2); %Inlet temperature of vacuum pump
-options.P_perm = 50*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 
+options.P_perm = 100*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 
 options.C2_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 2 propulsor portion (30%) of 4 RR RB-211 engines
 
 
 %% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
 options.OTM_specific_mass = 0.048907*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.048907kg/ 81cm^2 cell
+options.heat_pipe_specific_mass = 1./1.116*ones(n1,n2); %Weight per kW of heat transfer
 options.sofc_specific_mass = 0.05508*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
 options.fuel_tank_mass_per_kg_fuel = 1*ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
 options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
-options.safety_factor = 1*ones(n1,n2); %Safety factor on power plant sizing
+options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 
 %% 787-8 Standard Case in Piano_X
 [segment,history,profile] = import_flight_txt('787');
@@ -108,7 +109,7 @@ toc
 
 param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
 payload = param.weight.payload;
-[performancetable,weighttable] = collector(param,mission);
+% [performancetable,weighttable] = collector(param,mission);
 payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
 figure(3)
 ax = surf(options.PR_comp,param.i_den,payload);
