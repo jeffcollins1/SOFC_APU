@@ -60,7 +60,7 @@ P_sys_mission = zeros(m*n,length(mission.alt));
 eff_mission = zeros(m*n,length(mission.alt));
 param.power_mission = zeros(m,n,length(mission.alt));
 param.efficiency_mission = zeros(m,n,length(mission.alt));
-parallel = true;
+parallel = false;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);

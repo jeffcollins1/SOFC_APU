@@ -81,6 +81,7 @@ options.propulsor_weight = 0.3*num_engines*engine_mass*ones(n1,n2); %Weight prop
 %% all parameters of mission must be the same length, design_point is the index of the mission profile for whitch the nominal power is scaled
 mission.alt = (segment.initial_alt + [segment.initial_alt(2:end);0])/2; %average altitude for segment (m)
 mission.duration = (segment.end_time - [0;segment.end_time(1:end-1)])/60; %duration for segment (hrs)
+mission.thrust = zeros(n1,n2,length(mission.alt));
 for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = ones(n1,n2)*abs(mean(nonzeros(history.FN_eng(i,:))))*num_engines;%thrust profile in N

@@ -29,6 +29,7 @@ FC.H2O_supply = anode_in.H2O;
 FC.H2_used = anode_in.H2.*options.spu;
 FC.i_total = FC.H2_used*2000*F; %Flow of H2 that reacts
 FC.n_in = net_flow(anode_in); 
+anode_out.T = anode_in.T + options.dT_fc;
 anode_out.H2 = anode_in.H2 - FC.H2_used;
 anode_out.H2O = anode_in.H2O + FC.H2_used; %Water/Steam Produced by Reaction, mol/s
 

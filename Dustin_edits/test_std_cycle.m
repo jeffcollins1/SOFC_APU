@@ -1,6 +1,6 @@
 %%  Test Cycle
-n1 = 10; % number of points in test dimension 1
-n2 = 10; % number of points in test dimension 2
+n1 = 2; % number of points in test dimension 1
+n2 = 2; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 % options.SOFC_area = linspace(1.5e2,3.5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
@@ -9,7 +9,7 @@ options.asr = 0.15*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.01*ones(n1,n2); %Percentage of humidification at fuel inlet
-options.PR_comp = ones(n1,1)*linspace(15,60,n2); %Range of intake pressures for OTM, kPa
+options.PR_comp = ones(n1,1)*linspace(15,30,n2); %Range of intake pressures for OTM, kPa
 options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
 options.T1_eff = 0.88*ones(n1,n2); %Mechanical efficiency of turbine
@@ -74,6 +74,7 @@ options.propulsor_weight = 0.3*num_engines*engine_mass*ones(n1,n2); %Weight prop
 %% all parameters of mission must be the same length, design_point is the index of the mission profile for whitch the nominal power is scaled
 mission.alt = (segment.initial_alt + [segment.initial_alt(2:end);0])/2; %average altitude for segment (m)
 mission.duration = (segment.end_time - [0;segment.end_time(1:end-1)])/60; %duration for segment (hrs)
+mission.thrust = zeros(n1,n2,length(mission.alt));
 for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = ones(n1,n2)*abs(mean(nonzeros(history.FN_eng(i,:))))*num_engines;%thrust profile in N
