@@ -17,7 +17,7 @@ RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
 A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
 
 [A6,T1] = expander(A5,A1.P,options.T1_eff);
-[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
+[FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 
 %% Calculate nominal and mission power
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000;%nominal power in kW
@@ -37,15 +37,10 @@ options.SOFC_area = scale.*options.SOFC_area;
 [A1,~] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
-% A3.T = max(options.T_fc-.5*options.dT_fc,A2.T);
 [FC,A4,E1,F5] = des_fuelcell(options,A3);
-% A5 = A4;
-% A5.T = A4.T - (A3.T-A2.T);
-% RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
-% A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
 
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
-[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
+[FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 
 weight = system_weight(options,FC,{C1;T1;B1;},[],HX);
 param = NetParam(options,FC,{C1;T1;B1;},[],FL);
@@ -60,7 +55,7 @@ P_sys_mission = zeros(m*n,length(mission.alt));
 eff_mission = zeros(m*n,length(mission.alt));
 param.power_mission = zeros(m,n,length(mission.alt));
 param.efficiency_mission = zeros(m,n,length(mission.alt));
-parallel = false;
+parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
@@ -108,15 +103,22 @@ molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant 
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
 A3 = A2;
 %% add bypass
+max_current = 0.5*A3.O2*(96485.33*4000);% 50% O2 utilization
+min_current = 0.01*A3.O2*(96485.33*4000);% 1% O2 utilization
+max_fuel = min(nominal_fuel(i,j)*1.2,max_current/(96485.33*2000)./options2.spu);
+min_fuel = max(nominal_fuel(i,j)*.25,min_current/(96485.33*2000)./options2.spu);
 F5.T = options2.T_fc - .5*options2.dT_fc;
 F5.P = A3.P;
-F5.H2 = nominal_fuel(i,j)*(linspace(1.2,.25,mm)'*ones(1,nn));
+F5.H2 = zeros(mm,nn);
+for k = 1:1:nn
+    F5.H2(:,k) = linspace(max_fuel(1,k),min_fuel(mm,k),mm)';
+end
 F5.H2O = F5.H2.*options2.steamratio./(1-options2.steamratio);
 
 [FC,A4,E1] = std_fuelcell(options2,A3,F5);
 [A5,T1] = expander(A4,A1.P,options2.T1_eff);
 
-[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options2,E1,F5,A1);
+[FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options2,E1,F5,A1);
 P_sys = FC.Power + C1.work + T1.work + B1.work;
 P_shaft = options2.motor_eff.*P_sys;
 FTE = P_sys./(FC.H2_used.*FC.hrxnmol);

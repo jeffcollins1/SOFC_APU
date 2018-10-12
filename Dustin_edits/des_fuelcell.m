@@ -102,6 +102,7 @@ end
 FC.V = V;
 FC.Power = FC.V.*FC.i_total./1000; %Electric Power produced by FC, kW
 FC.O2 = ion.O2;
+FC.O2_util = ion.O2./cath_in.O2;
 FC.i_den = FC.i_total./(options.SOFC_area*10000); %A/cm^2
 FC.i_Cell = FC.cell_area*FC.i_den;%FC.i_total./FC.Cells; %Total amount of current per cell
 FC.pressure = P;

@@ -19,7 +19,7 @@ options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
 [FC,E1,F5] = oxy_fuelcell(options,O5);
 
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
-[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
+[FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 
 %% Calculate nominal and mission power
 P_nominal = mission.thrust(:,:,mission.design_point)*mission.mach_num(mission.design_point).*ss./options.prop_eff/1000 + options.electricdemand;%nominal power in kW
@@ -42,7 +42,7 @@ options.OTM_area = scale.*options.OTM_area;
 [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2);
 [FC,E1,F5] = oxy_fuelcell(options,O5);
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
-[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
+[FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 HX = otm_heat_exchangers(options,FC,OTM,HX,A1,O1,O2,O3,O4,O5);
 
 weight = system_weight(options,FC,{C1;T1;B1;C2},OTM,HX);
@@ -130,7 +130,7 @@ if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
 end
 [A5,T1] = expander(A4,A1.P,options2.T1_eff);
 [FC,E1,F5] = oxy_fuelcell(options2,O5);
-[FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options2,E1,F5,A1);
+[FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options2,E1,F5,A1);
 P_sys = FC.Power + C1.work + C2.work + T1.work + B1.work;
 
 P_shaft = options2.motor_eff.*P_sys;

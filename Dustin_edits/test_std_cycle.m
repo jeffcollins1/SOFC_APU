@@ -1,11 +1,10 @@
 %%  Test Cycle
-n1 = 2; % number of points in test dimension 1
-n2 = 2; % number of points in test dimension 2
+n1 = 10; % number of points in test dimension 1
+n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
-% options.SOFC_area = linspace(1.5e2,3.5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
-options.asr = 0.15*ones(n1,n2); % Area specific resistance, ohm-cm^2
+options.asr = 0.3*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.01*ones(n1,n2); %Percentage of humidification at fuel inlet
@@ -85,7 +84,7 @@ tic
 param = run_std_cycle(options,mission);
 toc
 
-param.weight.payload = options.TO_weight - options.air_frame_weight - param.weight.total;
+param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
 payload = param.weight.payload;
 payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
 figure(3)

@@ -83,10 +83,10 @@ while any(any(abs(error_V)>1e-4))
     
     cath_not_bypass.O2 = cath_in.O2.*(1-bypass) - ion.O2;
     cath_not_bypass.N2 = cath_in.N2.*(1-bypass);
+
     Q_need = property(cath_not_bypass,'h','kJ') + Q_ion - Q_cath_in.*(1-bypass);
     error_Q = (Q_need - Q_cath)./max(Q_cath,Q_need);
-%     bypass = bypass + (bypass==0).*(error_Q>0).*.05;
-    bypass = min(.99*max_bypass,max(0,bypass + max(0.5*error_Q,-(max_bypass-bypass).*(-error_Q))));
+    bypass = min(.98*max_bypass,max(0,bypass + max(0.5*error_Q,-(max_bypass-bypass).*(-error_Q))));
 end
 
 cath_out = cath_in;
@@ -96,6 +96,7 @@ cath_out.T = find_T(cath_out, property(cath_in,'h','kJ') + Q_cath - Q_ion);
 FC.V = V;
 FC.Power = FC.V.*FC.i_total./1000; %Electric Power produced by FC, kW
 FC.O2 = ion.O2;
+FC.O2_util = ion.O2./cath_in.O2;
 FC.i_den = FC.i_total./(options.SOFC_area*10000); %A/cm^2
 FC.i_Cell = FC.cell_area*FC.i_den;%FC.i_total./FC.Cells; %Total amount of current per cell
 FC.pressure = P;

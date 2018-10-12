@@ -1,4 +1,4 @@
-function [FL,B1,F2,F3,F4,F5,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1)
+function [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1)
 F2.T =  options.T_motor;
 F2.P = F5.P  - options.Blower_dP;
 F2.H2 = F5.H2.*options.spu;
@@ -38,14 +38,14 @@ E3.H2 = E2.H2 + F2.H2;
 H_E3 = H_E2 + property(F2,'h','kJ');
 E3_sat = E3;
 P_h2O_E3_sat = E3.H2O./net_flow(E3).*E3.P;
-E3_sat.T = interp1(satP,Tdb_K,P_h2O_E3_sat)+.01;%temperature of condensation with exhaust water concentration
+E3_sat.T = interp1(satP,Tdb_K,P_h2O_E3_sat)+.1;%temperature of condensation with exhaust water concentration
 H_E3_sat = property(E3_sat,'h','kJ');
 H2O_condense = min(E3.H2O,max(0,(H_E3_sat - H_E3)./(2260*18)));%latent heat of water = 2260kJ/kg
 E3.H2O = E3.H2O - H2O_condense;
 water.H2O = H2O_condense;
 water.T = E3.T;
 water.P = E3.P;
-E3.T = E3_sat.T+.01;
+E3.T = E3_sat.T+.1;
 E3.T = find_T(E3, H_E3 -  property(water,'h','kJ'));
 E3.T(H2O_condense>0) = E3_sat.T(H2O_condense>0);
 E4.T = F3.T;
