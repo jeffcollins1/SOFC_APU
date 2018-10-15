@@ -63,12 +63,13 @@ P_sys_mission = zeros(m*n,length(mission.alt));
 eff_mission = zeros(m*n,length(mission.alt));
 FCV_mission = zeros(m*n,length(mission.alt));
 FCiden_mission = zeros(m*n,length(mission.alt));
+TSFC_mission = zeros(m*n,length(mission.alt));
 param.power_mission = zeros(m,n,length(mission.alt));
 param.efficiency_mission = zeros(m,n,length(mission.alt));
 param.FCV_mission = zeros(m,n,length(mission.alt));
 param.FCiden_mission = zeros(m,n,length(mission.alt));
 param.TSFC_mission = zeros(m,n,length(mission.alt));
-parallel = false;
+parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,par_i,n);

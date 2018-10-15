@@ -12,6 +12,7 @@ for i = 1:1:length(turbo)
     end
 end
 weight.hx_fuel = HX.fuel.mass; 
+weight.hx_condense = HX.condenser.mass; 
 weight.hx =  HX.fuel.mass + HX.condenser.mass + HX.HP.mass; %Heat exchanger weight
 if ~isempty(OTM)
     weight.otm = options.OTM_area.*options.OTM_specific_mass;

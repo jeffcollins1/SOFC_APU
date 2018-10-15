@@ -4,10 +4,10 @@ n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
-options.asr = 0.35*ones(n1,n2); % Area specific resistance, ohm-cm^2
+options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
-options.steamratio = 0.01*ones(n1,n2); %Percentage of humidification at fuel inlet
+options.steamratio = 0.05*ones(n1,n2); %Percentage of humidification at fuel inlet
 options.PR_comp = ones(n1,1)*linspace(15,40,n2); %Range of intake pressures for OTM, kPa
 options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
@@ -42,16 +42,16 @@ options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 % options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 
 %% %Airbus A380 Standard Case in Piano_X
-% [segment,history,profile] = import_flight_txt('A380F');
-% TO_weight = 569000;% kg, Initial mass at condition 1
-% StandardPayload = 52725; %kg, Piano default design
-% FuelUsed = 211418;% kg, Piano block summary, end
-% Range = 14408;% nm, Piano default design
-% engine_mass = 6246; % kg,Trent 900 EASA certification
-% res_fuel = 22356; %kg
-% options.engine_radius = 2.5*ones(n1,n2); %
-% options.num_engines = 4*ones(n1,n2);
-% options.electric_demand = 1000*ones(n1,n2); %Ancilliary demand, kW
+[segment,history,profile] = import_flight_txt('A380F');
+TO_weight = 569000;% kg, Initial mass at condition 1
+StandardPayload = 52725; %kg, Piano default design
+FuelUsed = 211418;% kg, Piano block summary, end
+Range = 14408;% nm, Piano default design
+engine_mass = 6246; % kg,Trent 900 EASA certification
+res_fuel = 22356; %kg
+options.engine_radius = 2.5*ones(n1,n2); %
+options.num_engines = 4*ones(n1,n2);
+options.electric_demand = 1000*ones(n1,n2); %Ancilliary demand, kW
 
 %% Airbus A300 600R, Standard case in Piano X
 % [segment,history,profile] = import_flight_txt('A300');
@@ -66,17 +66,17 @@ options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 % options.electric_demand = 300*ones(n1,n2); %Ancilliary demand, kW
 
 %% Fokker F70, Standard case in Piano X
-[segment,history,profile] = import_flight_txt('F70');
-TO_weight = 36741;% kg, Initial mass at condition 1
-StandardPayload = 7167; %kg, Piano default design
-FuelUsed = 4917;% kg, Piano block summary, end
-Range = 2020;% km, Piano default design
-num_engines = 2;
-engine_mass = 1501; % kg,RR tay 620-15 EASA certification+
-res_fuel = 2136; %kg
-options.engine_radius = 2*ones(n1,n2); %
-options.num_engines = 2*ones(n1,n2);
-options.electric_demand = 100*ones(n1,n2); %Ancilliary demand, kW
+% [segment,history,profile] = import_flight_txt('F70');
+% TO_weight = 36741;% kg, Initial mass at condition 1
+% StandardPayload = 7167; %kg, Piano default design
+% FuelUsed = 4917;% kg, Piano block summary, end
+% Range = 2020;% km, Piano default design
+% num_engines = 2;
+% engine_mass = 1501; % kg,RR tay 620-15 EASA certification+
+% res_fuel = 2136; %kg
+% options.engine_radius = 2*ones(n1,n2); %
+% options.num_engines = 2*ones(n1,n2);
+% options.electric_demand = 100*ones(n1,n2); %Ancilliary demand, kW
 
 %%%
 options.air_frame_weight = (TO_weight - FuelUsed - res_fuel - StandardPayload - options.num_engines*engine_mass);%airframe mass in kg:
@@ -90,7 +90,7 @@ for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
-mission.design_point = 4;%%change based on mission profile
+mission.design_point = 3;%%change based on mission profile
 
 tic
 param = run_std_cycle(options,mission,res_fuel);

@@ -1,13 +1,13 @@
 %%  Test Cycle
-n1 = 10; % number of points in test dimension 1
-n2 = 10; % number of points in test dimension 2
+n1 = 5; % number of points in test dimension 1
+n2 = 5; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(2e3,1e4,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
 options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
-options.steamratio = 0.01*ones(n1,n2); %Percentage of humidification at fuel inlet
+options.steamratio = 0.05*ones(n1,n2); %Percentage of humidification at fuel inlet
 options.PR_comp = ones(n1,1)*linspace(20,60,n2); %Range of intake pressures for OTM, kPa
 options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
@@ -101,7 +101,7 @@ for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
-mission.design_point = 7;%%change based on mission profile
+mission.design_point = 3;%%change based on mission profile
 
 tic
 param = run_cycle(options,mission,res_fuel);

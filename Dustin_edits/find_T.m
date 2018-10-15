@@ -1,8 +1,10 @@
 function T = find_T(Flow, H)
 Flow_2 = Flow;
-% Flow_3 = Flow;
+Flow_3 = Flow;
 error = 1;
+count = 0;
 while max(max(abs(error)))>1e-3
+    count = count+1;
     Flow_2.T = Flow.T+.01;
 %     Flow_3.T = Flow.T-1;
     H_flow = property(Flow,'h','kJ');
@@ -11,6 +13,10 @@ while max(max(abs(error)))>1e-3
     error = dT_dH.*(H -  H_flow);
     error(isinf(error)) = 0;
     Flow.T = Flow.T + error;
+    if count>25
+        Flow.T = Flow_3.T;
+        error = 0;
+    end
 end
 T = Flow.T;
 end
