@@ -4,7 +4,7 @@ n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(2e3,1e4,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
-options.asr = 0.2*ones(n1,n2); % Area specific resistance, ohm-cm^2
+options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.01*ones(n1,n2); %Percentage of humidification at fuel inlet
@@ -30,9 +30,9 @@ options.C2_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 2 propul
 
 %% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
-options.OTM_specific_mass = 0.048907*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.048907kg/ 81cm^2 cell
-options.heat_pipe_specific_mass = 1./1.116*ones(n1,n2); %Weight per kW of heat transfer
-options.sofc_specific_mass = 0.05508*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
+options.OTM_specific_mass = 0.0746*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.048907kg/ 81cm^2 cell
+options.heat_pipe_specific_mass = 1./1.72*ones(n1,n2); %Weight per kW of heat transfer
+options.sofc_specific_mass = 0.08223*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
 options.fuel_tank_mass_per_kg_fuel = 1*ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
@@ -41,28 +41,28 @@ options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide,
 options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 
 %% 787-8 Standard Case in Piano_X
-[segment,history,profile] = import_flight_txt('787');
-TO_weight = 219539;% Initial mass at condition 1
-StandardPayload = 23052;% kg
-FuelUsed = 75126;% kg, block summary end
-Range = 14187;% km
-engine_mass = 6033; %Trent 1000 engine, EASA certification
-res_fuel = 7799; %res fuel
-options.engine_radius = 2.8*ones(n1,n2); %
-options.num_engines = 2*ones(n1,n2);
-options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
+% [segment,history,profile] = import_flight_txt('787');
+% TO_weight = 219539;% Initial mass at condition 1
+% StandardPayload = 23052;% kg
+% FuelUsed = 75126;% kg, block summary end
+% Range = 14187;% km
+% engine_mass = 6033; %Trent 1000 engine, EASA certification
+% res_fuel = 7799; %res fuel
+% options.engine_radius = 2.8*ones(n1,n2); %
+% options.num_engines = 2*ones(n1,n2);
+% options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 
 %% %Airbus A380 Standard Case in Piano_X
-% [segment,history,profile] = import_flight_txt('A380F');
-% TO_weight = 569000;% kg, Initial mass at condition 1
-% StandardPayload = 52725; %kg, Piano default design
-% FuelUsed = 211418;% kg, Piano block summary, end
-% Range = 14408;% nm, Piano default design
-% engine_mass = 6246; % kg,Trent 900 EASA certification
-% res_fuel = 22356; %kg
-% options.engine_radius = 2.5*ones(n1,n2); %
-% options.num_engines = 4*ones(n1,n2);
-% options.electric_demand = 1000*ones(n1,n2); %Ancilliary demand, kW
+[segment,history,profile] = import_flight_txt('A380F');
+TO_weight = 569000;% kg, Initial mass at condition 1
+StandardPayload = 52725; %kg, Piano default design
+FuelUsed = 211418;% kg, Piano block summary, end
+Range = 14408;% nm, Piano default design
+engine_mass = 6246; % kg,Trent 900 EASA certification
+res_fuel = 22356; %kg
+options.engine_radius = 2.5*ones(n1,n2); %
+options.num_engines = 4*ones(n1,n2);
+options.electric_demand = 1000*ones(n1,n2); %Ancilliary demand, kW
 
 %% Airbus A300 600R, Standard case in Piano X
 % [segment,history,profile] = import_flight_txt('A300');
@@ -101,7 +101,7 @@ for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
-mission.design_point = 3;%%change based on mission profile
+mission.design_point = 7;%%change based on mission profile
 
 tic
 param = run_cycle(options,mission,res_fuel);
@@ -109,7 +109,7 @@ toc
 
 param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
 payload = param.weight.payload;
-% [performancetable,weighttable] = collector(param,mission);
+[performancetable,weighttable] = collector(param,mission);
 payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
 figure(3)
 ax = surf(options.PR_comp,param.i_den,payload);
