@@ -51,34 +51,34 @@ param = NetParam(options,FC,{C1;T1;B1;},[],FL);
 param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F2',F2;'F3',F3;'F4',F4;'F5',F5;};
 
 %% calculate off-design power output to meet mission profile for each condition by varying permeate pressure
-weight.fuel = zeros(m,n);
-battery_kJ = zeros(m,n);
-fuel = zeros(m*n,1);
-battery = zeros(m*n,1);
-P_sys_mission = zeros(m*n,length(mission.alt));
-eff_mission = zeros(m*n,length(mission.alt));
-FCV_mission = zeros(m*n,length(mission.alt));
-FCiden_mission = zeros(m*n,length(mission.alt));
-TSFC_mission = zeros(m*n,length(mission.alt));
-param.power_mission = zeros(m,n,length(mission.alt));
-param.efficiency_mission = zeros(m,n,length(mission.alt));
-param.FCV_mission = zeros(m,n,length(mission.alt));
-param.FCiden_mission = zeros(m,n,length(mission.alt));
-param.TSFC_mission = zeros(m,n,length(mission.alt));
+nn = length(mission.alt);
+fuel = zeros(m*n,nn);
+battery = zeros(m*n,nn);
+battery_kJ = zeros(m,n,nn);
+P_sys_mission = zeros(m*n,nn);
+eff_mission = zeros(m*n,nn);
+FCV_mission = zeros(m*n,nn);
+FCiden_mission = zeros(m*n,nn);
+TSFC_mission = zeros(m*n,nn);
+param.power_mission = zeros(m,n,nn);
+param.efficiency_mission = zeros(m,n,nn);
+param.FCV_mission = zeros(m,n,nn);
+param.FCiden_mission = zeros(m,n,nn);
+param.TSFC_mission = zeros(m,n,nn);
 parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i),battery(par_i),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
+        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
     end
 else
     for i = 1:1:m*n
-        [fuel(i),battery(i),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
+        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
     end
 end
 for i = 1:1:m
     for j = 1:1:n
-        battery_kJ(i,j) = battery(n*(i-1)+j);
-        weight.fuel(i,j) = fuel(n*(i-1)+j);
+        battery_kJ(i,j,:) = battery(n*(i-1)+j,:);
+        param.fuel_by_seg(i,j,:) = fuel(n*(i-1)+j,:);
         param.power_mission(i,j,:) = P_sys_mission(n*(i-1)+j,:);
         param.efficiency_mission(i,j,:) = eff_mission(n*(i-1)+j,:);
         param.FCV_mission(i,j,:) = FCV_mission(n*(i-1)+j,:);
@@ -86,20 +86,15 @@ for i = 1:1:m
         param.TSFC_mission(i,j,:) = TSFC_mission(n*(i-1)+j,:);
     end
 end
-weight.fuel = weight.fuel.*options.fuel_tank_mass_per_kg_fuel; %Total LH2 storage including weight of insulated container
-weight.fuel_burn = weight.fuel; 
-weight.fuel_stored = weight.fuel.*options.fuel_tank_mass_per_kg_fuel + res_fuel/3; %Total LH2 storage including weight of insulated container and equivalent energy reserve storage
-weight.battery = battery_kJ./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
-%weight.total = (weight.sofc + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel_stored); 
-weight.battery = battery_kJ./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
+weight.fuel_burn = sum(param.fuel_by_seg,3); 
+weight.fuel_stored = weight.fuel_burn.*options.fuel_tank_mass_per_kg_fuel + res_fuel/3; %Total LH2 storage including weight of insulated container and equivalent energy reserve storage
+weight.battery = sum(battery_kJ,3)./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
 weight.total = (weight.sofc + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel).*options.safety_factor; 
 param.weight = weight;
 param.P_den = param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
 function [fuel,battery,P_sys_mission,eff_mission,FCV_mission,FCiden_mission,TSFC_mission] = flight_profile(options,mission,vol_flow,nominal_fuel,par_i,n)
-fuel = 0;
-battery = 0;
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
 atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
 i = ceil(par_i/n);
@@ -110,6 +105,9 @@ mm = 12;
 for k = 1:1:length(f)
     options2.(f{k}) = ones(mm,nn)*options.(f{k})(i,j);
 end
+battery = zeros(1,nn);
+fuel = zeros(1,nn);
+
 vol_flow2 = vol_flow(i,j)*ones(mm,nn);%reduce volume flow to 50%, then increase P_perm to reduce oxygen and power
 options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
 air_den = interp1(alt_tab,atmosphere_density,options2.height);
@@ -143,34 +141,31 @@ P_sys_mission = zeros(1,nn);
 eff_mission = zeros(1,nn);
 FCV_mission = zeros(1,nn);
 FCiden_mission = zeros(1,nn); 
-TSFC_mission = zeros(1,nn);
 %find permeate pressure condition that results in correct power for each flight segment
 for k = 1:1:nn
     P_req = mission.power(i,j,k);%shaft power in kW.  
     if P_req>max(P_shaft(:,k))
         [P,I] = max(P_shaft(:,k));
-        battery = battery + (P_req - P)*mission.duration(k)*3600;
-        fuel = fuel + (FC.H2_used(I,k))*2*mission.duration(k)*3600;
+        battery(k) = (P_req - P)*mission.duration(k)*3600;
+        fuel(k) = FC.H2_used(I,k)*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_sys(I,k);
         eff_mission(k) = FTE(I,k);
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
-        TSFC_mission(k) = fuel./(mission.thrust(k).*mission.duration(k)); % SFC in kg/N*hour; 
     elseif P_req<min(P_shaft(:,k))
         [h2_use,I] = min(FC.H2_used(:,k));
-        fuel = fuel + P_req/P_shaft(I,k)*(FC.H2_used(I,k))*2*mission.duration(k)*3600;
+        fuel(k) = P_req/P_shaft(I,k)*(FC.H2_used(I,k))*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_req/min(P_sys(:,k))*P_sys(I,k);
         eff_mission(k) = FTE(I,k);
         FCV_mission(k) = FC.V(I,k);
          FCiden_mission(k) = FC.i_den(I,k);
-         TSFC_mission(k) = fuel./(mission.thrust(k).*mission.duration(k)); 
     else
-        fuel = fuel + interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;
+        fuel(k) = interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;
         P_sys_mission(k) = interp1(P_shaft(:,k),P_sys(:,k),P_req);
         eff_mission(k) = interp1(P_shaft(:,k),FTE(:,k),P_req);
         FCV_mission(k) = interp1(P_shaft(:,k),FC.V(:,k),P_req);
         FCiden_mission(k) =interp1(P_shaft(:,k),FC.i_den(:,k),P_req);
-        TSFC_mission(k) = fuel./(mission.thrust(k).*mission.duration(k)); 
     end
 end
+TSFC_mission = fuel./(squeeze(mission.thrust(i,j,:)).*mission.duration)'; % SFC in kg/N*hour; 
 end%Ends function flight_profile
