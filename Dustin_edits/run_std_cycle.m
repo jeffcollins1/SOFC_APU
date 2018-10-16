@@ -84,6 +84,7 @@ for i = 1:1:m
         param.FCV_mission(i,j,:) = FCV_mission(n*(i-1)+j,:);
         param.FCiden_mission(i,j,:) = FCiden_mission(n*(i-1)+j,:);
         param.TSFC_mission(i,j,:) = TSFC_mission(n*(i-1)+j,:);
+        param.battery_mass_by_segment(i,j,:) = battery_kJ(i,j,:)./options.battery_specific_energy(i,j); 
     end
 end
 weight.fuel_burn = sum(param.fuel_by_seg,3); 
@@ -120,8 +121,8 @@ A3 = A2;
 %% add bypass
 max_current = 0.5*A3.O2*(96485.33*4000);% 50% O2 utilization
 min_current = 0.01*A3.O2*(96485.33*4000);% 1% O2 utilization
-max_fuel = min(nominal_fuel(i,j)*1.2,max_current/(96485.33*2000)./options2.spu);
-min_fuel = max(nominal_fuel(i,j)*.25,min_current/(96485.33*2000)./options2.spu);
+max_fuel = min(nominal_fuel(i,j)*1.2,max_current./(96485.33*2000)./options2.spu);
+min_fuel = max(nominal_fuel(i,j)*.25,min_current./(96485.33*2000)./options2.spu);
 F5.T = options2.T_fc - .5*options2.dT_fc;
 F5.P = A3.P;
 F5.H2 = zeros(mm,nn);
@@ -153,12 +154,12 @@ for k = 1:1:nn
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
     elseif P_req<min(P_shaft(:,k))
-        [h2_use,I] = min(FC.H2_used(:,k));
+        [~,I] = min(P_shaft(:,k));
         fuel(k) = P_req/P_shaft(I,k)*(FC.H2_used(I,k))*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_req/min(P_sys(:,k))*P_sys(I,k);
         eff_mission(k) = FTE(I,k);
         FCV_mission(k) = FC.V(I,k);
-         FCiden_mission(k) = FC.i_den(I,k);
+        FCiden_mission(k) = FC.i_den(I,k);
     else
         fuel(k) = interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;
         P_sys_mission(k) = interp1(P_shaft(:,k),P_sys(:,k),P_req);

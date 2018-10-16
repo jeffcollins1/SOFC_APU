@@ -26,7 +26,7 @@ options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
 options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
-options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
+options.safety_factor = 1.5*ones(n1,n2); %Safety factor on power plant sizing
 
 %% 787-8 Standard Case in Piano_X
 [segment,history,profile] = import_flight_txt('787');
@@ -89,7 +89,7 @@ for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
-mission.design_point = 3;%%change based on mission profile
+mission.design_point = 4;%%change based on mission profile
 
 tic
 param = run_std_cycle(options,mission,res_fuel);

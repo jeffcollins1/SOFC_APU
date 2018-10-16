@@ -163,12 +163,12 @@ for k = 1:1:nn
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
     elseif P_req<min(P_shaft(:,k))
-        [h2_use,I] = min(FC.H2_used(:,k));
+        [~,I] = min(P_shaft(:,k));
         fuel(k) = P_req/P_shaft(I,k)*(FC.H2_used(I,k)+fuel_for_OTM_preheat(I,k))*2*mission.duration(k)*3600;
         P_sys_mission(k) = P_req/min(P_sys(:,k))*P_sys(I,k);
         eff_mission(k) = FTE(I,k);
-         FCV_mission(k) = FC.V(I,k);
-         FCiden_mission(k) = FC.i_den(I,k);
+        FCV_mission(k) = FC.V(I,k);
+        FCiden_mission(k) = FC.i_den(I,k);
     else
         fuel(k) = (interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)+interp1(P_shaft(:,k),fuel_for_OTM_preheat(:,k),P_req))*2*mission.duration(k)*3600;
         P_sys_mission(k) = interp1(P_shaft(:,k),P_sys(:,k),P_req);
