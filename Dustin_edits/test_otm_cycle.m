@@ -19,12 +19,12 @@ options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
 
 %%OTM cycle specific parameters
 options.P_fc = 1000*ones(n1,n2); %Operating pressure for SOFC
-options.OTM_area = 1.75e3*ones(n1,n2); %membrane area in m^2 per kmol airflow
+options.OTM_area = 1e3*ones(n1,n2); %membrane area in m^2 per kmol airflow
 options.T_otm = options.T_fc; %Operating temperature for OTM
 options.j0_otm = 7*ones(n1,n2); %Nominal oxygen flux through OTM NmL/cm^2*min
 options.P0_otm = 2.1*ones(n1,n2); %Nominal oxygen pressure ratio across OTM (total pressure ratio *.21)
 options.T_oxygen_pump = 323*ones(n1,n2); %Inlet temperature of vacuum pump
-options.P_perm = 110*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 
+options.P_perm = 50*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 
 options.C2_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 2 propulsor portion (30%) of 4 RR RB-211 engines
 
 
@@ -38,7 +38,7 @@ options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
 options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
-options.safety_factor = 1.0*ones(n1,n2); %Safety factor on power plant sizing
+options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 
 %% 787-8 Standard Case in Piano_X
 [segment,history,profile] = import_flight_txt('787');
@@ -101,7 +101,7 @@ for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
-mission.design_point = 8;%%change based on mission profile
+mission.design_point = 6;%%change based on mission profile
 
 tic
 param = run_cycle(options,mission,res_fuel);

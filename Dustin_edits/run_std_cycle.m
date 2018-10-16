@@ -31,7 +31,7 @@ end
 P_nominal = mission.power(:,:,mission.design_point);%nominal power in kW
 
 %% scale system to meet nominal power requirements
-scale = P_nominal./options.motor_eff./(FC.Power + C1.work + T1.work + B1.work);
+scale = options.safety_factor.*P_nominal./options.motor_eff./(FC.Power + C1.work + T1.work + B1.work);
 molar_flow = scale.*molar_flow;
 vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
 options.SOFC_area = scale.*options.SOFC_area;
@@ -58,6 +58,7 @@ battery_kJ = zeros(m,n,nn);
 P_sys_mission = zeros(m*n,nn);
 eff_mission = zeros(m*n,nn);
 FCV_mission = zeros(m*n,nn);
+TIT = zeros(m*n,nn);
 FCiden_mission = zeros(m*n,nn);
 TSFC_mission = zeros(m*n,nn);
 param.power_mission = zeros(m,n,nn);
@@ -65,14 +66,15 @@ param.efficiency_mission = zeros(m,n,nn);
 param.FCV_mission = zeros(m,n,nn);
 param.FCiden_mission = zeros(m,n,nn);
 param.TSFC_mission = zeros(m,n,nn);
+param.turbine_inlet = zeros(m,n,nn);
 parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
+        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
     end
 else
     for i = 1:1:m*n
-        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
+        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:),TIT(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
     end
 end
 for i = 1:1:m
@@ -85,6 +87,7 @@ for i = 1:1:m
         param.FCiden_mission(i,j,:) = FCiden_mission(n*(i-1)+j,:);
         param.TSFC_mission(i,j,:) = TSFC_mission(n*(i-1)+j,:);
         param.battery_mass_by_segment(i,j,:) = battery_kJ(i,j,:)./options.battery_specific_energy(i,j); 
+        param.turbine_inlet(i,j,:) = TIT(n*(i-1)+j,:);
     end
 end
 weight.fuel_burn = sum(param.fuel_by_seg,3); 
@@ -95,7 +98,7 @@ param.weight = weight;
 param.P_den = param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
 
-function [fuel,battery,P_sys_mission,eff_mission,FCV_mission,FCiden_mission,TSFC_mission] = flight_profile(options,mission,vol_flow,nominal_fuel,par_i,n)
+function [fuel,battery,P_sys_mission,eff_mission,FCV_mission,FCiden_mission,TSFC_mission,turbine_inlet_temperature] = flight_profile(options,mission,vol_flow,nominal_fuel,par_i,n)
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
 atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
 i = ceil(par_i/n);
@@ -153,6 +156,7 @@ for k = 1:1:nn
         eff_mission(k) = FTE(I,k);
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
+        turbine_inlet_temperature(k) = A4.T(I,k);
     elseif P_req<min(P_shaft(:,k))
         [~,I] = min(P_shaft(:,k));
         fuel(k) = P_req/P_shaft(I,k)*(FC.H2_used(I,k))*2*mission.duration(k)*3600;
@@ -160,12 +164,14 @@ for k = 1:1:nn
         eff_mission(k) = FTE(I,k);
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
+        turbine_inlet_temperature(k) = A4.T(I,k);
     else
         fuel(k) = interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;
         P_sys_mission(k) = interp1(P_shaft(:,k),P_sys(:,k),P_req);
         eff_mission(k) = interp1(P_shaft(:,k),FTE(:,k),P_req);
         FCV_mission(k) = interp1(P_shaft(:,k),FC.V(:,k),P_req);
         FCiden_mission(k) =interp1(P_shaft(:,k),FC.i_den(:,k),P_req);
+        turbine_inlet_temperature(k) = A4.T(I,k);
     end
 end
 TSFC_mission = fuel./(squeeze(mission.thrust(i,j,:)).*mission.duration)'; % SFC in kg/N*hour; 

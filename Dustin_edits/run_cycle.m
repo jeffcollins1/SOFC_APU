@@ -121,7 +121,7 @@ air_den = interp1(alt_tab,atmosphere_density,options2.height);
 molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
 [A1,~] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
 for k = 1:1:nn
-    options2.P_perm(:,k) = [25*ones(5,1);logspace(log10(25),log10(0.99*.21*A1.P(1,k)*options2.PR_comp(1,1)),mm-5)']; %Pressure of OTM oxygen stream, kPa; 
+    options2.P_perm(:,k) = [15*ones(5,1);logspace(log10(15),log10(0.99*.21*A1.P(1,k)*options2.PR_comp(1,1)),mm-5)']; %Pressure of OTM oxygen stream, kPa; 
 end
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
 [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options2,A2);

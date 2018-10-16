@@ -4,7 +4,7 @@ n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
-options.asr = 0.2*ones(n1,n2); % Area specific resistance, ohm-cm^2
+options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.05*ones(n1,n2); %Percentage of humidification at fuel inlet
@@ -26,7 +26,7 @@ options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
 options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
-options.safety_factor = 1.5*ones(n1,n2); %Safety factor on power plant sizing
+options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 
 %% 787-8 Standard Case in Piano_X
 [segment,history,profile] = import_flight_txt('787');

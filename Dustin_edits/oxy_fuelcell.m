@@ -24,7 +24,7 @@ FC.G = -198141 + (T-900)*(-192652+198141)/(1000-900);
 FC.G(T>1000) = -192652 + (T(T>1000)-1000)*(-187100+192652)/(1100-1000);
 E0 = -FC.G/(2*F);
 
-i = (ones(n1,n2,n)).*(FC.i_Cell./FC.cell_area); %Initial current density distribution per cell
+
 J_int = zeros(n1,n2,n); %Initializing the matrix for Current distribution
 FC.hrxnmol = -dH/1000; %H2 + 0.5*O2 -->  H2O, Heat Released in kJ/kmol
 
@@ -37,7 +37,9 @@ FC.n_in = FC.H2_supply + FC.H2O_supply;
 error_V = 1;
 V = zeros(n1,n2);
 asr = zeros(n1,n2,n);
+i = zeros(n1,n2,n);
 for j = 1:1:n
+    i(:,:,j) = FC.i_Cell./FC.cell_area; %Initial current density distribution per cell
     asr(:,:,j) = options.asr;
 end
 X_H2 = zeros(n1,n2,n);   
@@ -56,7 +58,9 @@ while max(max(abs(error_V)))>1e-4
         Vold = V;
     end
     while any(any(abs(error)>(FC.i_Cell*1e-4))) %|| count < 2
-        i = max(0,E-V.*ones(1,1,n))./asr; %new current distribution
+        for j = 1:1:n
+            i(:,:,j) = max(0,E(:,:,j)-V)./asr(:,:,j); %new current distribution
+        end
         error = (sum(i,3).*FC.cell_area/n) - FC.i_Cell; %error in total current
         V = V + 1*(error./FC.cell_area.*options.asr); %New average voltage 
     end  
