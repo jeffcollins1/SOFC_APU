@@ -89,7 +89,7 @@ end
 weight.fuel_burn = sum(param.fuel_by_seg,3); 
 weight.fuel_stored = weight.fuel_burn.*options.fuel_tank_mass_per_kg_fuel + res_fuel/3; %Total LH2 storage including weight of insulated container and equivalent energy reserve storage
 weight.battery = sum(battery_kJ,3)./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
-weight.total = (weight.sofc + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel).*options.safety_factor; 
+weight.total = (weight.sofc + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel_stored); 
 param.weight = weight;
 param.P_den = param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.hx);
 end%Ends function run_cycle
