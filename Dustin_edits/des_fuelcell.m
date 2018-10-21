@@ -8,24 +8,31 @@ P = cath_in.P;
 W = 9; %Width of active cell area in cm
 L = 9; %Length of active cell area in cm
 n = 10; %Number of nodes at which the voltage change is calculated
+reactant1.H2 = 1*ones(n1,n2); % 1 kmol of H2 for stoichiometric reaction
+reactant1.T = T;
+reactant2.O2 = 0.5*ones(n1,n2); % 0.5 kmol of O2 for stoichiometric reaction
+reactant2.T = T; 
+product.H2O = 1*ones(n1,n2); % 1 kmol of H2O as product
+product.T = T;
+dH = enthalpy(product) - enthalpy(reactant2) - enthalpy(reactant1); 
 FC.cell_area = W*L;
 FC.Cells = options.SOFC_area.*10000/FC.cell_area; % Number of cells based on total active surface area of 81 cm^2 per cell
-dH = 0*T;
-for i = 1:1:n2
-%     dS(:,i) = refproparray('s','T',T(:,i),'P',P(:,i),'WATER')*18.01528 - refpropm('s','T',T(:,i),'P',P(:,i),'Hydrogen')*2.016 - .5*refpropm('s','T',T(:,i),'P',P(:,i),'Oxygen')*32;
-    dH(:,i) = refproparray('h','T',T(:,i),'P',P(:,i),'WATER')*18.01528 - refproparray('h','T',T(:,i),'P',P(:,i),'Hydrogen')*2.016 - .5*refproparray('h','T',T(:,i),'P',P(:,i),'Oxygen')*32 - 45839000 - 241826400;%J/kmol
-end
-% E0 = -(dH-T.*dS)/(2000*F)%Reference Voltage
+% dH = 0*T;
+% for i = 1:1:n2
+% %     dS(:,i) = refproparray('s','T',T(:,i),'P',P(:,i),'WATER')*18.01528 - refpropm('s','T',T(:,i),'P',P(:,i),'Hydrogen')*2.016 - .5*refpropm('s','T',T(:,i),'P',P(:,i),'Oxygen')*32;
+%     dH(:,i) = refproparray('h','T',T(:,i),'P',P(:,i),'WATER')*18.01528 - refproparray('h','T',T(:,i),'P',P(:,i),'Hydrogen')*2.016 - .5*refproparray('h','T',T(:,i),'P',P(:,i),'Oxygen')*32 - 45839000 - 241826400;%J/kmol
+% end
+% % E0 = -(dH-T.*dS)/(2000*F)%Reference Voltage
 FC.G = -198141 + (T-900)*(-192652+198141)/(1000-900);
 FC.G(T>1000) = -192652 + (T(T>1000)-1000)*(-187100+192652)/(1100-1000);
 E0 = -FC.G/(2*F);
 
 J_int = zeros(n1,n2,n); %Initializing the matrix for Current distribution
-FC.hrxnmol = -dH/1000; %H2 + 0.5*O2 -->  H2O, Heat Released in kJ/kmol
+FC.hrxnmol = -dH; %H2 + 0.5*O2 -->  H2O, Heat Released in kJ/kmol
 
 cath_out = cath_in;
 cath_out.T = options.T_fc + .5*options.dT_fc;
-Q_cath = property(cath_out,'h','kJ') - property(cath_in,'h','kJ');
+Q_cath = enthalpy(cath_out) - enthalpy(cath_in); %property(cath_out,'h','kJ') - property(cath_in,'h','kJ');
 A3 = cath_in;
 A3.T = options.T_fc - .5*options.dT_fc;
 
@@ -47,12 +54,15 @@ while any(any(abs(error)>1e-3))
     anode_in.H2O = anode_in.H2.*options.steamratio./(1-options.steamratio);
     anode_out.H2 = anode_in.H2 - FC.i_total./(2000.*F);
     anode_out.H2O = anode_in.H2O + FC.i_total./(2000.*F); %Water/Steam Produced by Reaction, mol/s
+    test.T = anode_out.T;
+    test.H2O = anode_out.H2O;
+    [~,H_anode_out] = enthalpy(anode_out);
     ion.O2 = FC.i_total./(2000.*F)/2;
-    Q_anode = property(anode_out,'h','kJ')-property(anode_in,'h','kJ')-property(ion,'h','kJ'); %heat removed by anode (kW)
+    Q_anode = H_anode_out - enthalpy(anode_in) - enthalpy(ion);%property(anode_out,'h','kJ')-property(anode_in,'h','kJ')-property(ion,'h','kJ'); %heat removed by anode (kW)
     
     error = (FC.Qgen - Q_anode - Q_cath)./max(FC.Qgen-Q_anode,Q_cath);
     error(isnan(error)) = 0;
-    V = max(.25,min(1.1,V + .3*error.*max(0,(1.12-V))));
+    V = max(.25,min(1.1,V + .15*error.*max(0,(1.12-V))));
 end
 i = (ones(n1,n2,n)).*(FC.i_total./(1e4.*options.SOFC_area)); %Initial current density distribution per cell
 Vold = V;
@@ -84,7 +94,7 @@ while any(any(abs(error_Q)>1e-4))
         error = (sum(i,3).*options.SOFC_area*1e4/n) - FC.i_total; %error in total current
         error(isnan(error)) = 0;
         error(isinf(error)) = 0;
-        V = min(1.4,max(.2,V + .4*(error./options.SOFC_area/1e4.*options.asr))); %New average voltage 
+        V = min(1.4,max(.25,V + .15*(error./options.SOFC_area/1e4.*options.asr))); %New average voltage 
     end  
     error_V = Vold - V;
     Vold = V;
@@ -95,9 +105,10 @@ while any(any(abs(error_Q)>1e-4))
     anode_out.H2 = anode_in.H2 - FC.H2_used;
     anode_out.H2O = anode_in.H2O + FC.H2_used; %Water/Steam Produced by Reaction, mol/s
     ion.O2 = FC.H2_used/2;
-    FC.Q_anode = property(anode_out,'h','kJ')-property(anode_in,'h','kJ')-property(ion,'h','kJ'); %heat removed by anode (kW)
+    [~,H_anode_out] = enthalpy(anode_out);
+    FC.Q_anode = H_anode_out - enthalpy(anode_in) - enthalpy(ion); %property(anode_out,'h','kJ')-property(anode_in,'h','kJ')-property(ion,'h','kJ'); %heat removed by anode (kW)
     cath_out.O2 = max(1e-3*cath_in.O2,cath_in.O2 - ion.O2);
-    Q_cath = property(cath_out,'h','kJ') + property(ion,'h','kJ') - property(cath_in,'h','kJ');
+    Q_cath = enthalpy(cath_out) + enthalpy(ion) - enthalpy(cath_in); %property(cath_out,'h','kJ') + property(ion,'h','kJ') - property(cath_in,'h','kJ');
     error_Q = (Q_cath - (FC.Qgen - FC.Q_anode))./Q_cath;
     FC.i_total = FC.i_total.*(1 + .9*error_Q);
 end
@@ -108,6 +119,6 @@ FC.O2_util = ion.O2./cath_in.O2;
 FC.i_den = FC.i_total./(options.SOFC_area*10000); %A/cm^2
 FC.i_Cell = FC.cell_area*FC.i_den;%FC.i_total./FC.Cells; %Total amount of current per cell
 FC.pressure = P;
-Q_cath_in_stack = property(cath_out,'h','kJ') + property(ion,'h','kJ') - property(A3,'h','kJ');
+Q_cath_in_stack = enthalpy(cath_out) + enthalpy(ion) - enthalpy(A3);%property(cath_out,'h','kJ') + property(ion,'h','kJ') - property(A3,'h','kJ');
 FC.Qremove = FC.Qgen - FC.Q_anode - Q_cath_in_stack;
 end

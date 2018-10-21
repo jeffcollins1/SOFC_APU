@@ -89,18 +89,28 @@ for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
-mission.design_point = 4;%%change based on mission profile
+[z1,z2] = size(mission.alt);
+Weight = zeros(9,z1);
+performance_dp  = zeros(4,z1);
+performance_to = zeros(4,z1);
+for l = 1:z1
+mission.design_point = l;%%change based on mission profile
 
 tic
 param = run_std_cycle(options,mission,res_fuel);
 toc
-
 param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
-payload = param.weight.payload;
-payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
 [performancetable,weighttable] = collector_std_cycle(param,mission);
-figure(3)
-ax = surf(options.PR_comp,param.i_den,payload);
+performance_dp(:,l) = performancetable.PASTEdp;
+performance_to(:,l) = performancetable.PASTEto;
+Weight(:,l) = weighttable.PASTE; 
+end
+
+% payload = param.weight.payload;
+% payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
+% [performancetable,weighttable] = collector_std_cycle(param,mission);
+% figure(3)
+% ax = surf(options.PR_comp,param.i_den,payload);
 % xlabel(ax,'Compressor pressure ratio');
 % ylabel(ax,'SOFC current density (A/cm^2)');
 % zlabel(ax,'payload (kg)');

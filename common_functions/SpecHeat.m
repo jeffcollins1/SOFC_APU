@@ -3,24 +3,26 @@ function CpT = SpecHeat(varargin) % Specific heat
 % Option 1: provide a vector of temperatures and it returns specific heat at those temperatures for all species CH4, CO, CO2, H2, H2O, N2, O2, C, NO, OH, H
 % Option 2: provide a vector of temperatures and a cell array of strings for the species of interest
 % Option 3: provide a structure where __.T coresponds to temperature, ___.CH4 coresponds to the flow rate of methane ____.H2 to the flow rate of hydrogen...
-CPnet = zeros(10,10); 
+JJ = varargin{1};
+[m,n] = size(JJ.T);
+CPnet = zeros(m,n); 
 
-for u = 1:10
+for u = 1:n
 if isfield(varargin{1},'T')
     In = varargin{1};
-    Inlet.T= In.T(1:10,u);
+    Inlet.T= In.T(1:m,u);
     T = Inlet.T;
     if isfield(varargin{1},'N2')
-        Inlet.N2 = In.N2(1:10,u);
+        Inlet.N2 = In.N2(1:m,u);
     end
     if isfield(varargin{1},'O2')
-        Inlet.O2 = In.O2(1:10,u);
+        Inlet.O2 = In.O2(1:m,u);
     end
     if isfield(varargin{1},'H2O')
-        Inlet.H2O = In.H2O(1:10,u);
+        Inlet.H2O = In.H2O(1:m,u);
     end
     if isfield(varargin{1},'H2')
-        Inlet.H2 = In.H2(1:10,u);
+        Inlet.H2 = In.H2(1:m,u);
     end
 else
     T = varargin{1};
@@ -106,7 +108,7 @@ if exist('Inlet','var')
     Flow = net_flow(Inlet);
     %CPnet =0;
     for i = 1:1:length(spec)
-        CPnet(1:10,u) = CPnet(1:10,u) + Cp.(spec{i}).*Inlet.(spec{i})./Flow;
+        CPnet(1:m,u) = CPnet(1:m,u) + Cp.(spec{i}).*Inlet.(spec{i})./Flow;
     end
 end
     

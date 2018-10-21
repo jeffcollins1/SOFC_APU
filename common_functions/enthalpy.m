@@ -3,25 +3,28 @@ function [Out1,Out2] = enthalpy(varargin) % enthalpy (h) and sensible enthalpy(h
 % Option 1: provide a vector of temperatures and it returns total and specific enthalpy at those temperatures for all species CH4, CO, CO2, H2, H2O, N2, O2, C, NO, OH, H
 % Option 2: provide a structure where __.T coresponds to temperature, ___.CH4 coresponds to the flow rate of methane ____.H2 to the flow rate of hydrogen...
 % Option 2, returns the rate of energy flow in (kJ/s)
-%[u,v] = size(varargin{1}); 
-Out1 = zeros(10,10);
-Out2 = zeros(10,10);
-for u = 1:10
+
+JJ = varargin{1};
+[m,n] = size(JJ.T);
+Out1 = zeros(m,n);
+Out2 = zeros(m,n);
+
+for u = 1:n
 if isfield(varargin{1},'T')
     Inlet = varargin{1};
-    Inlet.T = Inlet.T(1:10,u);
+    Inlet.T = Inlet.T(1:n,u);
     T = Inlet.T;
     if isfield(varargin{1},'N2')
-        Inlet.N2 = Inlet.N2(1:10,u);
+        Inlet.N2 = Inlet.N2(1:n,u);
     end
     if isfield(varargin{1},'O2')
-        Inlet.O2 = Inlet.O2(1:10,u);
+        Inlet.O2 = Inlet.O2(1:n,u);
     end
     if isfield(varargin{1},'H2O')
-        Inlet.H2O = Inlet.H2O(1:10,u);
+        Inlet.H2O = Inlet.H2O(1:n,u);
     end
     if isfield(varargin{1},'H2')
-        Inlet.H2 = Inlet.H2(1:10,u);
+        Inlet.H2 = Inlet.H2(1:n,u);
     end
 else
     T = varargin{1};
@@ -120,9 +123,9 @@ else
     speciesName = fieldnames(Inlet);
     for i = 1:1:length(speciesName)
         if ~strcmp(speciesName{i},'T') && ~strcmp(speciesName{i},'P')
-            Out1(1:10,u) = Out1(1:10,u) + h.(speciesName{i}).*Inlet.(speciesName{i});
+            Out1(1:n,u) = Out1(1:n,u) + h.(speciesName{i}).*Inlet.(speciesName{i});
             %Out1 = ones(10,1)*(Z'); 
-            Out2(1:10,u) = Out2(1:10,u) + h_s.(speciesName{i}).*Inlet.(speciesName{i});
+            Out2(1:n,u) = Out2(1:n,u) + h_s.(speciesName{i}).*Inlet.(speciesName{i});
             %Out2 = ones(10,1)*(Z2');
         end
     end

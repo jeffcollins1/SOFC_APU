@@ -3,24 +3,26 @@ function S = entropy(varargin) % entropy (S)
 % Option 1: provide a vector of temperatures and it returns entropy for all species CH4, CO, CO2, H2, H2O, N2, O2, C, NO, OH, H
 % Option 2: provide a structure where __.T coresponds to temperature, ___.CH4 coresponds to the flow rate of methane ____.H2 to the flow rate of hydrogen...
 % Option 2 returns the rate form  (kJ/s)
+JJ = varargin{1};
+[m,n] = size(JJ.T);
+S= zeros(m,n);
 
-S = zeros(10,10);
-for u = 1:10
+for u = 1:n
 if isfield(varargin{1},'T')
     Inlet = varargin{1};
-    Inlet.T = Inlet.T(1:10,u);
+    Inlet.T = Inlet.T(1:m,u);
     T = Inlet.T;
     if isfield(varargin{1},'N2')
-        Inlet.N2 = Inlet.N2(1:10,u);
+        Inlet.N2 = Inlet.N2(1:m,u);
     end
     if isfield(varargin{1},'O2')
-        Inlet.O2 = Inlet.O2(1:10,u);
+        Inlet.O2 = Inlet.O2(1:m,u);
     end
     if isfield(varargin{1},'H2O')
-        Inlet.H2O = Inlet.H2O(1:10,u);
+        Inlet.H2O = Inlet.H2O(1:m,u);
     end
     if isfield(varargin{1},'H2')
-        Inlet.H2 = Inlet.H2(1:10,u);
+        Inlet.H2 = Inlet.H2(1:m,u);
     end
 else
     T = varargin{1};
@@ -97,7 +99,7 @@ else
     speciesName = fieldnames(Inlet);
     for i = 1:1:length(speciesName)
         if ~strcmp(speciesName{i},'T') && ~strcmp(speciesName{i},'P')
-            S(1:10,u) = S(1:10,u) + s.(speciesName{i}).*Inlet.(speciesName{i});
+            S(1:m,u) = S(1:m,u) + s.(speciesName{i}).*Inlet.(speciesName{i});
         end
     end
 end

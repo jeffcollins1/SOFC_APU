@@ -6,14 +6,17 @@ options.height = mission.alt(mission.design_point)*ones(m,n); %Altitude, meters
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
 atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
 air_den = interp1(alt_tab,atmosphere_density,options.height);
-[A1,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
+[Amb,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
+A1 = Amb; 
+A1.P = Amb.P.*((1+ 0.5*0.4.*mission.mach_num(mission.design_point).^2).^(1/0.4));
+A1.T = Amb.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
 [FC,A4,E1,F5] = des_fuelcell(options,A3);
 A5 = A4;
 A5.T = A4.T - (A3.T-A2.T);
-RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
-A5.T = find_T(A5,property(A4,'h','kJ') - RC.Q);
+RC.Q = enthalpy(A3) - enthalpy(A3); %property(A3,'h','kJ') - property(A2,'h','kJ');
+A5.T = find_T(A5,enthalpy(A4) - RC.Q);%find_T(A5,property(A4,'h','kJ') - RC.Q);
 
 [A6,T1] = expander(A5,A1.P,options.T1_eff);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
@@ -37,7 +40,10 @@ vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
 options.SOFC_area = scale.*options.SOFC_area;
 
 %% Re-Run with scaled system parameters
-[A1,~] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
+[Amb,~] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
+A1 = Amb; 
+A1.P = Amb.P.*((1+ 0.5*0.4.*mission.mach_num(mission.design_point).^2).^(1/0.4));
+A1.T = Amb.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 A3 = A2;
 [FC,A4,E1,F5] = des_fuelcell(options,A3);
@@ -117,8 +123,11 @@ options2.height = ones(mm,1)*mission.alt'; %Altitude, meters
 air_den = interp1(alt_tab,atmosphere_density,options2.height);
 molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
 
-
-[A1,~] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
+[Amb,~] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
+A1 = Amb; 
+mach = ones(nn,1).*mission.mach_num';
+A1.P = Amb.P.*((1+ 0.5*0.4.*mach.^2).^(1/0.4));
+A1.T = Amb.T.*(1 + 0.5*0.4.*mach.^2);
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
 A3 = A2;
 %% add bypass

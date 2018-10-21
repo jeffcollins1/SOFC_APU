@@ -8,8 +8,8 @@ F3 = F5;
 F3.T = 25.765*log(F3.P/1000)+354.84+5;% saturation temperature of 5% H2O in H2 @ 1MPa
 F3.P = F2.P;
 
-[F4,FL.blower_work] = compressor(F3,F5.P,options.Blower_eff);
-B1 = FL.blower_work; 
+[F4,B1] = compressor(F3,F5.P,options.Blower_eff);
+%B1.work = FL.blower_work; 
 FL.Q_preheat = enthalpy(F5) - enthalpy(F4);%property(F5,'h','kJ') - property(F4,'h','kJ');
 
 E4.T = F3.T;
@@ -71,12 +71,12 @@ E3.T = find_T(E3,H_E3);%find_T(E3,property(F2,'h','kJ') + H_E2);
 % FL.Qremove_fuel = H_E3 - property(F3,'h','kJ') - property(E4,'h','kJ');
 
 %% find AC mass flow based on condensor heat transfer
-AC.O2 = 3*A1.O2;
-AC.N2 = 3*A1.N2;
+AC.O2 = A1.O2; %initial guess for molar airflow through condenser
+AC.N2 = A1.N2;
 AC.T = A1.T;
 AC.P = A1.P; 
 ACout = AC; 
 ACout.T = E3.T + 25;%find_T(AC, HACout);
 HX.fuel = heat_exchanger(E1,E2,F4,F5,options);
-HX.condenser = heat_exchanger(E3,F3,AC,ACout,options);
+[HX.condenser,AC] = condenser(E3,F3,AC,options);
 end%Ends function fuel_loop

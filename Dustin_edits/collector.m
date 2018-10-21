@@ -1,4 +1,5 @@
-function [performancetable,weighttable,missionmax] = collector(param,mission)
+function [performancetable,weighttable] = collector(param,mission)
+
 dp = mission.design_point; 
 [v,w] = size(mission.alt); 
 maxpayload = max(max(param.weight.payload));

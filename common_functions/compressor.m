@@ -1,9 +1,9 @@
-function [Outlet,Work] = compressor(Inlet,P_out,eff)
+function [Outlet,Prop] = compressor(Inlet,P_out,eff)
 [n1,n2] = size(Inlet.T); 
 
 MM = molarmass(Inlet)*ones(n1,n1);
 
-Ru = 8.314*ones(n1,n1); %Universal Gas constant, kJ/(kg*K)
+Ru = 8.314*ones(n1,n2); %Universal Gas constant, kJ/(kg*K)
 %gamma = property(Inlet,'C','kJ/(kmol K)')./property(Inlet,'O','kJ/(kmol K)');
 [~,H_in] = enthalpy(Inlet); %property(Inlet,'h','kJ');
 S_in = entropy(Inlet); %property(Inlet,'s','kJ/K');
@@ -31,6 +31,9 @@ H_out = H_in + 1./eff.*(H_ideal - H_in);
 Outlet = Ideal;
 Outlet.T = Ideal.T + (H_out - H_ideal)./cp;
 Outlet.T = find_T(Outlet, H_out);
-Work = H_in - H_out;
+Prop.work = H_in - H_out;
+Prop.pressure_ratio = P_out./Inlet.P;
+Prop.eff = eff;
+Prop.mass_flow = mass_flow(Inlet);
 end
 

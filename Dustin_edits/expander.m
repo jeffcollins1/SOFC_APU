@@ -1,5 +1,6 @@
 function [outlet,prop] = expander(Inlet,P_out,eff)
-R = 8.314*ones(10,10); %kJ/kmol*K
+[m,n] = size(Inlet.T)
+R = 8.314*ones(m,n); %kJ/kmol*K
 cp = SpecHeat(Inlet);%property(Inlet,'C','kJ/(kmol K)');
 gamma = cp./(cp-R);
 H_in = enthalpy(Inlet); %property(Inlet,'h','kJ');

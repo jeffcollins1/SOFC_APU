@@ -7,6 +7,6 @@ AC.P = A1.P;
 ACout.O2 = AC.O2;
 ACout.N2 = AC.N2;
 ACout.P = A1.P; 
-ACout.T = find_T(AC,property(AC,'h','kJ') + OTM.Q_out); 
+ACout.T = find_T(AC,enthalpy(AC) + OTM.Q_out); 
 HX.oxycompressor = heat_exchanger(O2,O3,AC,ACout,options); 
 end
