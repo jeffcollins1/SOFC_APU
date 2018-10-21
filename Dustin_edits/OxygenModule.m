@@ -1,7 +1,7 @@
 function [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2)
 A3 = A2;
 A3.T = max(options.T_otm,A2.T);
-OTM.heat_added =  property(A3,'h','kJ') - property(A2,'h','kJ');
+OTM.heat_added = enthalpy(A3) - enthalpy(A2);  %property(A3,'h','kJ') - property(A2,'h','kJ');
 X_O2 = A3.O2./net_flow(A3);
 OTM.Rt = 1-(1-X_O2).*(options.P_perm)./(X_O2.*(A3.P-options.P_perm)); %Theoretical Percentage Recovery of O2 through OTM
 
@@ -26,9 +26,9 @@ O3.T = options.T_oxygen_pump;
 O5 = O4;
 O5.T = options.T_fc - .5*options.dT_fc;
 
-OTM.Q_oxygen_HX = property(O5,'h','kJ') - property(O4,'h','kJ');
+OTM.Q_oxygen_HX = enthalpy(O5) - enthalpy(O4); %property(O5,'h','kJ') - property(O4,'h','kJ');
 O2 = O1;
-H_O2 = property(O1,'h','kJ') - OTM.Q_oxygen_HX;
+H_O2 = enthalpy(O1) - OTM.Q_oxygen_HX; %property(O1,'h','kJ') - OTM.Q_oxygen_HX;
 O2.T = find_T(O2, H_O2);
-OTM.Q_out = property(O2,'h','kJ') - property(O3,'h','kJ');
+OTM.Q_out = enthalpy(O2) - enthalpy(O3);  %property(O2,'h','kJ') - property(O3,'h','kJ');
 end

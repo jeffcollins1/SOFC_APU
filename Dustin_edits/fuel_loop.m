@@ -10,22 +10,23 @@ F3.P = F2.P;
 
 [F4,FL.blower_work] = compressor(F3,F5.P,options.Blower_eff);
 B1 = FL.blower_work; 
-FL.Q_preheat = property(F5,'h','kJ') - property(F4,'h','kJ');
+FL.Q_preheat = enthalpy(F5) - enthalpy(F4);%property(F5,'h','kJ') - property(F4,'h','kJ');
 
 E4.T = F3.T;
 E4.P = F5.P;
 E4.H2O = E1.H2O - F3.H2O;
 
-FL.Qremove_fuel =  property(E1,'h','kJ') +  property(F2,'h','kJ') -  property(E4,'h','kJ') -  property(F3,'h','kJ') - FL.Q_preheat;
+FL.Qremove_fuel = enthalpy(E1) + enthalpy(F2) - enthalpy(E4) - enthalpy(F3) - FL.Q_preheat; %property(E1,'h','kJ') +  property(F2,'h','kJ') -  property(E4,'h','kJ') -  property(F3,'h','kJ') - FL.Q_preheat;
 
 E2 = E1;
 E2.T = F4.T;
-H_E2 = property(E1,'h','kJ') - FL.Q_preheat;
+H_E2 = enthalpy(E1) - FL.Q_preheat; %property(E1,'h','kJ') - FL.Q_preheat;
 E2.T = find_T(E2,H_E2);
 
 E3 = E2;
 E3.H2 = E2.H2 + F2.H2;
-E3.T = find_T(E3,property(F2,'h','kJ') + H_E2);
+H_E3 = enthalpy(F2) + H_E2;
+E3.T = find_T(E3,H_E3);%find_T(E3,property(F2,'h','kJ') + H_E2);
 
 % Tdb_K = linspace(275,500);
 % satP = exp((-5.8002206e3)./Tdb_K + 1.3914993 - 4.8640239e-2*Tdb_K + 4.1764768e-5*Tdb_K.^2 - 1.4452093e-8*Tdb_K.^3 + 6.5459673*log(Tdb_K))/1000; %saturated water vapor pressure ASHRAE 2013 fundamentals eq. 6 in kPa valid for 0 to 200C
