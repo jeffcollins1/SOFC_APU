@@ -30,9 +30,9 @@ options.C2_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 2 propul
 
 %% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
-options.OTM_specific_mass = 0.0746*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.048907kg/ 81cm^2 cell
+options.OTM_specific_mass = 0.05987*10000/81*ones(n1,n2); %Weight per m^2 OTM membrane, kg:  assumes 0.05987kg/ 81cm^2 cell, 0.87 mm repeating unit height
 options.heat_pipe_specific_mass = 1./1.72*ones(n1,n2); %Weight per kW of heat transfer
-options.sofc_specific_mass = 0.08223*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
+options.sofc_specific_mass = 0.06925*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.06925kg/ 81cm^2 cell, 0.9615mm repeating unit height
 options.fuel_tank_mass_per_kg_fuel = 1*ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e

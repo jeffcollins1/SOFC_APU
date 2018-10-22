@@ -19,7 +19,7 @@ options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
 
 %% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
-options.sofc_specific_mass = 0.08223*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.05508kg/ 81cm^2 cell
+options.sofc_specific_mass = 0.06925*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.06925kg/ 81cm^2 cell, repeating unit height of 0.965 mm 
 options.heat_pipe_specific_mass = 1./1.72*ones(n1,n2); 
 options.fuel_tank_mass_per_kg_fuel = ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
