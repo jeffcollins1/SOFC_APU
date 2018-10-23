@@ -24,6 +24,16 @@ performancetable.FCVto = param.FCV_mission(x,y,1);
 performancetable.FCVcr = param.FCV_mission(x,y,dp);
 performancetable.P_den = param.P_den; 
 performancetable.P_in = param.P_perm(x,y,1); 
+performancetable.T1_workto = param.T1_work(x,y,1);
+performancetable.T1_workdp = param.T1_work(x,y,dp);
+performancetable.C1_workto = param.C1_work(x,y,1);
+performancetable.C1_workdp = param.C1_work(x,y,dp);
+% performancetable.P_reqto = mission.power(x,y,1);
+% performancetable.P_reqdp = mission.power(x,y,dp); 
+performancetable.QbalFCto = param.Q_balFC(x,y,1); 
+performancetable.QbalFCdp = param.Q_balFC(x,y,dp); 
+performancetable.Qbalmotorto = param.Q_balmotors(x,y,1); 
+performancetable.Qbalmotordp = param.Q_balmotors(x,y,dp); 
 performancetable.dp = dp; 
 performancetable.tsfc = zeros(v,1);
 performancetable.thrust = zeros(v,1);
@@ -31,7 +41,7 @@ for i =1:v
     performancetable.tsfc(i,1) = param.TSFC_mission(x,y,i);
     performancetable.thrust(i,1) = mission.thrust(x,y,i); 
 end
-performancetable.PASTEto = [performancetable.topower,performancetable.FCVto,performancetable.toefficiency,performancetable.FCidento]'; 
-performancetable.PASTEdp = [performancetable.dppower,performancetable.FCVcr,performancetable.dpefficiency,performancetable.FCidencruise]';
+performancetable.PASTEto = [performancetable.topower,performancetable.FCVto,performancetable.toefficiency,performancetable.FCidento,performancetable.T1_workto,performancetable.C1_workto,performancetable.QbalFCto,performancetable.Qbalmotorto]'; 
+performancetable.PASTEdp = [performancetable.dppower,performancetable.FCVcr,performancetable.dpefficiency,performancetable.FCidencruise,performancetable.T1_workdp,performancetable.C1_workdp,performancetable.QbalFCdp,performancetable.Qbalmotordp]';
 weighttable.PASTE = [weighttable.payload,weighttable.sofc,weighttable.otm,weighttable.hx,weighttable.comp,weighttable.turb,weighttable.motor,weighttable.fuel_stored,weighttable.battery,weighttable.fuel_burn]';
 end

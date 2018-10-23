@@ -1,9 +1,10 @@
 function [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1)
-F2.T =  options.T_motor;
+F2.T =  options.T_motor - 10;
 F2.P = F5.P  - options.Blower_dP;
 F2.H2 = F5.H2.*options.spu;
-
-
+F1 = F2;
+F1.T = 20; %LH2 storage temp;
+FL.motor_cooling = enthalpy(F2) - enthalpy(F1);
 F3 = F5;
 F3.T = 25.765*log(F3.P/1000)+354.84+5;% saturation temperature of 5% H2O in H2 @ 1MPa
 F3.P = F2.P;
@@ -31,20 +32,20 @@ E3.T = find_T(E3,H_E3);%find_T(E3,property(F2,'h','kJ') + H_E2);
 % Tdb_K = linspace(275,500);
 % satP = exp((-5.8002206e3)./Tdb_K + 1.3914993 - 4.8640239e-2*Tdb_K + 4.1764768e-5*Tdb_K.^2 - 1.4452093e-8*Tdb_K.^3 + 6.5459673*log(Tdb_K))/1000; %saturated water vapor pressure ASHRAE 2013 fundamentals eq. 6 in kPa valid for 0 to 200C
 % E2.T = F4.T;
-% Q_removed = property(E1,'h','kJ') - property(E2,'h','kJ');
-% H_E2 = property(E1,'h','kJ') - FL.Q_preheat;
+% Q_removed = enthalpy(E1) - enthalpy(E2); % property(E1,'h','kJ') - property(E2,'h','kJ');
+% H_E2 = enthalpy(E1) - FL.Q_preheat; %property(E1,'h','kJ') - FL.Q_preheat;
 % E2_sat = E2;
 % P_h2O_E2_sat = E2.H2O./net_flow(E2).*E2.P;
 % E2_sat.T = interp1(satP,Tdb_K,P_h2O_E2_sat)+.1;%temperature of condensation with exhaust water concentration
-% E2_cp = property(E2_sat,'cp','kJ/K');
-% H_E2_sat = property(E2_sat,'h','kJ');
+% E2_cp = SpecHeat(E2); %property(E2_sat,'cp','kJ/K');
+% H_E2_sat = enthalpy(E2_sat) %property(E2_sat,'h','kJ');
 % H2O_condense = min(E2.H2O,max(0,(H_E2_sat - H_E2)./(2260*18)));%latent heat of water = 2260kJ/kg
 % E2.H2O = E2.H2O - H2O_condense;
 % water.H2O = H2O_condense;
 % water.T = E2.T;
 % water.P = E2.P;
 % E2.T = E2_sat.T+.01;
-% % E2.T = E2_sat.T + (H_E2 - property(E2_sat,'h','kJ'))./E2_cp;
+% % E2.T = E2_sat.T +(H_E2 - enthalpy(E2_sat)/E2_cp; %(H_E2 - property(E2_sat,'h','kJ'))./E2_cp;
 % % E2.T = E1.T - FL.Q_preheat./Q_removed.*(E1.T - F4.T);
 % E2.T = find_T(E2, H_E2);
 % 

@@ -9,6 +9,7 @@ O1.T = A3.T;
 O1.P = options.P_perm;
 O1.O2 = 0;
 A4 = A3;
+A4.T = A3.T + 0.5*options.dT_fc; 
 n = 25;
 for i = 1:1:n
     X_O2 = A4.O2./net_flow(A4);

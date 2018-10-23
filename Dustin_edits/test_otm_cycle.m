@@ -103,8 +103,8 @@ for i = 1:1:length(mission.alt)
 end
 [z1,z2] = size(mission.alt);
 Weight = zeros(10,z1);
-performance_dp = zeros(4,z1);
-performance_to = zeros(4,z1)
+performance_dp = zeros(8,z1);
+performance_to = zeros(8,z1)
 for l = 1:z1
 mission.design_point = l;%%change based on mission profile
 
