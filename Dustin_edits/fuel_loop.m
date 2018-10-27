@@ -1,4 +1,4 @@
-function [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1)
+function [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1,A5)
 F2.T =  options.T_motor - 10;
 F2.P = F5.P  - options.Blower_dP;
 F2.H2 = F5.H2.*options.spu;

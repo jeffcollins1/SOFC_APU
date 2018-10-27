@@ -5,10 +5,10 @@ options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
 options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
-options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
+options.T_fc = 1023*ones(n1,n2); %Operating temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.05*ones(n1,n2); %Percentage of humidification at fuel inlet
-options.PR_comp = ones(n1,1)*linspace(15,40,n2); %Range of intake pressures for OTM, kPa
+options.PR_comp = ones(n1,1)*linspace(15,40,n2); %Range of intake pressures, kPa
 options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
 options.T1_eff = 0.88*ones(n1,n2); %Mechanical efficiency of turbine
@@ -89,15 +89,17 @@ for i = 1:1:length(mission.alt)
     mission.mach_num(i,1) = mean(nonzeros(history.mach(i,:)));
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
-[z1,z2] = size(mission.alt);
+[w1,w2] = max(max(mission.alt)); 
+[w3,w4] = find(mission.alt ==w1);
+z1 = w3-1; 
 Weight = zeros(9,z1);
 performance_dp  = zeros(4,z1);
 performance_to = zeros(4,z1);
-for l = 1:z1
+for l = 2:w3
 mission.design_point = l;%%change based on mission profile
 
 tic
-param = run_std_cycle(options,mission,res_fuel);
+[param,Air,FC] = run_std_cycle(options,mission,res_fuel);
 toc
 param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
 [performancetable,weighttable] = collector_std_cycle(param,mission);

@@ -27,9 +27,11 @@ performancetable.P_den = param.P_den;
 performancetable.dp = dp; 
 performancetable.tsfc = zeros(v,1);
 performancetable.thrust = zeros(v,1);
-for i =1:v
+performancetable.TIT = zeros(v,1);
+for i = 1:v
     performancetable.tsfc(i,1) = param.TSFC_mission(x,y,i);
     performancetable.thrust(i,1) = mission.thrust(x,y,i); 
+    performancetable.TIT(i,1) = param.turbine_inlet(x,y,i); 
 end
 performancetable.PASTEto = [performancetable.topower,performancetable.FCVto,performancetable.toefficiency,performancetable.FCidento]'; 
 performancetable.PASTEdp = [performancetable.dppower,performancetable.FCVcr,performancetable.dpefficiency,performancetable.FCidencruise]';
