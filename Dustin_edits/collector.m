@@ -40,6 +40,7 @@ performancetable.thrust = zeros(v,1);
 for i =1:v
     performancetable.tsfc(i,1) = param.TSFC_mission(x,y,i);
     performancetable.thrust(i,1) = mission.thrust(x,y,i); 
+    performancetable.missionefficiency(i,1) =param.efficiency_mission(x,y,i);
 end
 performancetable.PASTEto = [performancetable.topower,performancetable.FCVto,performancetable.toefficiency,performancetable.FCidento,performancetable.T1_workto,performancetable.C1_workto,performancetable.QbalFCto,performancetable.Qbalmotorto]'; 
 performancetable.PASTEdp = [performancetable.dppower,performancetable.FCVcr,performancetable.dpefficiency,performancetable.FCidencruise,performancetable.T1_workdp,performancetable.C1_workdp,performancetable.QbalFCdp,performancetable.Qbalmotordp]';

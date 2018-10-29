@@ -20,8 +20,9 @@ options.P_perm = min(options.P_perm,0.5*A2.P.*(A2.O2./net_flow(A2)));
 i_den = 4000.*O5.O2.*96485.33./(options.SOFC_area*10000); %A/cm^2
 i_den = max(.1,min(i_den,.7./options.asr));%Cant solve for ultra low or high current densities
 options.SOFC_area = 4000.*O5.O2.*96485.33./i_den/1e4;
-[FC,E1,F5] = oxy_fuelcell(options,O5);
-
+[FC,E1,F5] = oxy_fuelcell(options,O5,OTM);
+%[C1,Prop,A2,A3,A4,A5,A6,IC] = compressor_2(A1,options.PR_comp.*A1.P,options.C1_eff,FC,C1)
+% [A8,T1] = expander(A7,A1.P,options.T1_eff);
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 
@@ -51,7 +52,7 @@ A1.P = Amb.P.*((1+ 0.5*0.4.*mission.mach_num(mission.design_point).^2).^(1/0.4))
 A1.T = Amb.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
 [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2);
-[FC,E1,F5] = oxy_fuelcell(options,O5);
+[FC,E1,F5] = oxy_fuelcell(options,O5,OTM);
 [A5,T1] = expander(A4,A1.P,options.T1_eff);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1);
 HX = otm_heat_exchangers(options,FC,OTM,HX,A1,O1,O2,O3,O4,O5);
@@ -138,7 +139,7 @@ air_den = interp1(alt_tab,atmosphere_density,options2.height);
 molar_flow2 = vol_flow2.*air_den/28.84;%Flow rate at altitude assuming constant volumetric flow device
 [Amb,~] = std_atmosphere(options2.height,molar_flow2);%Ambient conditions as a function of altitude
 A1 = Amb; 
-mach = ones(nn,1).*mission.mach_num';
+mach = ones(mm,1).*mission.mach_num';
 A1.P = Amb.P.*((1+ 0.5*0.4.*mach.^2).^(1/0.4));
 A1.T = Amb.T.*(1 + 0.5*0.4.*mach.^2);
 for k = 1:1:nn
@@ -159,7 +160,7 @@ if any(any(O5.O2>max_O2)) || any(any(O5.O2<min_O2))
     [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options2,A2);
 end
 [A5,T1] = expander(A4,A1.P,options2.T1_eff);
-[FC,E1,F5] = oxy_fuelcell(options2,O5);
+[FC,E1,F5] = oxy_fuelcell(options2,O5,OTM);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options2,E1,F5,A1);
 P_sys = FC.Power + C1.work + C2.work + T1.work + B1.work;
 

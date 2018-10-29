@@ -12,19 +12,19 @@ Out2 = zeros(m,n);
 for u = 1:n
 if isfield(varargin{1},'T')
     Inlet = varargin{1};
-    Inlet.T = Inlet.T(1:n,u);
+    Inlet.T = Inlet.T(1:m,u);
     T = Inlet.T;
     if isfield(varargin{1},'N2')
-        Inlet.N2 = Inlet.N2(1:n,u);
+        Inlet.N2 = Inlet.N2(1:m,u);
     end
     if isfield(varargin{1},'O2')
-        Inlet.O2 = Inlet.O2(1:n,u);
+        Inlet.O2 = Inlet.O2(1:m,u);
     end
     if isfield(varargin{1},'H2O')
-        Inlet.H2O = Inlet.H2O(1:n,u);
+        Inlet.H2O = Inlet.H2O(1:m,u);
     end
     if isfield(varargin{1},'H2')
-        Inlet.H2 = Inlet.H2(1:n,u);
+        Inlet.H2 = Inlet.H2(1:m,u);
     end
 else
     T = varargin{1};
@@ -123,9 +123,9 @@ else
     speciesName = fieldnames(Inlet);
     for i = 1:1:length(speciesName)
         if ~strcmp(speciesName{i},'T') && ~strcmp(speciesName{i},'P')
-            Out1(1:n,u) = Out1(1:n,u) + h.(speciesName{i}).*Inlet.(speciesName{i});
+            Out1(1:m,u) = Out1(1:m,u) + h.(speciesName{i}).*Inlet.(speciesName{i});
             %Out1 = ones(10,1)*(Z'); 
-            Out2(1:n,u) = Out2(1:n,u) + h_s.(speciesName{i}).*Inlet.(speciesName{i});
+            Out2(1:m,u) = Out2(1:m,u) + h_s.(speciesName{i}).*Inlet.(speciesName{i});
             %Out2 = ones(10,1)*(Z2');
         end
     end

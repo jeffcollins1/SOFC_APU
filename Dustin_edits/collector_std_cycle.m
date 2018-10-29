@@ -28,11 +28,16 @@ performancetable.dp = dp;
 performancetable.tsfc = zeros(v,1);
 performancetable.thrust = zeros(v,1);
 performancetable.TIT = zeros(v,1);
+performancetable.mission_efficiency = zeros(v,1);
 for i = 1:v
     performancetable.tsfc(i,1) = param.TSFC_mission(x,y,i);
     performancetable.thrust(i,1) = mission.thrust(x,y,i); 
     performancetable.TIT(i,1) = param.turbine_inlet(x,y,i); 
+    performancetable.mission_efficiency(i,1) = param.efficiency_mission(x,y,i);
+%     performancetable.I_den(i,1) = param.FCiden_mission(x,y,i);
+%     performancetable.FCV(i,1) = param.FCV_mission(x,y,i); 
 end
+%performancetable.all = [performancetable.tsfc',performancetable.thrust',performancetable.TIT',performancetable.efficiency',performancetable.I_den',performancetable.FCV'];
 performancetable.PASTEto = [performancetable.topower,performancetable.FCVto,performancetable.toefficiency,performancetable.FCidento]'; 
 performancetable.PASTEdp = [performancetable.dppower,performancetable.FCVcr,performancetable.dpefficiency,performancetable.FCidencruise]';
 weighttable.PASTE = [weighttable.payload,weighttable.sofc,weighttable.hx,weighttable.comp,weighttable.turb,weighttable.motor,weighttable.fuel_stored,weighttable.battery,weighttable.fuel_burn]';

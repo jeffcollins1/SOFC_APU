@@ -1,3 +1,4 @@
+
 function [FC,cath_out,anode_out,A3,A5] = std_fuelcell(options,cath_in,anode_in)
 %% determine operating conditions (fuel flow) that results in the specified temperature gradient
 F = 96485.33; %Faraday's Constant in Coulombs/mol
@@ -66,7 +67,7 @@ Q_cath_in = enthalpy(cath_in); % property(cath_in,'h','kJ');
 cath_not_bypass = cath_in;
 cath_not_bypass.T = options.T_fc + .5*options.dT_fc;
 bypass = zeros(n1,n2);
-fuel_heat = zeros(n1,n1);
+fuel_heat = zeros(n1,n2);
 max_bypass = 0.8*(1-ion.O2./cath_in.O2);
 A4 = cath_not_bypass;
 %bypass = 0;
