@@ -115,6 +115,7 @@ P_sys_mission = zeros(m*n,nn);
 eff_mission = zeros(m*n,nn);
 FCV_mission = zeros(m*n,nn);
 TIT = zeros(m*n,nn);
+Q_balFC_mission = zeros(m*n,nn)
 FCiden_mission = zeros(m*n,nn);
 TSFC_mission = zeros(m*n,nn);
 bypass = zeros(m*n,nn); 
@@ -124,15 +125,18 @@ param.FCV_mission = zeros(m,n,nn);
 param.FCiden_mission = zeros(m,n,nn);
 param.TSFC_mission = zeros(m,n,nn);
 param.turbine_inlet = zeros(m,n,nn);
+param.T1_work = zeros(m,n,nn);
+param.C1_work = zeros(m,n,nn); 
+param.Q_balFC = zeros(m,n,nn);
 param.FCbypass = zeros(m,n,nn);
 parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n,Air);
+        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:),T1_work_mission(par_i,:),C1_work_mission(par_i,:),Q_balFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n,Air);
     end
 else
     for i = 1:1:m*n
-        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:),TIT(i,:),bypass(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n,Air);
+        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:),TIT(i,:),bypass(i,:),T1_work_mission(i,:),C1_work_mission(i,:),Q_balFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n,Air);
     end
 end
 for i = 1:1:m
@@ -147,6 +151,9 @@ for i = 1:1:m
         param.battery_mass_by_segment(i,j,:) = battery_kJ(i,j,:)./options.battery_specific_energy(i,j); 
         param.turbine_inlet(i,j,:) = TIT(n*(i-1)+j,:);
         param.FCbypass(i,j,:) = bypass(n*(i-1)+j,:);
+        param.T1_work(i,j,:) = T1_work_mission(n*(i-1) +j,:);
+        param.C1_work(i,j,:) = C1_work_mission(n*(i-1) + j,:); 
+          param.Q_balFC(i,j,:) = Q_balFC_mission(n*(i-1) + j,:)
     end
 end
 weight.fuel_burn = sum(param.fuel_by_seg,3); 
@@ -158,7 +165,7 @@ param.P_den = param.NetPower./(weight.sofc + weight.comp + weight.turb + weight.
 
 end%Ends function run_cycle
 
-function [fuel,battery,P_sys_mission,eff_mission,FCV_mission,FCiden_mission,TSFC_mission,turbine_inlet_temperature,bypass] = flight_profile(options,mission,vol_flow,nominal_fuel,par_i,n,Air,FC)
+function [fuel,battery,P_sys_mission,eff_mission,FCV_mission,FCiden_mission,TSFC_mission,turbine_inlet_temperature,bypass,C1_work_mission,T1_work_mission,Q_balFC_mission] = flight_profile(options,mission,vol_flow,nominal_fuel,par_i,n,Air,FC)
 alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
 atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
 i = ceil(par_i/n);
@@ -248,11 +255,15 @@ A1.T = Amb.T.*(1 + 0.5*0.4.*mach.^2);
 P_sys = FC.Power + C1.work + T1.work + B1.work;
 P_shaft = options2.motor_eff.*P_sys;
 FTE = P_sys./(FC.H2_used.*FC.hrxnmol);
+Q_balFC = FC.Qremove;
 P_sys_mission = zeros(1,nn);
 eff_mission = zeros(1,nn);
 FCV_mission = zeros(1,nn);
 FCiden_mission = zeros(1,nn);
+T1_work_mission = zeros(1,nn);
+C1_work_mission = zeros(1,nn); 
 turbine_inlet_temperature = zeros(1,nn);
+Q_balFC_mission = zeros(1,nn);
 bypass = zeros(1,nn);
 %find permeate pressure condition that results in correct power for each flight segment
 for k = 1:1:nn
@@ -266,6 +277,9 @@ for k = 1:1:nn
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
         bypass(k) = FC.bypass(I,k);
+        T1_work_mission(k) = T1.work(I,k);
+        C1_work_mission(k) = C1.work(I,k);
+        Q_balFC_mission(k) = FC.Qremove(I,k);
         turbine_inlet_temperature(k) = A4.T(I,k);
     elseif P_req<min(P_shaft(:,k))
         [~,I] = min(P_shaft(:,k));
@@ -275,7 +289,10 @@ for k = 1:1:nn
         FCV_mission(k) = FC.V(I,k);
         FCiden_mission(k) = FC.i_den(I,k);
          bypass(k) = FC.bypass(I,k); 
+         T1_work_mission(k) = T1.work(I,k);
+        C1_work_mission(k) = C1.work(I,k);
         turbine_inlet_temperature(k) = A4.T(I,k);
+        Q_balFC_mission(k) = FC.Qremove(I,k);
        
     else
         fuel(k) = interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;
@@ -284,7 +301,10 @@ for k = 1:1:nn
         FCV_mission(k) = interp1(P_shaft(:,k),FC.V(:,k),P_req);
         FCiden_mission(k) =interp1(P_shaft(:,k),FC.i_den(:,k),P_req);
         bypass(k) = interp1(P_shaft(:,k),FC.bypass(:,k),P_req); 
+        T1_work_mission(k) =interp1(P_shaft(:,k), T1.work(:,k),P_req);
+        C1_work_mission(k) = interp1(P_shaft(:,k),C1.work(:,k),P_req);
         turbine_inlet_temperature(k) = interp1(P_shaft(:,k),A4.T(:,k),P_req); 
+        Q_balFC_mission(k) = interp1(P_shaft(:,k),FC.Qremove(:,k),P_req);
     end
 end
 TSFC_mission = fuel./(squeeze(mission.thrust(i,j,:)).*mission.duration)'; % SFC in kg/N*hour; 

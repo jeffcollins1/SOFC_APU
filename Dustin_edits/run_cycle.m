@@ -13,7 +13,7 @@ A1 = Amb;
 A1.P = Amb.P.*((1+ 0.5*0.4.*mission.mach_num(mission.design_point).^2).^(1/0.4));
 A1.T = Amb.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
-options.P_perm = min(options.P_perm,0.5*A2.P.*(A2.O2./net_flow(A2)));
+options.P_perm = min(options.P_perm,0.9*A2.P.*(A2.O2./net_flow(A2)));
 [OTM,C2,A3,A4,O1,O2,O3,O4,O5] = OxygenModule(options,A2);
 
 %one-time adjustment of SOFC area per kmol air flow to ensure a feasible current density
@@ -58,6 +58,9 @@ A1.T = Amb.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
 HX = otm_heat_exchangers(options,FC,OTM,HX,A1,O1,O2,O3,O4,O5);
 HX.HP.mass = FC.Qremove.*options.heat_pipe_specific_mass; 
 
+FC_excess_heat = max(0,FC.Qremove - OTM.heat_added);
+FC_shortfall_heat = -min(0,FC.Qremove - OTM.heat_added);
+
 weight = system_weight(options,FC,{C1;T1;B1;C2},OTM,HX);
 param = NetParam(options,FC,{C1;T1;B1;C2},OTM,FL);
 param.states = {'A1',A1;'A2',A2;'A3',A3;'A4',A4;'A5',A5;'E1',E1;'E2',E2;'E3',E3;'E4',E4;'F2',F2;'F3',F3;'F4',F4;'F5',F5;'O1',O1;'O2',O2;'O3',O3;'O4',O4;'O5',O5;};
@@ -85,7 +88,7 @@ param.T1_work = zeros(m,n,nn);
 param.C1_work = zeros(m,n,nn); 
 param.Q_balFC = zeros(m,n,nn); 
 param.Q_balmotors = zeros(m,n,nn); 
-parallel = false;
+parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),T1_work_mission(par_i,:),C1_work_mission(par_i,:),Q_balFC_mission(par_i,:),Q_balmotors_mission(par_i,:)] = flight_profile(options,mission,vol_flow,par_i,n);

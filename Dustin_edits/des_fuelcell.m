@@ -149,6 +149,7 @@ FC.i_Cell = FC.cell_area*FC.i_den;%FC.i_total./FC.Cells; %Total amount of curren
 FC.pressure = P;
 Q_cath_in_stack = enthalpy(cath_out) + enthalpy(ion) - enthalpy(A3);%property(cath_out,'h','kJ') + property(ion,'h','kJ') - property(A3,'h','kJ');
 FC.Qremove = FC.Qgen - FC.Q_anode - Q_cath_in_stack;
+FC.Qbalance = FC.Qremove;
 %FC.H_cath_out = enthalpy(cath_out)+FC.Qremove;
 A5 = cath_in;
 RC.Q = enthalpy(A3) - enthalpy(cath_in); %property(A3,'h','kJ') - property(A2,'h','kJ'); %

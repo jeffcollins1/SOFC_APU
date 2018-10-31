@@ -4,11 +4,11 @@ n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(2e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
-options.asr = 0.2*ones(n1,n2); % Area specific resistance, ohm-cm^2
+options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Inlet temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
 options.steamratio = 0.05*ones(n1,n2); %Percentage of humidification at fuel inlet
-options.PR_comp = ones(n1,1)*linspace(18,50,n2); %Range of intake pressures for OTM, kPa
+options.PR_comp = ones(n1,1)*linspace(12,48,n2); %Range of intake pressures for OTM, kPa
 options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
 options.C1_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 1
 options.T1_eff = 0.88*ones(n1,n2); %Mechanical efficiency of turbine
@@ -24,7 +24,7 @@ options.T_otm = options.T_fc; %Operating temperature for OTM
 options.j0_otm = 7*ones(n1,n2); %Nominal oxygen flux through OTM NmL/cm^2*min
 options.P0_otm = 2.1*ones(n1,n2); %Nominal oxygen pressure ratio across OTM (total pressure ratio *.21)
 options.T_oxygen_pump = 323*ones(n1,n2); %Inlet temperature of vacuum pump
-options.P_perm = 50*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 
+options.P_perm = 75*ones(n1,n2); %Pressure of OTM oxygen stream, kPa; 
 options.C2_eff = 0.80*ones(n1,n2); %Mechanical efficiency of compressor 2 propulsor portion (30%) of 4 RR RB-211 engines
 
 
@@ -41,16 +41,16 @@ options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide,
 options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 
 %% 787-8 Standard Case in Piano_X
-% [segment,history,profile] = import_flight_txt('787');
-% TO_weight = 219539;% Initial mass at condition 1
-% StandardPayload = 23052;% kg
-% FuelUsed = 75126;% kg, block summary end
-% Range = 14187;% km
-% engine_mass = 6033; %Trent 1000 engine, EASA certification
-% res_fuel = 7799; %res fuel
-% options.engine_radius = 2.8*ones(n1,n2); %
-% options.num_engines = 2*ones(n1,n2);
-% options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
+[segment,history,profile] = import_flight_txt('787');
+TO_weight = 219539;% Initial mass at condition 1
+StandardPayload = 23052;% kg
+FuelUsed = 75126;% kg, block summary end
+Range = 14187;% km
+engine_mass = 6033; %Trent 1000 engine, EASA certification
+res_fuel = 7799; %res fuel
+options.engine_radius = 2.8*ones(n1,n2); %
+options.num_engines = 2*ones(n1,n2);
+options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 
 %% %Airbus A380 Standard Case in Piano_X
 % [segment,history,profile] = import_flight_txt('A380F');
@@ -77,17 +77,17 @@ options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 % options.electric_demand = 300*ones(n1,n2); %Ancilliary demand, kW
 
 %% Fokker F70, Standard case in Piano X
-[segment,history,profile] = import_flight_txt('F70');
-TO_weight = 36741;% kg, Initial mass at condition 1
-StandardPayload = 7167; %kg, Piano default design
-FuelUsed = 4917;% kg, Piano block summary, end
-Range = 2020;% km, Piano default design
-num_engines = 2;
-engine_mass = 1501; % kg,RR tay 620-15 EASA certification+
-res_fuel = 2136; %kg
-options.engine_radius = 2*ones(n1,n2); %
-options.num_engines = 2*ones(n1,n2);
-options.electric_demand = 100*ones(n1,n2); %Ancilliary demand, kW
+% [segment,history,profile] = import_flight_txt('F70');
+% TO_weight = 36741;% kg, Initial mass at condition 1
+% StandardPayload = 7167; %kg, Piano default design
+% FuelUsed = 4917;% kg, Piano block summary, end
+% Range = 2020;% km, Piano default design
+% num_engines = 2;
+% engine_mass = 1501; % kg,RR tay 620-15 EASA certification+
+% res_fuel = 2136; %kg
+% options.engine_radius = 2*ones(n1,n2); %
+% options.num_engines = 2*ones(n1,n2);
+% options.electric_demand = 100*ones(n1,n2); %Ancilliary demand, kW
 
 %%%
 options.air_frame_weight = (TO_weight - FuelUsed - res_fuel - StandardPayload - options.num_engines*engine_mass);%airframe mass in kg:
@@ -109,7 +109,7 @@ z1 = w3;
 Weight = zeros(10,z1);
 performance_dp = zeros(8,z1);
 performance_to = zeros(8,z1)
-for l = 2:z1
+for l = 8:8
 mission.design_point = l;%%change based on mission profile
 
 tic
