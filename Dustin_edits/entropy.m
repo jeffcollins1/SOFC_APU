@@ -1,33 +1,27 @@
-function S = entropy(varargin) % entropy (S) 
+function out = entropy(varargin) % entropy (S) 
 % returns both entropy in kJ/kmol, or in rate form kJ/s
 % Option 1: provide a vector of temperatures and it returns entropy for all species CH4, CO, CO2, H2, H2O, N2, O2, C, NO, OH, H
 % Option 2: provide a structure where __.T coresponds to temperature, ___.CH4 coresponds to the flow rate of methane ____.H2 to the flow rate of hydrogen...
 % Option 2 returns the rate form  (kJ/s)
-JJ = varargin{1};
-[m,n] = size(JJ.T);
-S= zeros(m,n);
-
-for u = 1:n
 if isfield(varargin{1},'T')
     Inlet = varargin{1};
-    Inlet.T = Inlet.T(1:m,u);
-    T = Inlet.T;
-    if isfield(varargin{1},'N2')
-        Inlet.N2 = Inlet.N2(1:m,u);
-    end
-    if isfield(varargin{1},'O2')
-        Inlet.O2 = Inlet.O2(1:m,u);
-    end
-    if isfield(varargin{1},'H2O')
-        Inlet.H2O = Inlet.H2O(1:m,u);
-    end
-    if isfield(varargin{1},'H2')
-        Inlet.H2 = Inlet.H2(1:m,u);
+    [m,n] = size(Inlet.T);
+    out = zeros(m,n);
+    spec = fieldnames(Inlet);
+    for u = 1:n
+        s = specific_entropy(Inlet.T(:,u));
+        for i = 1:1:length(spec)
+            if ~strcmp(spec{i},'T') && ~strcmp(spec{i},'P')
+                out(1:m,u) = out(1:m,u) + s.(spec{i}).*Inlet.(spec{i})(:,u);
+            end
+        end
     end
 else
-    T = varargin{1};
+    out = specific_entropy(varargin{1});
 end
+end%Ends function entropy
 
+function s = specific_entropy(T)
 CH4a = [85.81217,11.26467,-2.114146,0.138190,-26.42221,224.4143;];
 CH4b = [-0.703029,108.4773,-42.52157,5.862788,0.678565,158.7163;];
 CH4 = (T>1300)*CH4a+(T<=1300)*CH4b;
@@ -78,7 +72,6 @@ T4 = ((T/1000).^3)/3;
 T5 = -1./(2*(T/1000).^2); 
 T6 = ones(length(T),1);
 
-
 s.CH4 = sum([T1.*CH4(:,1), T2.*CH4(:,2), T3.*CH4(:,3), T4.*CH4(:,4), T5.*CH4(:,5), T6.*CH4(:,6)],2);
 s.CO = sum([T1.*CO(:,1), T2.*CO(:,2), T3.*CO(:,3), T4.*CO(:,4), T5.*CO(:,5), T6.*CO(:,6)],2);
 s.CO2 = sum([T1.*CO2(:,1), T2.*CO2(:,2), T3.*CO2(:,3), T4.*CO2(:,4), T5.*CO2(:,5), T6.*CO2(:,6)],2);
@@ -90,17 +83,4 @@ s.C = sum([T1.*C(:,1), T2.*C(:,2), T3.*C(:,3), T4.*C(:,4), T5.*C(:,5), T6.*C(:,6
 s.NO = sum([T1.*NO(:,1), T2.*NO(:,2), T3.*NO(:,3), T4.*NO(:,4), T5.*NO(:,5), T6.*NO(:,6)],2);
 s.OH = sum([T1.*OH(:,1), T2.*OH(:,2), T3.*OH(:,3), T4.*OH(:,4), T5.*OH(:,5), T6.*OH(:,6)],2);
 s.H = sum([T1.*H(:,1), T2.*H(:,2), T3.*H(:,3), T4.*H(:,4), T5.*H(:,5), T6.*H(:,6)],2);
-
-
-if ~exist('Inlet','var')
-    S = s;
-else
-    %S = 0;
-    speciesName = fieldnames(Inlet);
-    for i = 1:1:length(speciesName)
-        if ~strcmp(speciesName{i},'T') && ~strcmp(speciesName{i},'P')
-            S(1:m,u) = S(1:m,u) + s.(speciesName{i}).*Inlet.(speciesName{i});
-        end
-    end
-end
-end
+end%Ends function specific entropy
