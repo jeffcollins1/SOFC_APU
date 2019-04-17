@@ -65,11 +65,11 @@ for j = 1:1:length(history.alt(:,1))
         profile.(hist{k})(end+1:end+n,1) = history.(hist{k})(j,1:n)';
     end
 end
-figure(1)
-[ax,h1,h2] = plotyy(profile.time/3600,max(0,profile.FN_eng),profile.time/3600,profile.alt);
-xlabel(ax(1),'Time (hrs)')
-ylabel(ax(1),'Thrust per Engine (N)')
-ylabel(ax(2),'Altitude (ft)')
+% figure(1)
+% [ax,h1,h2] = plotyy(profile.time/3600,max(0,profile.FN_eng),profile.time/3600,profile.alt);
+% xlabel(ax(1),'Time (hrs)')
+% ylabel(ax(1),'Thrust per Engine (N)')
+% ylabel(ax(2),'Altitude (ft)')
 
 % [ax,h1,h2] = plotyy(profile.time/3600,max(0,profile.mach),profile.time/3600,profile.alt);
 % xlabel(ax(1),'Time (hrs)')

@@ -1,5 +1,4 @@
-
-function [performancetable,weighttable,missionmax] = collector_std_cycle(param,mission)
+function [design_point,take_off,component_weight] = collector_std_cycle(param,mission)
 dp = mission.design_point; 
 design_Q_out = param.Q_balFC(:,:,dp);
 max_Q_out = param.Q_balFC(:,:,1);
@@ -53,11 +52,6 @@ performancetable.I_den(i,1) = param.FCiden_mission(x,y,i);
 performancetable.QbalFC_mission(i,1) = param.Q_balFC(x,y,i);
 %     performancetable.FCV(i,1) = param.FCV_mission(x,y,i); 
 end
-% design_Q_out = performancetable.QbalFC_mission(dp,1);
-% max_Q_out = max(max(performancetable.QbalFC_mission));
-% 
-% weighttable.hxTrue = (max_Q_out-design_Q_out)/1.72 + weighttable.hx;
-% weighttable.payloadTrue = weighttable.payload - (max_Q_out-design_Q_out)/1.72; 
-performancetable.PASTEto = [performancetable.topower,performancetable.FCVto,performancetable.toefficiency,performancetable.FCidento,performancetable.T1_workto,performancetable.C1_workto]'; 
-performancetable.PASTEdp = [performancetable.dppower,performancetable.FCVcr,performancetable.dpefficiency,performancetable.FCidencruise,performancetable.T1_workdp,performancetable.C1_workdp]';
-weighttable.PASTE = [weighttable.payload,weighttable.sofc,weighttable.hx,weighttable.comp,weighttable.turb,weighttable.motor,weighttable.fuel_stored,weighttable.battery,weighttable.fuel_burn]';
+take_off = [performancetable.topower,performancetable.FCVto,performancetable.toefficiency,performancetable.FCidento,performancetable.T1_workto,performancetable.C1_workto]'; 
+design_point = [performancetable.dppower,performancetable.FCVcr,performancetable.dpefficiency,performancetable.FCidencruise,performancetable.T1_workdp,performancetable.C1_workdp]';
+component_weight = [weighttable.payload,weighttable.sofc,weighttable.hx,weighttable.comp,weighttable.turb,weighttable.motor,weighttable.fuel_stored,weighttable.battery,weighttable.fuel_burn]';

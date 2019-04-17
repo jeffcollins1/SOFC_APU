@@ -1,27 +1,25 @@
 function [param,Air,FC] = run_std_cycle(options,mission,res_fuel)
 %% calculate conditions for each design trade-off per kmol/s of inlet air
 [m,n] = size(options.SOFC_area);
-molar_flow = ones(m,n);
-options.height = mission.alt(mission.design_point)*ones(m,n); %Altitude, meters
-alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%
-atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
-air_den = interp1(alt_tab,atmosphere_density,options.height);
-[Amb,ss] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
-A1 = Amb; 
-A1.P = Amb.P.*((1+ 0.5*0.4.*mission.mach_num(mission.design_point).^2).^(1/0.4));
-A1.T = Amb.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
-[A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
-A3 = A2;
-%A3.T = options.T_fc - 0.5*options.dT_fc;
-[FC,A4,E1,F5,A3,A5] = des_fuelcell(options,A2);
-A5 = A4;
-RC.Q = enthalpy(A3) - enthalpy(A2); %property(A3,'h','kJ') - property(A2,'h','kJ');
-% A5.T = find_T(A5,enthalpy(A4) - RC.Q);%find_T(A5,property(A4,'h','kJ') - RC.Q); %TIT if heat is recovered from inlet, or the resulting outlet temperature from the heat pipe if considered
 
-[A6,T1] = expander(A5,A1.P,options.T1_eff);
+%determine air inlet from flight conditions
+options.height = mission.alt(mission.design_point)*ones(m,n); %Altitude, meters
+ambient = std_atmosphere(options.height);%Ambient conditions as a function of altitude
+A1.P = ambient.P.*((1+ 0.5*0.4.*mission.mach_num(mission.design_point).^2).^(1/0.4));
+A1.T = ambient.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
+A1.O2 = .21*ones(m,n);
+A1.N2 = .79*ones(m,n);
+[A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
+[FC,A4,E1,F5,A3,A3b] = des_fuelcell(options,A2);
+A5 = A4;
+RC.Q = enthalpy(A3) - enthalpy(A2); %
+% RC.Q = property(A3,'h','kJ') - property(A2,'h','kJ');
+[A5,T1] = expander(A4,A1.P,options.T1_eff);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1,A5);
 
 %% Calculate nominal and mission power
+alt_tab = [0:200:7000,8000,9000,10000,12000,14000];%%Altitude, meters
+atmosphere_density = [1.225,1.202,1.179,1.156,1.134,1.112,1.090,1.069,1.048,1.027,1.007,0.987,0.967,0.947,0.928,0.909,0.891,0.872,0.854,0.837,0.819,0.802,0.785,0.769,0.752,0.736,0.721,0.705,0.690,0.675,0.660,0.646,0.631,0.617,0.604,0.590,0.526,0.467,0.414,0.312,0.228]'; %Density, kg/m^3
 mission.air_den = interp1(alt_tab,atmosphere_density,mission.alt);
 [~,mission.ss] = std_atmosphere(mission.alt,1);%Ambient conditions as a function of altitude
 for i = 1:1:length(mission.alt)
@@ -36,63 +34,17 @@ dp_density = mission.air_den(mission.design_point);
 min_density = min(mission.air_den);
 %% scale system to meet nominal power requirements
 scale = options.safety_factor.*P_nominal./options.motor_eff./(FC.Power + C1.work + T1.work + B1.work);
-% cath_out_ideal = A4;
-% cath_out_ideal_loop = cath_out_ideal; 
-% cath_out_ideal_loop.T = A5.T; 
-% [y,z] = size(A4.T);
-% for u = 1:y %Find scale for mass flow to bring TIT below physical limit
-%     for v = 1:z
-%     if cath_out_ideal_loop.T(u,v) > 1048
-%     cath_out_ideal_loop.N2(u,v) = 1.2*(cath_out_ideal_loop.T(u,v)/1048)*cath_out_ideal_loop.N2(u,v);
-%     cath_out_ideal_loop.O2(u,v) = 1.2*(cath_out_ideal_loop.T(u,v)/1048)*cath_out_ideal_loop.O2(u,v);
-%     flow_new.N2 = cath_out_ideal_loop.N2(u,v) ;
-%     flow_new.O2 = cath_out_ideal_loop.O2(u,v) ;
-%     H_in = FC.H_cath_out(u,v);
-%     flow_new.T = 1000;
-%     flow_new.T = find_T(flow_new,H_in);
-%     cath_out_ideal_loop.T(u,v) = flow_new.T;
-%     end
-%     end
-% end
-[w1,w2] = max(max(mission.alt)); 
-[w3,w4] = find(mission.alt ==w1);
-point = mission.design_point/w3;
-%if point <= 0.2
 Air.scalemax= 2; %Maximum flow rate set for high altitude
 Air.scalemin = 1;
-% else if point > 0.2 && point <= 0.4
-%         maxboost = 0.8;
-%         Air.scalemax = 1+ maxboost;
-%         Air.scalemin = 1- (1-maxboost);
-%     else if point > 0.4 && point <= 0.6
-%             maxboost = 0.6;
-%             Air.scalemax = 1+maxboost;
-%         Air.scalemin = (1-(1-maxboost));
-%         else if point > 0.6 && point <= 0.8
-%                 maxboost = 0.2;
-%             Air.scalemax = 1+ maxboost;
-%         Air.scalemin = 1-(1-maxboost);
-%             else if point > 0.8
-%                     Air.scalemax = 1;
-%                     Air.scalemin = 0.5;
-%                 end
-%             end
-%         end
-%     end
-% end
-  Air.scale2 = dp_density/min_density;            
-molar_flow = (scale).*molar_flow;
-vol_flow = molar_flow*28.84./air_den;%Volumetric flow at the design condition
-options.SOFC_area = scale.*options.SOFC_area;
+Air.scale2 = dp_density/min_density;   
+
 
 %% Re-Run with scaled system parameters
-[Amb,~] = std_atmosphere(options.height,molar_flow);%Ambient conditions as a function of altitude
-A1 = Amb; 
-A1.P = Amb.P.*((1+ 0.5*0.4.*mission.mach_num(mission.design_point).^2).^(1/0.4));
-A1.T = Amb.T.*(1 + 0.5*0.4.*mission.mach_num(mission.design_point).^2);
+vol_flow = scale*28.84./ambient.rho;%Volumetric flow at the design condition
+options.SOFC_area = scale.*options.SOFC_area;
+A1.O2 = .21*scale;
+A1.N2 = .79*scale;
 [A2,C1] = compressor(A1,options.PR_comp.*A1.P,options.C1_eff);
-%A3 = A2;
-%A3.T = options.T_fc - 0.5*options.dT_fc;
 [FC,A4,E1,F5,A3,A5] = des_fuelcell(options,A2);
 A5 = A4;
 Air.relation = FC.i_den./net_flow(A2);
