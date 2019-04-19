@@ -72,7 +72,7 @@ while any(any(abs(error_Q)>1e-4))
     %% adjust cathode flow to ensure deltaT (if utilization>50%, determine combustion heating)
     need_combustion = (cath_in.O2 == ion.O2*2) & error_Q<0;
     Q_pre_combustor = zeros(n1,n2);
-    Q_pre_combustor(need_combustion) = error_Q(need_combustion);
+    Q_pre_combustor(need_combustion) = -error_Q(need_combustion);
     error_Q(need_combustion) = 0;
     cath_in.O2 = max(ion.O2*2,cath_in.O2.*(1 + error_Q)); 
     cath_in.N2 = cath_in.O2*.79/.21;

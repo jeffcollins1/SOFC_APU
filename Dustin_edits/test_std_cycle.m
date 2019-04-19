@@ -93,18 +93,22 @@ end
 weight = zeros(9,z1);
 performance_dp  = zeros(6,z1);
 performance_to = zeros(6,z1);
+C_data = zeros(n1,n2,3);
+C_data(:,:,1) = ones(n1,n2);
+C_data(:,:,2) = zeros(n1,n2);
+C_data(:,:,3) = zeros(n1,n2);
 for l = 2:z1
     mission.design_point = l;%%change based on mission profile
-    [param,FC] = run_std_cycle(options,mission,res_fuel);
+    [param,FC] = run_std_cycle(options,mission,(res_fuel/(FuelUsed + res_fuel)));
     param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
     [performance_dp(:,l),performance_to(:,l),weight(:,l)] = collector_std_cycle(param,mission);
+    payload = param.weight.payload;
+    payload(payload<max(0,0.8*mean(mean(payload)))) = nan;
+    figure(l);
+    surf(options.PR_comp,param.i_den,payload);
+    hold on
+    surf(options.PR_comp,param.i_den,StandardPayload*ones(n1,n2),C_data)
+    xlabel('Compressor pressure ratio');
+    ylabel('SOFC current density (A/cm^2)');
+    zlabel('payload (kg)');
 end
-
-payload = param.weight.payload;
-payload(payload<0.8*mean(mean(param.weight.payload))) = nan;
-[performancetable,weighttable] = collector_std_cycle(param,mission);
-figure(3)
-ax = surf(options.PR_comp,param.i_den,payload);
-xlabel(ax,'Compressor pressure ratio');
-ylabel(ax,'SOFC current density (A/cm^2)');
-zlabel(ax,'payload (kg)');

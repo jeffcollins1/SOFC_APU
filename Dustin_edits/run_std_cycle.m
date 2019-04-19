@@ -51,11 +51,13 @@ battery_kJ = zeros(m,n,nn);
 P_sys_mission = zeros(m*n,nn);
 eff_mission = zeros(m*n,nn);
 FCV_mission = zeros(m*n,nn);
-TIT = zeros(m*n,nn);
-Q_balFC_mission = zeros(m*n,nn);
 FCiden_mission = zeros(m*n,nn);
 TSFC_mission = zeros(m*n,nn);
+TIT = zeros(m*n,nn);
 bypass = zeros(m*n,nn); 
+T1_work_mission = zeros(m*n,nn);
+C1_work_mission = zeros(m*n,nn);
+Q_balFC_mission = zeros(m*n,nn);
 param.power_mission = zeros(m,n,nn);
 param.efficiency_mission = zeros(m,n,nn);
 param.FCV_mission = zeros(m,n,nn);
@@ -94,7 +96,7 @@ for i = 1:1:m
     end
 end
 weight.fuel_burn = sum(param.fuel_by_seg,3); 
-weight.fuel_stored = weight.fuel_burn.*options.fuel_tank_mass_per_kg_fuel + res_fuel/3; %Total LH2 storage including weight of insulated container and equivalent energy reserve storage
+weight.fuel_stored = weight.fuel_burn*(1+res_fuel).*options.fuel_tank_mass_per_kg_fuel; %Total LH2 storage including weight of insulated container and proportional reserve storage
 weight.battery = sum(battery_kJ,3)./options.battery_specific_energy; %battery weight required to assist with takeoff assuming battery energy storage of 1260 kJ/kg;
 weight.total = (weight.sofc + weight.comp + weight.turb + weight.hx + weight.motor + weight.battery + weight.propulsor + weight.fuel_stored); 
 param.weight = weight;
@@ -123,9 +125,9 @@ A1.O2 = .21*ones(mm,nn);
 A1.N2 = .79*ones(mm,nn);
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
 
-max_O2 = 0.21*vol_flow(i,j).*ambient.rho/28.84;%full engine speed mass flow rate
-max_current = 0.5.*max_O2*(F*4000);% 50% O2 utilization at max air flow
-min_current = 0.025.*max_O2*(96485.33*4000);% 5% O2 utilization at 50% air flow
+nominal_O2 = 0.21*vol_flow(i,j).*ambient.rho/28.84;%full engine speed mass flow rate
+max_current = 0.5.*nominal_O2*(F*4000);% 50% O2 utilization at max air flow
+min_current = 0.025.*nominal_O2*(96485.33*4000);% 5% O2 utilization at 50% air flow
 max_fuel = min(nominal_fuel(i,j)*1.2,max_current./(F*2000)./options2.spu);
 min_fuel = max(nominal_fuel(i,j)*.1,min_current./(F*2000)./options2.spu);
 F5.T = options2.T_fc - .5*options2.dT_fc;
@@ -138,8 +140,8 @@ F5.H2O = F5.H2.*options2.steamratio./(1-options2.steamratio);
 
 [FC,A3,A4,E1] = std_fuelcell(options2,A2,F5);
 %%find speed turndown or bypass amount
-speed = max(.5, A3.O2./max_O2);
-A1.O2 = max(A3.O2,.5*max_O2);
+speed = max(.5, A3.O2./nominal_O2);
+A1.O2 = max(A3.O2,.5*nominal_O2);
 A1.N2 = A1.O2*.79/.21;
 [A2,C1] = compressor(A1,options2.PR_comp.*A1.P,options2.C1_eff);
 
@@ -156,11 +158,11 @@ turb_in.T = find_T(turb_in,enthalpy(A4)+enthalpy(bypass_flow));
 [A5,T1] = expander(turb_in,A1.P,options2.T1_eff);
 [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options2,E1,F5,A1);
 
-FC.H2_used = FC.i_total./(2000.*F) + FC.Q_pre_combustor.*FC.hrxnmol;
+FC.H2_used = FC.i_total./(2000.*F) + FC.Q_pre_combustor./FC.hrxnmol;
 
 P_sys = FC.Power + C1.work + T1.work + B1.work;
 P_shaft = options2.motor_eff.*P_sys;
-FTE = P_sys./(FC.i_total./(2000.*F).*FC.hrxnmol+FC.Q_pre_combustor);
+FTE = P_sys./(FC.H2_used.*FC.hrxnmol);
 P_sys_mission = zeros(1,nn);
 eff_mission = zeros(1,nn);
 FCV_mission = zeros(1,nn);

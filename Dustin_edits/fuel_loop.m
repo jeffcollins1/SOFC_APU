@@ -1,41 +1,47 @@
 function [FL,B1,F2,F3,F4,E2,E3,E4,HX] = fuel_loop(options,E1,F5,A1)
 F2.T =  options.T_motor - 10;
 F2.P = F5.P  - options.Blower_dP;
-F2.H2 = F5.H2.*options.spu;
+F2.H2 = F5.H2-E1.H2;%make-up hydrogen
+
 F1 = F2;
 F1.T = 20; %LH2 storage temp;
 FL.motor_cooling = enthalpy(F2) - enthalpy(F1);
+
 F3 = F5;
-F3.T = 25.765*log(F3.P/1000)+354.84+5;% saturation temperature of 5% H2O in H2 @ 1MPa
 F3.P = F2.P;
+T_sat = [318.96	333.21	342.25	349.01	354.47	359.08	363.08	366.64	369.84	372.76	375.44	377.93	380.26	382.44	384.5	386.45	388.3	390.06	391.75	393.36	394.91	396.4	397.84	399.22	400.56	401.86	403.12	404.34	405.52	406.67	407.79	408.89	409.95	410.99	412.01	413	413.97	414.92	415.85	416.76	417.65	418.53	419.38	420.23	421.05	421.87	422.66	423.45	424.22	424.98	425.73	426.46	427.19	427.9	428.61	429.3	429.98	430.66	431.32	431.98	432.62	433.26	433.89	434.52	435.13	435.74	436.34	436.93	437.52	438.1	438.67	439.24	439.8	440.35	440.9	441.44	441.98	442.51	443.04	443.56	444.07	444.58	445.09	445.59	446.09	446.58	447.06	447.55	448.03	448.5	448.97	449.44	449.9	450.36	450.81	451.26	451.71	452.15	452.59	453.03];
+P_sat = linspace(10,1000)';
+h_fg = [43091.88	42461.355	42083.04	41758.77	41506.56	41308.395	41128.245	40948.095	40803.975	40659.855	40533.75	40425.66	40317.57	40191.465	40101.39	40011.315	39921.24	39813.15	39741.09	39651.015	39596.97	39506.895	39434.835	39362.775	39308.73	39218.655	39164.61	39092.55	39020.49	38966.445	38912.4	38858.355	38786.295	38750.265	38696.22	38624.16	38588.13	38534.085	38480.04	38425.995	38371.95	38335.92	38281.875	38227.83	38191.8	38137.755	38101.725	38047.68	38011.65	37975.62	37939.59	37885.545	37849.515	37813.485	37759.44	37723.41	37687.38	37651.35	37615.32	37579.29	37543.26	37507.23	37453.185	37417.155	37399.14	37345.095	37327.08	37291.05	37237.005	37218.99	37164.945	37146.93	37110.9	37074.87	37056.855	37002.81	36984.795	36948.765	36912.735	36876.705	36858.69	36822.66	36786.63	36750.6	36732.585	36696.555	36678.54	36642.51	36606.48	36570.45	36552.435	36516.405	36480.375	36462.36	36426.33	36408.315	36372.285	36336.255	36318.24	36282.21];
+P_H2O = F3.P.*F3.H2O./(F3.H2+F3.H2O);
+F3.T = interp1(P_sat,T_sat,P_H2O);
+% F3.T = 25.765*log(F3.P/1000)+354.84+5;% saturation temperature of 5% H2O in H2 @ 1MPa
 
 [F4,B1] = compressor(F3,F5.P,options.Blower_eff);
 %B1.work = FL.blower_work; 
-FL.Q_preheat = enthalpy(F5) - enthalpy(F4);%property(F5,'h','kJ') - property(F4,'h','kJ');
+FL.Q_preheat = enthalpy(F5) - enthalpy(F4);
 
 E4.T = F3.T;
-E4.P = F5.P;
+E4.P = F3.P;
 E4.H2O = E1.H2O - F3.H2O;
-
-FL.Qremove_fuel = enthalpy(E1) + enthalpy(F2) - enthalpy(E4) - enthalpy(F3) - FL.Q_preheat; %property(E1,'h','kJ') +  property(F2,'h','kJ') -  property(E4,'h','kJ') -  property(F3,'h','kJ') - FL.Q_preheat;
 
 E2 = E1;
 E2.T = F4.T;
 H_E2 = enthalpy(E1) - FL.Q_preheat; %property(E1,'h','kJ') - FL.Q_preheat;
 E2.T = find_T(E2,H_E2);
 
+HX.fuel = heat_exchanger(E1,E2,F4,F5,options);
+
 E3 = E2;
 E3.H2 = E2.H2 + F2.H2;
 H_E3 = enthalpy(F2) + H_E2;
-E3.T = find_T(E3,H_E3);%find_T(E3,property(F2,'h','kJ') + H_E2);
+E3.T = find_T(E3,H_E3);
 
-%% find AC mass flow based on condenser heat transfer
-AC.O2 = A1.O2; %initial guess for molar airflow through condenser
-AC.N2 = A1.N2;
-AC.T = A1.T;
-AC.P = A1.P; 
-ACout = AC; 
-ACout.T = E3.T + 25;%find_T(AC, HACout);
-HX.fuel = heat_exchanger(E1,E2,F4,F5,options);
-[HX.condenser,AC] = condenser(E3,F3,AC,options);
+condensate = E3.H2O - F3.H2O;
+FL.Qremove_fuel = enthalpy(E3) - enthalpy(E4) - enthalpy(F3) + condensate.*interp1(T_sat,h_fg,F3.T);
+
+dT1 = E3.T - A1.T; %LMTD Values for counterflow HX
+dT2 = F3.T - (A1.T + .5*(F3.T-A1.T)); 
+LMTD = (dT1 - dT2)./log(dT1./dT2); 
+A = FL.Qremove_fuel./(options.hx_U.*LMTD); %Surface area based on range of assumed overall heat transfer coefficients, U
+HX.condenser.mass = options.hx_t.*options.hx_mat_density.*A; 
 end%Ends function fuel_loop
