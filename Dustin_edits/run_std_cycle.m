@@ -203,8 +203,12 @@ for k = 1:1:nn
     bypass(k) = (1-r)*(bypass_flow.O2(I,k)/A2.O2(I,k)) + r*(bypass_flow.O2(I+1,k)/A2.O2(I+1,k)); 
     T1_work_mission(k) = (1-r)*T1.work(I,k) + r*T1.work(I+1,k);
     C1_work_mission(k) = (1-r)*C1.work(I,k) + r*C1.work(I+1,k);
-    turbine_inlet_temperature(k) = (1-r)*A4.T(I,k) + r*A4.T(I+1,k);
+    turbine_inlet_temperature(k) = (1-r)*turb_in.T(I,k) + r*turb_in.T(I+1,k);
     Q_balFC_mission(k) = (1-r)*FC.Qremove(I,k) + r*FC.Qremove(I+1,k);
+%     if bypass(k)>0
+%         disp(strcat('TIT:',num2str(turbine_inlet_temperature(k))))
+%     end
+
 %     if ((1-r)*speed(I,k) + r*speed(I+1,k))>1
 %         disp(strcat('overspeed:',num2str(((1-r)*speed(I,k) + r*speed(I+1,k)-1)*100),'%'))
 %     end

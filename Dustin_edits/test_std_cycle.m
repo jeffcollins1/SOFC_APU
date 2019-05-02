@@ -3,7 +3,7 @@ n1 = 10; % number of points in test dimension 1
 n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
-options.dT_fc = 100*ones(n1,n2); %Maximum temperature differential, Kelvin
+options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
 options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Operating temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
@@ -29,16 +29,16 @@ options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide,
 options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 
 % %% 787-8 Standard Case in Piano_X
-[segment,history,profile] = import_flight_txt('787');
-TO_weight = 219539;% Initial mass at condition 1
-StandardPayload = 23052;% kg
-FuelUsed = 75126;% kg, block summary end
-Range = 14187;% km
-engine_mass = 6033; %Trent 1000 engine, EASA certification
-res_fuel = 7799; %res fuel
-options.engine_radius = 2.8*ones(n1,n2); %
-options.num_engines = 2*ones(n1,n2);
-options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
+% [segment,history,profile] = import_flight_txt('787');
+% TO_weight = 219539;% Initial mass at condition 1
+% StandardPayload = 23052;% kg
+% FuelUsed = 75126;% kg, block summary end
+% Range = 14187;% km
+% engine_mass = 6033; %Trent 1000 engine, EASA certification
+% res_fuel = 7799; %res fuel
+% options.engine_radius = 2.8*ones(n1,n2); %
+% options.num_engines = 2*ones(n1,n2);
+% options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 
 %% %Airbus A380 Standard Case in Piano_X
 % [segment,history,profile] = import_flight_txt('A380F');
@@ -65,17 +65,17 @@ options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 % options.electric_demand = 300*ones(n1,n2); %Ancilliary demand, kW
 
 %% Fokker F70, Standard case in Piano X
-% [segment,history,profile] = import_flight_txt('F70');
-% TO_weight = 36741;% kg, Initial mass at condition 1
-% StandardPayload = 7167; %kg, Piano default design
-% FuelUsed = 4917;% kg, Piano block summary, end
-% Range = 2020;% km, Piano default design
-% num_engines = 2;
-% engine_mass = 1501; % kg,RR tay 620-15 EASA certification+
-% res_fuel = 2136; %kg
-% options.engine_radius = 2*ones(n1,n2); %
-% options.num_engines = 2*ones(n1,n2);
-% options.electric_demand = 100*ones(n1,n2); %Ancilliary demand, kW
+[segment,history,profile] = import_flight_txt('F70');
+TO_weight = 36741;% kg, Initial mass at condition 1
+StandardPayload = 7167; %kg, Piano default design
+FuelUsed = 4917;% kg, Piano block summary, end
+Range = 2020;% km, Piano default design
+num_engines = 2;
+engine_mass = 1501; % kg,RR tay 620-15 EASA certification+
+res_fuel = 2136; %kg
+options.engine_radius = 2*ones(n1,n2); %
+options.num_engines = 2*ones(n1,n2);
+options.electric_demand = 100*ones(n1,n2); %Ancilliary demand, kW
 
 %%%
 options.air_frame_weight = (TO_weight - FuelUsed - res_fuel - StandardPayload - options.num_engines*engine_mass);%airframe mass in kg:
