@@ -1,19 +1,9 @@
 function [design_point,take_off,component_weight] = collector_std_cycle(param,mission)
 dp = mission.design_point; 
-design_Q_out = param.Q_balFC(:,:,dp);
-max_Q_out = param.Q_balFC(:,:,1);
-Q_diff  = max_Q_out - design_Q_out;
-for z1 = 1:10
-    for z2 = 1:10
-        if Q_diff(z1,z2) > 0
-            param.weight.hx(z1,z2) = param.weight.hx(z1,z2) + Q_diff(z1,z2)/1.72; %add difference of heat pipe for largest heat rejection
-            param.weight.payload(z1,z2) = param.weight.payload(z1,z2) - Q_diff(z1,z2)/1.72; %Subtract heat pipe mass from payload
-        end
-    end
-end
 [v,w] = size(mission.alt); 
-maxpayload = max(max(param.weight.payload));
-[x,y] = find(param.weight.payload == maxpayload);
+[m,I] = max(param.weight.payload);
+[maxpayload,y] = max(m);
+x = I(y);
 weighttable.payload = maxpayload; 
 weighttable.sofc = param.weight.sofc(x,y);
 %weighttable.otm = param.weight.otm(x,y);

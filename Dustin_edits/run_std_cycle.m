@@ -71,11 +71,11 @@ param.FCbypass = zeros(m,n,nn);
 parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:),T1_work_mission(par_i,:),C1_work_mission(par_i,:),Q_balFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
+        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:),C1_work_mission(par_i,:),T1_work_mission(par_i,:),Q_balFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
     end
 else
     for i = 1:1:m*n
-        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:),TIT(i,:),bypass(i,:),T1_work_mission(i,:),C1_work_mission(i,:),Q_balFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
+        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:),TIT(i,:),bypass(i,:),C1_work_mission(i,:),T1_work_mission(i,:),Q_balFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
     end
 end
 for i = 1:1:m
