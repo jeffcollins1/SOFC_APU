@@ -71,11 +71,11 @@ param.FCbypass = zeros(m,n,nn);
 parallel = false;
 if parallel
     parfor par_i = 1:1:m*n
-        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:),T1_work_mission(par_i,:),C1_work_mission(par_i,:),Q_balFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
+        [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:),C1_work_mission(par_i,:),T1_work_mission(par_i,:),Q_balFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
     end
 else
     for i = 1:1:m*n
-        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:),TIT(i,:),bypass(i,:),T1_work_mission(i,:),C1_work_mission(i,:),Q_balFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
+        [fuel(i,:),battery(i,:),P_sys_mission(i,:),eff_mission(i,:),FCV_mission(i,:),FCiden_mission(i,:),TSFC_mission(i,:),TIT(i,:),bypass(i,:),C1_work_mission(i,:),T1_work_mission(i,:),Q_balFC_mission(i,:)] = flight_profile(options,mission,vol_flow,F5.H2,i,n);
     end
 end
 for i = 1:1:m
@@ -203,8 +203,12 @@ for k = 1:1:nn
     bypass(k) = (1-r)*(bypass_flow.O2(I,k)/A2.O2(I,k)) + r*(bypass_flow.O2(I+1,k)/A2.O2(I+1,k)); 
     T1_work_mission(k) = (1-r)*T1.work(I,k) + r*T1.work(I+1,k);
     C1_work_mission(k) = (1-r)*C1.work(I,k) + r*C1.work(I+1,k);
-    turbine_inlet_temperature(k) = (1-r)*A4.T(I,k) + r*A4.T(I+1,k);
+    turbine_inlet_temperature(k) = (1-r)*turb_in.T(I,k) + r*turb_in.T(I+1,k);
     Q_balFC_mission(k) = (1-r)*FC.Qremove(I,k) + r*FC.Qremove(I+1,k);
+%     if bypass(k)>0
+%         disp(strcat('TIT:',num2str(turbine_inlet_temperature(k))))
+%     end
+
 %     if ((1-r)*speed(I,k) + r*speed(I+1,k))>1
 %         disp(strcat('overspeed:',num2str(((1-r)*speed(I,k) + r*speed(I+1,k)-1)*100),'%'))
 %     end

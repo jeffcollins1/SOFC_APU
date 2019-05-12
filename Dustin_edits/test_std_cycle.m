@@ -3,7 +3,7 @@ n1 = 10; % number of points in test dimension 1
 n2 = 10; % number of points in test dimension 2
 options.airflow = ones(n1,n2); %Initial airflow, kmol/s
 options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per kmol airflow
-options.dT_fc = 100*ones(n1,n2); %Maximum temperature differential, Kelvin
+options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
 options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Operating temperature for SOFC
 options.spu = 0.2*ones(n1,n2); 
@@ -19,8 +19,8 @@ options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
 
 %% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
-options.sofc_specific_mass = 0.06925*10000/81*ones(n1,n2); %Weight per m^2, kg:  assumes 0.06925kg/ 81cm^2 cell, repeating unit height of 0.965 mm 
-options.heat_pipe_specific_mass = 1./1.72*ones(n1,n2); 
+options.sofc_specific_mass = 59.2/1e3*1e4/81*ones(n1,n2); %Weight per m^2, kg:  assumes 59.2g/ 81cm^2 cell, repeating unit height of 1.1 mm 
+options.heat_pipe_specific_mass = 1./1.12*ones(n1,n2); 
 options.fuel_tank_mass_per_kg_fuel = ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
@@ -28,7 +28,7 @@ options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, 
 options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
 options.safety_factor = 1.05*ones(n1,n2); %Safety factor on power plant sizing
 
-% %% 787-8 Standard Case in Piano_X
+%% 787-8 Standard Case in Piano_X
 [segment,history,profile] = import_flight_txt('787');
 TO_weight = 219539;% Initial mass at condition 1
 StandardPayload = 23052;% kg
@@ -52,7 +52,7 @@ options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 % options.num_engines = 4*ones(n1,n2);
 % options.electric_demand = 1000*ones(n1,n2); %Ancilliary demand, kW
 
-% %%Airbus A300 600R, Standard case in Piano X
+%% Airbus A300 600R, Standard case in Piano X
 % [segment,history,profile] = import_flight_txt('A300');
 % TO_weight = 170500;% kg, Initial mass at condition 1
 % StandardPayload = 25365; %kg, Piano default design
@@ -97,7 +97,7 @@ C_data = zeros(n1,n2,3);
 C_data(:,:,1) = ones(n1,n2);
 C_data(:,:,2) = zeros(n1,n2);
 C_data(:,:,3) = zeros(n1,n2);
-for l = 2:z1
+for l = 4:4
     mission.design_point = l;%%change based on mission profile
     [param,FC] = run_std_cycle(options,mission,(res_fuel/(FuelUsed + res_fuel)));
     param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
