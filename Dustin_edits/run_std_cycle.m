@@ -68,7 +68,7 @@ param.T1_work = zeros(m,n,nn);
 param.C1_work = zeros(m,n,nn); 
 param.Q_balFC = zeros(m,n,nn);
 param.FCbypass = zeros(m,n,nn);
-parallel = true;
+parallel = false;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:),T1_work_mission(par_i,:),C1_work_mission(par_i,:),Q_balFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
