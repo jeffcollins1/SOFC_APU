@@ -172,6 +172,7 @@ C1_work_mission = zeros(1,nn);
 turbine_inlet_temperature = zeros(1,nn);
 Q_balFC_mission = zeros(1,nn);
 bypass = zeros(1,nn);
+error = zeros(1,nn); 
 %find permeate pressure condition that results in correct power for each flight segment
 for k = 1:1:nn
     P_req = mission.power(i,j,k);%shaft power in kW.  
@@ -205,6 +206,8 @@ for k = 1:1:nn
     C1_work_mission(k) = (1-r)*C1.work(I,k) + r*C1.work(I+1,k);
     turbine_inlet_temperature(k) = (1-r)*turb_in.T(I,k) + r*turb_in.T(I+1,k);
     Q_balFC_mission(k) = (1-r)*FC.Qremove(I,k) + r*FC.Qremove(I+1,k);
+    Ebalsystem(k) = fuel(k).*FC.hrxnmol(k).*eff_mission(k)/2 - P_sys_mission(k).*mission.duration(k)*3600; %Check fuel burn, convert back to kmol from kg, multiply by reported efficiency and LHV fuel, and compare with total system energy output over flight segment 
+    Pbalmission(k) = P_req - P_sys_mission(k) - battery(k)/(3600*mission.duration(k)); %check instananeous balance between required power, system output and battery assist
 %     if bypass(k)>0
 %         disp(strcat('TIT:',num2str(turbine_inlet_temperature(k))))
 %     end
