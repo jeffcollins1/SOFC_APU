@@ -68,7 +68,7 @@ param.T1_work = zeros(m,n,nn);
 param.C1_work = zeros(m,n,nn); 
 param.Q_balFC = zeros(m,n,nn);
 param.FCbypass = zeros(m,n,nn);
-parallel = false;
+parallel = true;
 if parallel
     parfor par_i = 1:1:m*n
         [fuel(par_i,:),battery(par_i,:),P_sys_mission(par_i,:),eff_mission(par_i,:),FCV_mission(par_i,:),FCiden_mission(par_i,:),TSFC_mission(par_i,:),TIT(par_i,:),bypass(par_i,:),C1_work_mission(par_i,:),T1_work_mission(par_i,:),Q_balFC_mission(par_i,:)] = flight_profile(options,mission,vol_flow,F5.H2,par_i,n);
@@ -161,7 +161,7 @@ turb_in.T = find_T(turb_in,enthalpy(A4)+enthalpy(bypass_flow));
 FC.H2_used = FC.i_total./(2000.*F) + FC.Q_pre_combustor./FC.hrxnmol;
 
 P_sys = FC.Power + C1.work + T1.work + B1.work;
-P_shaft = options2.motor_eff.*P_sys;
+P_shaft = options2.motor_eff.*(P_sys-options2.electric_demand);
 FTE = P_sys./(FC.H2_used.*FC.hrxnmol);
 P_sys_mission = zeros(1,nn);
 eff_mission = zeros(1,nn);
@@ -175,7 +175,7 @@ bypass = zeros(1,nn);
 error = zeros(1,nn); 
 %find permeate pressure condition that results in correct power for each flight segment
 for k = 1:1:nn
-    P_req = mission.power(i,j,k);%shaft power in kW.  
+    P_req = mission.power(i,j,k) - options2.electric_demand(1,k);%shaft power in kW.  
     if P_req>max(P_shaft(:,k))
         [P,I] = max(P_shaft(:,k));
         battery(k) = (P_req - P)*mission.duration(k)*3600;
@@ -183,8 +183,9 @@ for k = 1:1:nn
         P_sys_mission(k) = P_sys(I,k);
     elseif P_req<min(P_shaft(:,k))
         [~,I] = min(P_shaft(:,k));
-        fuel(k) = P_req/P_shaft(I,k)*FC.H2_used(I,k)*2*mission.duration(k)*3600;
-        P_sys_mission(k) = P_req/min(P_sys(:,k))*P_sys(I,k);
+        scale_Pow = (P_req/options2.motor_eff(1,k)+options2.electric_demand(1,k))/P_sys(I,k);
+        fuel(k) = scale_Pow*FC.H2_used(I,k)*2*mission.duration(k)*3600;
+        P_sys_mission(k) = scale_Pow*P_sys(I,k);
     else
         I = interp1(P_shaft(:,k),1:mm,P_req);
         fuel(k) = interp1(P_shaft(:,k),FC.H2_used(:,k),P_req)*2*mission.duration(k)*3600;

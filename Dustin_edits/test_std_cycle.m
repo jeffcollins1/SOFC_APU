@@ -6,7 +6,7 @@ options.SOFC_area = linspace(1e3,5e3,n1)'*ones(1,n2); %membrane area in m^2 per 
 options.dT_fc = 50*ones(n1,n2); %Maximum temperature differential, Kelvin
 options.asr = 0.25*ones(n1,n2); % Area specific resistance, ohm-cm^2
 options.T_fc = 1023*ones(n1,n2); %Operating temperature for SOFC
-options.spu = 0.2*ones(n1,n2); 
+options.spu = 0.25*ones(n1,n2); 
 options.steamratio = 0.05*ones(n1,n2); %Percentage of humidification at fuel inlet
 options.PR_comp = ones(n1,1)*linspace(15,40,n2); %Range of intake pressures, kPa
 options.T_motor = 77*ones(n1,n2); %temperture of H2 gas after cooling superconducting motors
@@ -19,8 +19,8 @@ options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
 
 %% system mass parameters
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
-options.sofc_specific_mass = 59.2/1e3*1e4/81*ones(n1,n2); %Weight per m^2, kg:  assumes 59.2g/ 81cm^2 cell, repeating unit height of 1.1 mm 
-options.heat_pipe_specific_mass = 1./1.12*ones(n1,n2); 
+options.sofc_specific_mass = 41.6/1e3*1e4/81*ones(n1,n2); %Weight per m^2, kg:  assumes 59.2g/ 81cm^2 cell, repeating unit height of 1.1 mm 
+options.heat_pipe_specific_mass = 1./1.72*ones(n1,n2); 
 options.fuel_tank_mass_per_kg_fuel = ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
@@ -38,7 +38,7 @@ engine_mass = 6033; %Trent 1000 engine, EASA certification
 res_fuel = 7799; %res fuel
 options.engine_radius = 2.8*ones(n1,n2); %
 options.num_engines = 2*ones(n1,n2);
-options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
+options.electric_demand = 972*ones(n1,n2); %Ancilliary demand, kW
 
 %% %Airbus A380 Standard Case in Piano_X
 % [segment,history,profile] = import_flight_txt('A380F');
@@ -50,7 +50,7 @@ options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 % res_fuel = 22356; %kg
 % options.engine_radius = 2.5*ones(n1,n2); %
 % options.num_engines = 4*ones(n1,n2);
-% options.electric_demand = 1000*ones(n1,n2); %Ancilliary demand, kW
+% options.electric_demand = 2909*ones(n1,n2); %Ancilliary demand, kW
 
 %% Airbus A300 600R, Standard case in Piano X
 % [segment,history,profile] = import_flight_txt('A300');
@@ -62,7 +62,7 @@ options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 % res_fuel= 7537; %Reserve fuel, kg
 % options.engine_radius = 2.5*ones(n1,n2); %
 % options.num_engines = 2*ones(n1,n2);
-% options.electric_demand = 300*ones(n1,n2); %Ancilliary demand, kW
+% options.electric_demand = 994*ones(n1,n2); %Ancilliary demand, kW
 
 %% Fokker F70, Standard case in Piano X
 % [segment,history,profile] = import_flight_txt('F70');
@@ -75,7 +75,7 @@ options.electric_demand = 500*ones(n1,n2); %Ancilliary demand, kW
 % res_fuel = 2136; %kg
 % options.engine_radius = 2*ones(n1,n2); %
 % options.num_engines = 2*ones(n1,n2);
-% options.electric_demand = 100*ones(n1,n2); %Ancilliary demand, kW
+% options.electric_demand = 191*ones(n1,n2); %Ancilliary demand, kW
 
 %%%
 options.air_frame_weight = (TO_weight - FuelUsed - res_fuel - StandardPayload - options.num_engines*engine_mass);%airframe mass in kg:
@@ -97,18 +97,37 @@ C_data = zeros(n1,n2,3);
 C_data(:,:,1) = ones(n1,n2);
 C_data(:,:,2) = zeros(n1,n2);
 C_data(:,:,3) = zeros(n1,n2);
-for l = 4:4
+max_payload = zeros(length(mission.alt),1);
+for l = 1:length(mission.alt)
     mission.design_point = l;%%change based on mission profile
     [param,FC] = run_std_cycle(options,mission,(res_fuel/(FuelUsed + res_fuel)));
     param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
     [performance_dp(:,l),performance_to(:,l),weight(:,l)] = collector_std_cycle(param,mission);
     payload = param.weight.payload;
     payload(payload<max(0,0.8*mean(mean(payload)))) = nan;
-    figure(l);
-    surf(options.PR_comp,param.i_den,payload);
-    hold on
-    surf(options.PR_comp,param.i_den,StandardPayload*ones(n1,n2),C_data)
-    xlabel('Compressor pressure ratio');
-    ylabel('SOFC current density (A/cm^2)');
-    zlabel('payload (kg)');
+    max_payload(l) = max(max(payload));
 end
+
+[p_max,best_des] = max(max_payload);
+mission.design_point = best_des;%%change based on mission profile
+[param,FC] = run_std_cycle(options,mission,(res_fuel/(FuelUsed + res_fuel)));
+param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
+[performance_dp(:,l),performance_to(:,l),weight(:,l)] = collector_std_cycle(param,mission);
+payload = param.weight.payload;
+payload(payload<max(0,0.8*mean(mean(payload)))) = nan;
+[mp,I] = max(payload);
+[~,I2] = max(mp);
+
+des_weight = [param.weight.sofc(I(I2),I2);param.weight.hx(I(I2),I2);param.weight.comp(I(I2),I2);param.weight.turb(I(I2),I2);param.weight.motor(I(I2),I2);...
+              param.weight.propulsor(I(I2),I2);param.weight.battery(I(I2),I2);param.weight.fuel_burn(I(I2),I2);(param.weight.fuel_stored(I(I2),I2)-param.weight.fuel_burn(I(I2),I2));...
+              options.air_frame_weight(I(I2),I2);param.weight.payload(I(I2),I2)];
+b_power_seg = squeeze(param.battery_mass_by_segment(I(I2),I2,:))*options.battery_specific_energy(4,1)./(mission.duration*3600);
+sys_pow_seg = squeeze(param.power_mission(I(I2),I2,:));
+
+figure(l);
+surf(options.PR_comp,param.i_den,payload);
+hold on
+surf(options.PR_comp,param.i_den,StandardPayload*ones(n1,n2),C_data)
+xlabel('Compressor pressure ratio');
+ylabel('SOFC current density (A/cm^2)');
+zlabel('payload (kg)');
