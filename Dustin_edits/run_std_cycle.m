@@ -20,8 +20,8 @@ mission.ss = air.ss;
 mission.air_den = air.rho;
 for i = 1:1:length(mission.alt)
     velocity = mission.mach_num(i).*mission.ss(i);
-    Thrust_Coefficient = mission.thrust(:,:,i)./(options.num_engines.*.5*mission.air_den(i).*velocity.^2*pi()*options.engine_radius.^2);
-    Froude_efficiency = 2./(1+(1+Thrust_Coefficient).^.5);
+    Thrust_Coefficient = mission.thrust(:,:,i)./(options.num_engines.*.5*mission.air_den(i).*velocity.^2*pi().*options.engine_radius.^2);
+    Froude_efficiency = 2./(1+(1+Thrust_Coefficient).^.5);%http://web.mit.edu/16.unified/www/SPRING/systems/Lab_Notes/airpower.pdf
     net_prop_eff = options.prop_eff.*Froude_efficiency;
     mission.power(:,:,i) = mission.thrust(:,:,i)*velocity./net_prop_eff/1000 + options.electric_demand;%shaft power in kW. 
 end

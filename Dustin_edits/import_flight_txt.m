@@ -46,7 +46,11 @@ while i<n_l-1
         a = 1;
         for k = 1:1:length(hist)
             a = max(a,per(k)-6);
-            b = min(length(lines{i}),per(k)+2);
+            if k==3 || k == 7 || k ==8
+                b = min(length(lines{i}),per(k)+2);
+            else
+                b = min(length(lines{i}),per(k)+1);
+            end
             history.(hist{k})(j,t) = str2double(lines{i}(a:b));
             a = per(k)+1;
         end
