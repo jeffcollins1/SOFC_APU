@@ -21,7 +21,8 @@ options.motor_eff = 0.984*ones(n1,n2);%motor efficiency
 options.motor_power_den = 24*ones(n1,n2); %Power density of HTSM
 options.sofc_specific_mass = 41.6/1e3*1e4/81*ones(n1,n2); %Weight per m^2, kg:  assumes 59.2g/ 81cm^2 cell, repeating unit height of 1.1 mm 
 options.heat_pipe_specific_mass = 1./1.72*ones(n1,n2); 
-options.fuel_tank_mass_per_kg_fuel = ones(n1,n2); %Weight kg  (did you subtract the regular fuel tank weight?)
+options.LH2_tank_mass_per_kg_fuel = (1-.64)/.64*ones(n1,n2); %https://www.mdpi.com/1996-1073/11/1/105
+options.JetA_tank_mass_per_kg_fuel = (1-.9)/.9*ones(n1,n2); %Not good data (assumption)
 options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
@@ -78,7 +79,8 @@ options.electric_demand = 972*ones(n1,n2); %Ancilliary demand, kW
 % options.electric_demand = 191*ones(n1,n2); %Ancilliary demand, kW
 
 %%%
-options.air_frame_weight = (TO_weight - FuelUsed - res_fuel - StandardPayload - options.num_engines*engine_mass);%airframe mass in kg:
+options.jetA_tank_mass = options.JetA_tank_mass_per_kg_fuel*(FuelUsed - res_fuel);
+options.air_frame_weight = (TO_weight - FuelUsed - res_fuel - StandardPayload - options.num_engines*engine_mass - options.jetA_tank_mass);%airframe mass in kg:
 options.propulsor_weight = 0.3*options.num_engines*engine_mass; %Weight propulsor portion (30%) 
 
 %% all parameters of mission must be the same length, design_point is the index of the mission profile for whitch the nominal power is scaled
@@ -90,7 +92,7 @@ for i = 1:1:length(mission.alt)
 	mission.thrust(:,:,i) = abs(mean(nonzeros(history.FN_eng(i,:))))*options.num_engines;%thrust profile in N
 end
 [~,z1] = max(mission.alt); 
-weight = zeros(9,z1);
+weight = zeros(10,z1);
 performance_dp  = zeros(6,z1);
 performance_to = zeros(6,z1);
 C_data = zeros(n1,n2,3);
@@ -119,15 +121,15 @@ payload(payload<max(0,0.8*mean(mean(payload)))) = nan;
 [~,I2] = max(mp);
 
 des_weight = [param.weight.sofc(I(I2),I2);param.weight.hx(I(I2),I2);param.weight.comp(I(I2),I2);param.weight.turb(I(I2),I2);param.weight.motor(I(I2),I2);...
-              param.weight.propulsor(I(I2),I2);param.weight.battery(I(I2),I2);param.weight.fuel_burn(I(I2),I2);(param.weight.fuel_stored(I(I2),I2)-param.weight.fuel_burn(I(I2),I2));...
-              options.air_frame_weight(I(I2),I2);param.weight.payload(I(I2),I2)];
+              param.weight.propulsor(I(I2),I2);param.weight.battery(I(I2),I2);param.weight.fuel_burn(I(I2),I2);param.weight.fuel_reserve(I(I2),I2);...
+              param.weight.fuel_storage(I(I2),I2);options.air_frame_weight(I(I2),I2);param.weight.payload(I(I2),I2)];
 b_power_seg = squeeze(param.battery_mass_by_segment(I(I2),I2,:))*options.battery_specific_energy(4,1)./(mission.duration*3600);
 sys_pow_seg = squeeze(param.power_mission(I(I2),I2,:));
 
 figure(l);
-surf(options.PR_comp,param.i_den,payload);
+surf(options.PR_comp,param.i_den,payload/1000);
 hold on
-surf(options.PR_comp,param.i_den,StandardPayload*ones(n1,n2),C_data)
+surf(options.PR_comp,param.i_den,StandardPayload*ones(n1,n2)/1000,C_data)
 xlabel('Compressor pressure ratio');
 ylabel('SOFC current density (A/cm^2)');
-zlabel('payload (kg)');
+zlabel('payload (1000 kg)');
