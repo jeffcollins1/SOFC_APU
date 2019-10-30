@@ -14,7 +14,7 @@ w_seal = 5e-3; %width of seal
 t_seal = 200e-6; %compressed seal thickness
 d_seal = 1200;% density of compressed/sintered thermiculit 870
 
-T_SOFC = 650; %Temperature
+T_SOFC = 750; %Temperature
 T_wall = 85; %Temperature
 k_insul = 0.11; %W/m*K thermal conductivity of insulation
 d_insul = 64; %Density of insulation

@@ -18,7 +18,7 @@ F3.T = interp1(P_sat,T_sat,P_H2O);
 
 [F4,B1] = compressor(F3,F5.P,options.Blower_eff);
 %B1.work = FL.blower_work; 
-FL.Q_preheat = enthalpy(F5) - enthalpy(F4);
+FL.Q_preheat = max(0,enthalpy(F5) - enthalpy(F4));
 
 E4.T = F3.T;
 E4.P = F3.P;

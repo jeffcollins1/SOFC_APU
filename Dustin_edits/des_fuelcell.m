@@ -16,7 +16,7 @@ cath_in = comp_out;
 cath_in.T = options.T_fc - .5*options.dT_fc;
 cath_out = cath_in;
 cath_out.T = options.T_fc + .5*options.dT_fc;
-Q_heat_pipe = enthalpy(cath_in) - enthalpy(comp_out);%Heat necessary to pre-heat air.
+Q_heat_pipe = max(0,enthalpy(cath_in) - enthalpy(comp_out));%Heat necessary to pre-heat air.
 
 anode_in.T = options.T_fc - .5*options.dT_fc;
 anode_in.P = P; 
