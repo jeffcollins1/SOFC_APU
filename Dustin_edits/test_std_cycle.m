@@ -23,7 +23,7 @@ options.sofc_specific_mass = 41.6/1e3*1e4/81*ones(n1,n2); %Weight per m^2, kg:  
 options.heat_pipe_specific_mass = 1./1.72*ones(n1,n2); 
 options.LH2_tank_mass_per_kg_fuel = (1-.64)/.64*ones(n1,n2); %https://www.mdpi.com/1996-1073/11/1/105
 options.JetA_tank_mass_per_kg_fuel = (1-.9)/.9*ones(n1,n2); %Not good data (assumption)
-options.battery_specific_energy = 1260*ones(n1,n2); %kJ / kg
+options.battery_specific_energy = 0.35*3600*ones(n1,n2); %kJ / kg
 options.hx_U = 40*ones(n1,n2); %Upper heat transfer performance of a gas-to-gas counterflow HX based on Heat and Mass transfer, Cengel, 4e
 options.hx_t = 0.0018*ones(n1,n2); %Total thickness of plates and housing in m, based on NASA estimates, 2005
 options.hx_mat_density = 2700*ones(n1,n2); %Density of sintered silicon carbide, kg/m^3, chosen to replace SS 304 in NASA estimates with same plate and housing thickness
@@ -114,7 +114,6 @@ end
 mission.design_point = best_des;%%change based on mission profile
 [param,FC] = run_std_cycle(options,mission,(res_fuel/(FuelUsed + res_fuel)));
 param.weight.payload = TO_weight - options.air_frame_weight - param.weight.total;
-[performance_dp(:,l),performance_to(:,l),weight(:,l)] = collector_std_cycle(param,mission);
 payload = param.weight.payload;
 payload(payload<max(0,0.8*mean(mean(payload)))) = nan;
 [mp,I] = max(payload);
@@ -126,7 +125,7 @@ des_weight = [param.weight.sofc(I(I2),I2);param.weight.hx(I(I2),I2);param.weight
 b_power_seg = squeeze(param.battery_mass_by_segment(I(I2),I2,:))*options.battery_specific_energy(4,1)./(mission.duration*3600);
 sys_pow_seg = squeeze(param.power_mission(I(I2),I2,:));
 
-figure(l);
+figure(1);
 surf(options.PR_comp,param.i_den,payload/1000);
 hold on
 surf(options.PR_comp,param.i_den,StandardPayload*ones(n1,n2)/1000,C_data)
